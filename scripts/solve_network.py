@@ -44,6 +44,12 @@ from linopy.remote.oetc import OetcCredentials, OetcHandler, OetcSettings
 from pypsa.descriptors import get_activity_mask
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._benchmark import memory_logger
 from scripts._helpers import (
     PYPSA_V1,
@@ -64,6 +70,71 @@ else:
 
 class ObjectiveValueError(Exception):
     pass
+
+def _has_scenarios(n: pypsa.Network) -> bool:
+    """Return True if the network is stochastic (PyPSA scenarios enabled)."""
+    if hasattr(n, "has_scenarios"):
+        return bool(n.has_scenarios)
+    # Fallback: check typical stochastic structure (MultiIndex columns)
+    try:
+        p = n.loads_t.p_set
+        return isinstance(p.columns, pd.MultiIndex) and p.columns.nlevels >= 2
+    except Exception:
+        return False
+
+
+def _scenario_names(n: pypsa.Network) -> list[str]:
+    """Return scenario names as strings."""
+    if hasattr(n, "scenarios") and n.scenarios is not None and len(n.scenarios) > 0:
+        return [str(x) for x in list(n.scenarios)]
+
+    # Fallback: infer from loads_t columns
+    try:
+        p = n.loads_t.p_set
+        if isinstance(p.columns, pd.MultiIndex) and p.columns.nlevels >= 2:
+            return [str(x) for x in pd.Index(p.columns.get_level_values(0)).unique().tolist()]
+    except Exception:
+        pass
+
+    # Fallback: infer from any component MultiIndex index
+    for comp in ("buses", "loads", "generators", "links", "stores"):
+        df = getattr(n, comp, None)
+        if df is not None and isinstance(df.index, pd.MultiIndex) and "scenario" in df.index.names:
+            return [str(x) for x in pd.Index(df.index.get_level_values("scenario")).unique().tolist()]
+
+    return []
+
+
+def _idx_level(idx: pd.Index, level_name: str, fallback_pos: int) -> pd.Index:
+    """Get a level from MultiIndex by name, else fallback position."""
+    if isinstance(idx, pd.MultiIndex):
+        if level_name in idx.names:
+            return idx.get_level_values(level_name)
+        return idx.get_level_values(fallback_pos)
+    return idx
+
+
+def _name_values(idx: pd.Index) -> pd.Index:
+    """Return the base 'name' level as strings (works for Index and MultiIndex)."""
+    return _idx_level(idx, "name", -1).astype(str)
+
+def _bool_mask(x) -> np.ndarray:
+    """Return a boolean numpy mask from Index/Series/ndarray comparisons."""
+    return np.asarray(x, dtype=bool)
+
+def _slice_scenario_df(df: pd.DataFrame, scenario: str | None) -> pd.DataFrame:
+    """Return a scenario slice with plain Index (name) if df is MultiIndex (scenario, name)."""
+    if scenario is None or not isinstance(df.index, pd.MultiIndex):
+        return df
+    level = "scenario" if "scenario" in df.index.names else 0
+    return df.xs(scenario, level=level, drop_level=True)
+
+
+def _safe_id(s: str, maxlen: int = 120) -> str:
+    """Sanitize strings for constraint names."""
+    s = re.sub(r"[^A-Za-z0-9_-]+", "_", str(s))
+    return s[:maxlen]
+
 
 
 def add_land_use_constraint_perfect(n: pypsa.Network) -> None:
@@ -847,152 +918,180 @@ def add_operational_reserve_margin(n, sns, config):
 
 def add_TES_energy_to_power_ratio_constraints(n: pypsa.Network) -> None:
     """
-    Add TES constraints to the network.
+    Add TES constraints:
+        Store-e_nom(tes) - etpr * Link-p_nom(charger) == 0
 
-    For each TES storage unit, enforce:
-        Store-e_nom - etpr * Link-p_nom == 0
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        A PyPSA network with TES and heating sectors enabled.
-
-    Raises
-    ------
-    ValueError
-        If no valid TES storage or charger links are found.
-    RuntimeError
-        If the TES storage and charger indices do not align.
+    Stochastic-safe:
+    - Capacity variables (p_nom/e_nom) are scenario-independent (indexed by name only).
+    - We build constraints using base names only, reading parameters from a reference scenario.
     """
-    indices_charger_p_nom_extendable = n.links.index[
-        n.links.index.str.contains("water tanks charger|water pits charger")
-        & n.links.p_nom_extendable
-    ]
-    indices_stores_e_nom_extendable = n.stores.index[
-        n.stores.index.str.contains("water tanks|water pits")
-        & n.stores.e_nom_extendable
-    ]
+    links = n.links
+    stores = n.stores
 
-    if indices_charger_p_nom_extendable.empty or indices_stores_e_nom_extendable.empty:
+    scenarios = _scenario_names(n) if _has_scenarios(n) else []
+    ref_sc = scenarios[0] if scenarios else None
+
+    links_ref = _slice_scenario_df(links, ref_sc)
+    stores_ref = _slice_scenario_df(stores, ref_sc)
+
+    charger_regex = r"water tanks charger|water pits charger"
+    store_regex = r"water tanks|water pits"
+
+    chargers = links_ref.index[
+        links_ref.p_nom_extendable.astype(bool)
+        & links_ref.index.to_series().astype(str).str.contains(charger_regex, regex=True)
+    ]
+    tes_stores = set(
+        stores_ref.index[
+            stores_ref.e_nom_extendable.astype(bool)
+            & stores_ref.index.to_series().astype(str).str.contains(store_regex, regex=True)
+        ].astype(str)
+    )
+
+    if len(chargers) == 0 or len(tes_stores) == 0:
         logger.warning(
-            "No valid extendable charger links or stores found for TES energy-to-power constraints.Not enforcing TES energy-to-power ratio constraints!"
+            "No valid extendable TES charger/store pairs found. "
+            "Not enforcing TES energy-to-power ratio constraints."
         )
         return
 
-    energy_to_power_ratio_values = n.links.loc[
-        indices_charger_p_nom_extendable, "energy to power ratio"
-    ].values
+    link_p_nom = n.model["Link-p_nom"]
+    store_e_nom = n.model["Store-e_nom"]
 
-    linear_expr_list = []
-    for charger, tes, energy_to_power_value in zip(
-        indices_charger_p_nom_extendable,
-        indices_stores_e_nom_extendable,
-        energy_to_power_ratio_values,
-    ):
-        charger_var = n.model["Link-p_nom"].loc[charger]
-        if not tes == charger.replace(" charger", ""):
-            # e.g. "DE0 0 urban central water tanks charger-2050" -> "DE0 0 urban central water tanks-2050"
+    for charger in chargers.astype(str):
+        tes = charger.replace(" charger", "")
+        if tes not in tes_stores:
             raise RuntimeError(
-                f"Charger {charger} and TES {tes} do not match. "
-                "Ensure that the charger and TES are in the same location and refer to the same technology."
+                f"TES store not found for charger '{charger}'. Expected store '{tes}'."
             )
-        store_var = n.model["Store-e_nom"].loc[tes]
-        linear_expr = store_var - energy_to_power_value * charger_var
-        linear_expr_list.append(linear_expr)
 
-    # Merge the individual expressions
-    dim = "Store-ext, Link-ext" if PYPSA_V1 else "name"
-    merged_expr = linopy.expressions.merge(
-        linear_expr_list, dim=dim, cls=type(linear_expr_list[0])
-    )
+        etpr = float(links_ref.loc[charger, "energy to power ratio"])
 
-    n.model.add_constraints(merged_expr == 0, name="TES_energy_to_power_ratio")
+        # Capacity variables are indexed by base name only (no scenario)
+        charger_var = link_p_nom.loc[charger]
+        store_var = store_e_nom.loc[tes]
+
+        lhs = store_var - etpr * charger_var
+
+        n.model.add_constraints(
+            lhs == 0,
+            name=f"TES_energy_to_power_ratio_{_safe_id(charger)}",
+        )
+
+
 
 
 def add_TES_charger_ratio_constraints(n: pypsa.Network) -> None:
     """
-    Add TES charger ratio constraints.
+    Add TES charger ratio constraints:
+        Link-p_nom(charger) - efficiency(discharger) * Link-p_nom(discharger) == 0
 
-    For each TES unit, enforce:
-        Link-p_nom(charger) - efficiency * Link-p_nom(discharger) == 0
-
-    Parameters
-    ----------
-    n : pypsa.Network
-        A PyPSA network with TES and heating sectors enabled.
-
-    Raises
-    ------
-    ValueError
-        If no valid TES discharger or charger links are found.
-    RuntimeError
-        If the charger and discharger indices do not align.
+    Stochastic-safe: uses base names (scenario-independent capacities).
     """
-    indices_charger_p_nom_extendable = n.links.index[
-        n.links.index.str.contains(
-            "water tanks charger|water pits charger|aquifer thermal energy storage charger"
-        )
-        & n.links.p_nom_extendable
-    ]
-    indices_discharger_p_nom_extendable = n.links.index[
-        n.links.index.str.contains(
-            "water tanks discharger|water pits discharger|aquifer thermal energy storage discharger"
-        )
-        & n.links.p_nom_extendable
-    ]
+    links = n.links
 
-    if (
-        indices_charger_p_nom_extendable.empty
-        or indices_discharger_p_nom_extendable.empty
-    ):
+    scenarios = _scenario_names(n) if _has_scenarios(n) else []
+    ref_sc = scenarios[0] if scenarios else None
+
+    links_ref = _slice_scenario_df(links, ref_sc)
+
+    charger_regex = (
+        r"water tanks charger|water pits charger|aquifer thermal energy storage charger"
+    )
+    discharger_regex = (
+        r"water tanks discharger|water pits discharger|aquifer thermal energy storage discharger"
+    )
+
+    chargers = links_ref.index[
+        links_ref.p_nom_extendable.astype(bool)
+        & links_ref.index.to_series().astype(str).str.contains(charger_regex, regex=True)
+    ].astype(str)
+
+    dischargers = set(
+        links_ref.index[
+            links_ref.p_nom_extendable.astype(bool)
+            & links_ref.index.to_series().astype(str).str.contains(discharger_regex, regex=True)
+        ].astype(str)
+    )
+
+    if len(chargers) == 0 or len(dischargers) == 0:
         logger.warning(
-            "No valid extendable TES discharger or charger links found for TES charger ratio constraints. Not enforcing TES charger_ratio constraints."
+            "No valid extendable TES charger/discharger pairs found. "
+            "Not enforcing TES charger ratio constraints."
         )
         return
 
-    for charger, discharger in zip(
-        indices_charger_p_nom_extendable, indices_discharger_p_nom_extendable
-    ):
-        if not charger.replace(" charger", " ") == discharger.replace(
-            " discharger", " "
-        ):
-            # e.g. "DE0 0 urban central water tanks charger-2050" -> "DE0 0 urban central water tanks-2050"
+    link_p_nom = n.model["Link-p_nom"]
+
+    for charger in chargers:
+        discharger = charger.replace(" charger", " discharger")
+        if discharger not in dischargers:
             raise RuntimeError(
-                f"Charger {charger} and discharger {discharger} do not match. "
-                "Ensure that the charger and discharger are in the same location and refer to the same technology."
+                f"TES discharger not found for charger '{charger}'. Expected '{discharger}'."
             )
 
-    eff_discharger = n.links.efficiency[indices_discharger_p_nom_extendable].values
-    lhs = (
-        n.model["Link-p_nom"].loc[indices_charger_p_nom_extendable]
-        - n.model["Link-p_nom"].loc[indices_discharger_p_nom_extendable]
-        * eff_discharger
-    )
+        eff = float(links_ref.loc[discharger, "efficiency"])
 
-    n.model.add_constraints(lhs == 0, name="TES_charger_ratio")
+        lhs = link_p_nom.loc[charger] - eff * link_p_nom.loc[discharger]
+
+        n.model.add_constraints(
+            lhs == 0,
+            name=f"TES_charger_ratio_{_safe_id(charger)}",
+        )
 
 
-def add_battery_constraints(n):
+
+
+def add_battery_constraints(n: pypsa.Network) -> None:
     """
-    Add constraint ensuring that charger = discharger, i.e.
-    1 * charger_size - efficiency * discharger_size = 0
+    Add battery charger ratio constraints:
+        Link-p_nom(charger) - efficiency(discharger) * Link-p_nom(discharger) == 0
+
+    Stochastic-safe: capacities are scenario-independent.
     """
     if not n.links.p_nom_extendable.any():
         return
 
-    discharger_bool = n.links.index.str.contains("battery discharger")
-    charger_bool = n.links.index.str.contains("battery charger")
+    links = n.links
 
-    dischargers_ext = n.links[discharger_bool].query("p_nom_extendable").index
-    chargers_ext = n.links[charger_bool].query("p_nom_extendable").index
+    scenarios = _scenario_names(n) if _has_scenarios(n) else []
+    ref_sc = scenarios[0] if scenarios else None
 
-    eff = n.links.efficiency[dischargers_ext].values
-    lhs = (
-        n.model["Link-p_nom"].loc[chargers_ext]
-        - n.model["Link-p_nom"].loc[dischargers_ext] * eff
+    links_ref = _slice_scenario_df(links, ref_sc)
+
+    charger_mask = (
+        links_ref.p_nom_extendable.astype(bool)
+        & links_ref.index.to_series().astype(str).str.contains("battery charger", regex=False)
+    )
+    discharger_mask = (
+        links_ref.p_nom_extendable.astype(bool)
+        & links_ref.index.to_series().astype(str).str.contains("battery discharger", regex=False)
     )
 
-    n.model.add_constraints(lhs == 0, name="Link-charger_ratio")
+    chargers = links_ref.index[charger_mask].astype(str)
+    dischargers = set(links_ref.index[discharger_mask].astype(str))
+
+    if len(chargers) == 0 or len(dischargers) == 0:
+        return
+
+    link_p_nom = n.model["Link-p_nom"]
+
+    for charger in chargers:
+        discharger = charger.replace(" charger", " discharger")
+        if discharger not in dischargers:
+            raise RuntimeError(
+                f"Battery discharger not found for charger '{charger}'. Expected '{discharger}'."
+            )
+
+        eff = float(links_ref.loc[discharger, "efficiency"])
+        lhs = link_p_nom.loc[charger] - eff * link_p_nom.loc[discharger]
+
+        n.model.add_constraints(
+            lhs == 0,
+            name=f"Link_charger_ratio_{_safe_id(charger)}",
+        )
+
+
 
 
 def add_lossy_bidirectional_link_constraints(n):
@@ -1109,59 +1208,117 @@ def add_flexible_egs_constraint(n):
     )
 
 
-def add_import_limit_constraint(n: pypsa.Network, sns: pd.DatetimeIndex):
+def add_import_limit_constraint(n: pypsa.Network, sns: pd.DatetimeIndex) -> None:
     """
     Add constraint for limiting green energy imports (synthetic and biomass).
     Does not include fossil fuel imports.
-    """
 
+    Stochastic-safe: enforce one constraint per scenario.
+    """
     nyears = n.snapshot_weightings.generators.sum() / 8760
 
-    import_links = n.links.loc[n.links.carrier.str.contains("import")].index
-    import_gens = n.generators.loc[n.generators.carrier.str.contains("import")].index
+    import_links = n.links.loc[n.links.carrier.astype(str).str.contains("import")].index
+    import_gens = n.generators.loc[n.generators.carrier.astype(str).str.contains("import")].index
 
     limit = n.config["sector"]["imports"]["limit"]
     limit_sense = n.config["sector"]["imports"]["limit_sense"]
 
-    if (import_links.empty and import_gens.empty) or not np.isfinite(limit):
+    if (len(import_links) == 0 and len(import_gens) == 0) or not np.isfinite(limit):
         return
 
     weightings = n.snapshot_weightings.loc[sns, "generators"]
-
-    # everything needs to be in MWh_fuel
-    eff = n.links.loc[import_links, "efficiency"]
-
-    p_gens = n.model["Generator-p"].loc[sns, import_gens]
-    p_links = n.model["Link-p"].loc[sns, import_links]
-
-    lhs = (p_gens * weightings).sum() + (p_links * eff * weightings).sum()
-
     rhs = limit * 1e6 * nyears
 
-    n.model.add_constraints(lhs, limit_sense, rhs, name="import_limit")
+    if not _has_scenarios(n) or not isinstance(import_links, pd.MultiIndex):
+        eff = n.links.loc[import_links, "efficiency"] if len(import_links) else 0.0
+        lhs = 0.0
+        if len(import_gens):
+            p_g = n.model["Generator-p"].loc[sns, import_gens]
+            lhs = lhs + (p_g * weightings).sum()
+        if len(import_links):
+            p_l = n.model["Link-p"].loc[sns, import_links]
+            lhs = lhs + (p_l * eff * weightings).sum()
+        n.model.add_constraints(lhs, limit_sense, rhs, name="import_limit")
+        return
+
+    scenarios = _scenario_names(n)
+    link_sc_level = _idx_level(n.links.index, "scenario", 0).astype(str)
+    gen_sc_level = _idx_level(n.generators.index, "scenario", 0).astype(str)
+
+    for sc in scenarios:
+        links_sc = import_links[link_sc_level.loc[import_links] == sc]
+        gens_sc = import_gens[gen_sc_level.loc[import_gens] == sc]
+
+        if len(links_sc) == 0 and len(gens_sc) == 0:
+            continue
+
+        eff_sc = n.links.loc[links_sc, "efficiency"] if len(links_sc) else 0.0
+
+        lhs = 0.0
+        if len(gens_sc):
+            p_g = n.model["Generator-p"].loc[sns, gens_sc]
+            lhs = lhs + (p_g * weightings).sum()
+        if len(links_sc):
+            p_l = n.model["Link-p"].loc[sns, links_sc]
+            lhs = lhs + (p_l * eff_sc * weightings).sum()
+
+        n.model.add_constraints(lhs, limit_sense, rhs, name=f"import_limit-{sc}")
 
 
-def add_co2_atmosphere_constraint(n, snapshots):
+
+def add_co2_atmosphere_constraint(n: pypsa.Network, snapshots: pd.DatetimeIndex) -> None:
+    """
+    Add CO2 atmosphere constraint.
+
+    Stochastic-safe: enforce per scenario.
+    """
     glcs = n.global_constraints[n.global_constraints.type == "co2_atmosphere"]
-
     if glcs.empty:
         return
+
+    last_i = snapshots[-1]
+
+    if not _has_scenarios(n) or not isinstance(n.stores.index, pd.MultiIndex):
+        for name, glc in glcs.iterrows():
+            carattr = glc.carrier_attribute
+            emissions = n.carriers.query(f"{carattr} != 0")[carattr]
+            if emissions.empty:
+                continue
+
+            bus_carrier = n.stores.bus.map(n.buses.carrier)
+            stores = n.stores[bus_carrier.isin(emissions.index) & ~n.stores.e_cyclic]
+            if stores.empty:
+                continue
+
+            lhs = n.model["Store-e"].loc[last_i, stores.index]
+            n.model.add_constraints(lhs <= glc.constant, name=f"GlobalConstraint-{name}")
+        return
+
+    scenarios = _scenario_names(n)
+
+    # Precompute emissions carriers per constraint row (usually identical, but keep generic)
     for name, glc in glcs.iterrows():
         carattr = glc.carrier_attribute
         emissions = n.carriers.query(f"{carattr} != 0")[carattr]
-
         if emissions.empty:
             continue
 
-        # stores
-        bus_carrier = n.stores.bus.map(n.buses.carrier)
-        stores = n.stores[bus_carrier.isin(emissions.index) & ~n.stores.e_cyclic]
-        if not stores.empty:
-            last_i = snapshots[-1]
-            lhs = n.model["Store-e"].loc[last_i, stores.index]
-            rhs = glc.constant
+        # Per scenario: select stores with relevant bus carrier
+        for sc in scenarios:
+            stores_sc = n.stores.loc[_idx_level(n.stores.index, "scenario", 0).astype(str) == sc]
+            buses_sc = n.buses.loc[_idx_level(n.buses.index, "scenario", 0).astype(str) == sc]
 
-            n.model.add_constraints(lhs <= rhs, name=f"GlobalConstraint-{name}")
+            if stores_sc.empty or buses_sc.empty:
+                continue
+
+            bus_carrier = stores_sc.bus.map(buses_sc.carrier)
+            stores_sel = stores_sc[bus_carrier.isin(emissions.index) & ~stores_sc.e_cyclic]
+            if stores_sel.empty:
+                continue
+
+            lhs = n.model["Store-e"].loc[last_i, stores_sel.index]
+            n.model.add_constraints(lhs <= glc.constant, name=f"GlobalConstraint-{name}-{sc}")
+
 
 
 def extra_functionality(
@@ -1234,6 +1391,50 @@ def extra_functionality(
     if config["sector"]["imports"]["enable"]:
         add_import_limit_constraint(n, snapshots)
 
+    if n.params.custom_extra_functionality:
+        source_path = n.params.custom_extra_functionality
+        assert os.path.exists(source_path), f"{source_path} does not exist"
+        sys.path.append(os.path.dirname(source_path))
+        module_name = os.path.splitext(os.path.basename(source_path))[0]
+        module = importlib.import_module(module_name)
+        custom_extra_functionality = getattr(module, module_name)
+        custom_extra_functionality(n, snapshots, snakemake)  # pylint: disable=E0601
+
+
+def extra_functionality_stochastic_minimal(
+    n: pypsa.Network, snapshots: pd.DatetimeIndex, planning_horizons: str | None = None
+) -> None:
+    """
+    Minimal extra functionality for stochastic overnight sector-coupled runs.
+    Keeps only:
+    - TES constraints (if enabled and heat buses exist)
+    - Battery constraints
+    - CO2 atmosphere constraint (if present)
+    - Import limit constraint (if enabled)
+    - Optional user custom extra functionality
+    """
+    config = n.config
+
+    # TES only if requested and heat buses exist
+    if config.get("sector", {}).get("tes", False):
+        bus_names = _name_values(n.buses.index)
+        if bus_names.str.contains(
+            r"urban central heat|urban decentral heat|rural heat",
+            case=False,
+            na=False,
+        ).any():
+            add_TES_energy_to_power_ratio_constraints(n)
+            add_TES_charger_ratio_constraints(n)
+
+    add_battery_constraints(n)
+
+    # Non-multi-invest case: keep CO2 atmosphere if present
+    add_co2_atmosphere_constraint(n, snapshots)
+
+    if config.get("sector", {}).get("imports", {}).get("enable", False):
+        add_import_limit_constraint(n, snapshots)
+
+    # Custom user extra functionality (if provided)
     if n.params.custom_extra_functionality:
         source_path = n.params.custom_extra_functionality
         assert os.path.exists(source_path), f"{source_path} does not exist"
@@ -1405,9 +1606,11 @@ def create_optimization_model(
     logger.info("Creating optimization model...")
     n.optimize.create_model(**model_kwargs)
 
-    # Add extra functionality (custom constraints)
     logger.info("Adding extra functionality (custom constraints)...")
-    extra_functionality(n, n.snapshots, planning_horizons)
+
+    # Choose the correct extra functionality depending on stochastic scenarios
+    extra_fn = extra_functionality_stochastic_minimal if _has_scenarios(n) else extra_functionality
+    extra_fn(n, n.snapshots, planning_horizons)
 
 
 if __name__ == "__main__":
@@ -1417,10 +1620,10 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "solve_sector_network",
             opts="",
-            clusters="5",
-            configfiles="config/test/config.overnight.yaml",
+            clusters="adm",
+            configfiles="config/test_stoch/config.yaml",
             sector_opts="",
-            planning_horizons="2030",
+            planning_horizons="2050",
         )
     configure_logging(snakemake)
     set_scenario_config(snakemake)
@@ -1436,14 +1639,17 @@ if __name__ == "__main__":
     planning_horizons = snakemake.wildcards.get("planning_horizons", None)
 
     # Prepare network (settings before solving)
-    prepare_network(
-        n,
-        solve_opts=snakemake.params.solving["options"],
-        foresight=snakemake.params.foresight,
-        planning_horizons=planning_horizons,
-        co2_sequestration_potential=snakemake.params["co2_sequestration_potential"],
-        limit_max_growth=snakemake.params.get("sector", {}).get("limit_max_growth"),
-    )
+    if not _has_scenarios(n):
+        prepare_network(
+            n,
+            solve_opts=snakemake.params.solving["options"],
+            foresight=snakemake.params.foresight,
+            planning_horizons=planning_horizons,
+            co2_sequestration_potential=snakemake.params["co2_sequestration_potential"],
+            limit_max_growth=snakemake.params.get("sector", {}).get("limit_max_growth"),
+        )
+    else:
+        logger.info("Network already stochastic: skipping prepare_network().")
 
     # Determine solve mode
     rolling_horizon = cf_solving.get("rolling_horizon", False)
@@ -1473,9 +1679,8 @@ if __name__ == "__main__":
 
             n.config = snakemake.config
             n.params = snakemake.params
-            all_kwargs["extra_functionality"] = partial(
-                extra_functionality, planning_horizons=planning_horizons
-            )
+            extra_fn = extra_functionality_stochastic_minimal if _has_scenarios(n) else extra_functionality
+            all_kwargs["extra_functionality"] = partial(extra_fn, planning_horizons=planning_horizons)
             n.optimize.optimize_with_rolling_horizon(**all_kwargs)
             status, condition = "", ""
 

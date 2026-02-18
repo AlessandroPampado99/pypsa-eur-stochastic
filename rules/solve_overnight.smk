@@ -52,8 +52,8 @@ rule solve_sector_network:
         ),
         custom_extra_functionality=input_custom_extra_functionality,
     input:
-        network=RESULTS
-        + "networks/stochastic/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+        network=RESULTS + "networks/base_s_stoch_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+
     output:
         network=RESULTS
         + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
