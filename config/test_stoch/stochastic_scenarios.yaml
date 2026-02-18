@@ -1,0 +1,17 @@
+# Minimal stochastic scenario definition for PyPSA (v1.x) set_scenarios()
+
+scenarios:
+  normal: 0.3333333333
+  low:    0.3333333333
+  high:   0.3333333333
+
+patches:
+  - target: "loads_t.p_set"
+    op: "scale"
+    selector:
+      names: ".*"      # regex: all loads
+    values:
+      normal: 1.0
+      low:    0.75
+      high:   1.50
+

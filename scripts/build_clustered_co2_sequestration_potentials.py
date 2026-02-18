@@ -12,6 +12,12 @@ import logging
 import geopandas as gpd
 import pandas as pd
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import configure_logging, set_scenario_config
 
 logger = logging.getLogger(__name__)
@@ -42,7 +48,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_sequestration_potentials", clusters="128")
+        snakemake = mock_snakemake("build_clustered_co2_sequestration_potentials", clusters="50")
 
     configure_logging(snakemake)
     set_scenario_config(snakemake)
