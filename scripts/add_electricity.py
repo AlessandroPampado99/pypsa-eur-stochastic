@@ -52,6 +52,12 @@ import logging
 from collections.abc import Iterable
 from typing import Any
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd

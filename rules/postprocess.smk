@@ -2,6 +2,24 @@
 #
 # SPDX-License-Identifier: MIT
 
+def _stoch_enabled():
+    return bool(_stoch_cfg().get("enable", False))
+
+def _stoch_cfg():
+    return (config.get("stochastic_scenarios", {}) or {})
+
+def pp_network_expected(w):
+    """Return the deterministic network for postprocess: base (det) or __exp (stoch)."""
+    base = RESULTS + f"networks/base_s_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+    if _stoch_enabled():
+        return base.replace(".nc", "__exp.nc")
+    return base
+
+def pp_do_scenarios(rule_key: str) -> bool:
+    """Check if a postprocess rule should also run per-scenario."""
+    return bool((_stoch_cfg().get("postprocess", {}) or {}).get(rule_key, {}).get("scenarios", False))
+
+
 
 if config["foresight"] != "perfect":
 
@@ -48,8 +66,7 @@ if config["foresight"] != "perfect":
             plotting=config_provider("plotting"),
             transmission_limit=config_provider("electricity", "transmission_limit"),
         input:
-            network=RESULTS
-            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=pp_network_expected,
             regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             map=RESULTS
@@ -75,8 +92,7 @@ if config["foresight"] != "perfect":
             plotting=config_provider("plotting"),
             foresight=config_provider("foresight"),
         input:
-            network=RESULTS
-            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=pp_network_expected,
             regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             map=RESULTS
@@ -101,8 +117,7 @@ if config["foresight"] != "perfect":
         params:
             plotting=config_provider("plotting"),
         input:
-            network=RESULTS
-            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=pp_network_expected,
             regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             map=RESULTS
@@ -128,8 +143,7 @@ if config["foresight"] != "perfect":
             plotting=config_provider("plotting"),
             settings=lambda w: config_provider("plotting", "balance_map", w.carrier),
         input:
-            network=RESULTS
-            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=pp_network_expected,
             regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             RESULTS
@@ -154,8 +168,7 @@ if config["foresight"] != "perfect":
                 "plotting", "balance_map_interactive", w.carrier
             ),
         input:
-            network=RESULTS
-            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+            network=pp_network_expected,
             regions=resources("regions_onshore_base_s_{clusters}.geojson"),
         output:
             RESULTS
@@ -248,8 +261,7 @@ rule make_summary:
     message:
         "Creating optimization results summary statistics"
     input:
-        network=RESULTS
-        + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+        network=pp_network_expected,
     output:
         nodal_costs=RESULTS
         + "csvs/individual/nodal_costs_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.csv",
@@ -470,8 +482,7 @@ rule plot_balance_timeseries:
         snapshots=config_provider("snapshots"),
         drop_leap_day=config_provider("enable", "drop_leap_day"),
     input:
-        network=RESULTS
-        + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+        network=pp_network_expected,
         rc="matplotlibrc",
     threads: 16
     resources:
@@ -499,8 +510,7 @@ rule plot_heatmap_timeseries:
         snapshots=config_provider("snapshots"),
         drop_leap_day=config_provider("enable", "drop_leap_day"),
     input:
-        network=RESULTS
-        + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+        network=pp_network_expected,
         rc="matplotlibrc",
     threads: 16
     resources:
@@ -599,8 +609,7 @@ rule plot_interactive_bus_balance:
             "plotting", "interactive_bus_balance", "bus_name_pattern"
         ),
     input:
-        network=RESULTS
-        + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc",
+        network=pp_network_expected,
         rc="matplotlibrc",
     output:
         directory=directory(
@@ -617,3 +626,315 @@ rule plot_interactive_bus_balance:
         mem_mb=20000,
     script:
         scripts("plot_interactive_bus_balance.py")
+
+# -----------------------------
+# Scenario-specific postprocess rules
+# These rules consume the deterministic "scenario view" networks:
+#   ...__sc-{stoch_scenario}.nc
+# and write outputs suffixed with:
+#   __sc-{stoch_scenario}
+# -----------------------------
+
+if _stoch_enabled() and pp_do_scenarios("plot_power_network"):
+
+    rule plot_power_network_scenario:
+        message:
+            "Plotting power network for stochastic scenario {wildcards.stoch_scenario} (clusters={wildcards.clusters}, opts={wildcards.opts}, sector_opts={wildcards.sector_opts}, horizon={wildcards.planning_horizons})"
+        params:
+            plotting=config_provider("plotting"),
+            transmission_limit=config_provider("electricity", "transmission_limit"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            map=RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-costs-all_{planning_horizons}__sc-{stoch_scenario}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_power_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_power_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            )
+        script:
+            scripts("plot_power_network.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_hydrogen_network"):
+
+    rule plot_hydrogen_network_scenario:
+        message:
+            "Plotting hydrogen network for stochastic scenario {wildcards.stoch_scenario} (clusters={wildcards.clusters}, opts={wildcards.opts}, sector_opts={wildcards.sector_opts}, horizon={wildcards.planning_horizons})"
+        params:
+            plotting=config_provider("plotting"),
+            foresight=config_provider("foresight"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            map=RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-h2_network_{planning_horizons}__sc-{stoch_scenario}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_hydrogen_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_hydrogen_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            )
+        script:
+            scripts("plot_hydrogen_network.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_gas_network"):
+
+    rule plot_gas_network_scenario:
+        message:
+            "Plotting methane network for stochastic scenario {wildcards.stoch_scenario} (clusters={wildcards.clusters}, opts={wildcards.opts}, sector_opts={wildcards.sector_opts}, horizon={wildcards.planning_horizons})"
+        params:
+            plotting=config_provider("plotting"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            map=RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-ch4_network_{planning_horizons}__sc-{stoch_scenario}.pdf",
+        threads: 2
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_gas_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_gas_network/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            )
+        script:
+            scripts("plot_gas_network.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_balance_map"):
+
+    def _dbg_settings(w):
+        # This is the ONLY carrier we want to use to index plotting.balance_map
+        carrier = w.carrier
+
+        # Properly resolve config_provider (it returns a callable)
+        s = config_provider("plotting", "balance_map", carrier)(w)
+
+        print(
+            f"[DBG] plot_balance_map_scenario carrier='{carrier}' "
+            f"stoch_scenario='{w.stoch_scenario}' settings={s}"
+        )
+        return s
+
+    rule plot_balance_map_scenario:
+        message:
+            "Plotting balance map for stochastic scenario {wildcards.stoch_scenario} (carrier={wildcards.carrier})"
+        params:
+            plotting=config_provider("plotting"),
+            settings=_dbg_settings,
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            map=RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}-balance_map_{carrier}.pdf",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}_{carrier}.log",
+        benchmark:
+            RESULTS
+            + "benchmarks/plot_balance_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}_{carrier}",
+        wildcard_constraints:
+            # Prevent carrier from accidentally swallowing scenario/expected suffixes
+            carrier="(?!.*__sc-)(?!.*__exp).*",
+        script:
+            scripts("plot_balance_map.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_balance_map_interactive"):
+
+    rule plot_balance_map_interactive_scenario:
+        params:
+            settings=lambda w: config_provider("plotting", "balance_map_interactive", w.carrier),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            regions=resources("regions_onshore_base_s_{clusters}.geojson"),
+        output:
+            RESULTS
+            + "maps/interactive/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}-balance_map_{carrier}.html",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/plot_balance_map_interactive/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_{carrier}__sc-{stoch_scenario}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/plot_interactive_map/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}_{carrier}__sc-{stoch_scenario}"
+            )
+        script:
+            scripts("plot_balance_map_interactive.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("make_summary"):
+
+    rule make_summary_scenario:
+        message:
+            "Creating optimization results summary statistics for stochastic scenario {wildcards.stoch_scenario}"
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+        output:
+            nodal_costs=RESULTS
+            + "csvs/individual/nodal_costs_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            nodal_capacities=RESULTS
+            + "csvs/individual/nodal_capacities_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            nodal_capacity_factors=RESULTS
+            + "csvs/individual/nodal_capacity_factors_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            capacity_factors=RESULTS
+            + "csvs/individual/capacity_factors_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            costs=RESULTS
+            + "csvs/individual/costs_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            capacities=RESULTS
+            + "csvs/individual/capacities_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            curtailment=RESULTS
+            + "csvs/individual/curtailment_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            energy=RESULTS
+            + "csvs/individual/energy_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            energy_balance=RESULTS
+            + "csvs/individual/energy_balance_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            nodal_energy_balance=RESULTS
+            + "csvs/individual/nodal_energy_balance_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            prices=RESULTS
+            + "csvs/individual/prices_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            weighted_prices=RESULTS
+            + "csvs/individual/weighted_prices_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            market_values=RESULTS
+            + "csvs/individual/market_values_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            metrics=RESULTS
+            + "csvs/individual/metrics_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+        threads: 1
+        resources:
+            mem_mb=8000,
+        log:
+            RESULTS
+            + "logs/make_summary_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            (
+                RESULTS
+                + "benchmarks/make_summary_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            )
+        script:
+            scripts("make_summary.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_balance_timeseries"):
+
+    rule plot_balance_timeseries_scenario:
+        message:
+            "Plotting energy balance time series for stochastic scenario {wildcards.stoch_scenario}"
+        params:
+            plotting=config_provider("plotting"),
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            rc="matplotlibrc",
+        threads: 16
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_balance_timeseries/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            RESULTS
+            + "benchmarks/plot_balance_timeseries/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+        output:
+            directory(
+                RESULTS
+                + "graphics/balance_timeseries/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            ),
+        script:
+            scripts("plot_balance_timeseries.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_heatmap_timeseries"):
+
+    rule plot_heatmap_timeseries_scenario:
+        message:
+            "Plotting heatmap time series for stochastic scenario {wildcards.stoch_scenario}"
+        params:
+            plotting=config_provider("plotting"),
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            rc="matplotlibrc",
+        threads: 16
+        resources:
+            mem_mb=10000,
+        log:
+            RESULTS
+            + "logs/plot_heatmap_timeseries/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            RESULTS
+            + "benchmarks/plot_heatmap_timeseries/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+        output:
+            directory(
+                RESULTS
+                + "graphics/heatmap_timeseries/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            ),
+        script:
+            scripts("plot_heatmap_timeseries.py")
+
+
+if _stoch_enabled() and pp_do_scenarios("plot_interactive_bus_balance"):
+
+    rule plot_interactive_bus_balance_scenario:
+        message:
+            "Plotting interactive bus balance for stochastic scenario {wildcards.stoch_scenario}"
+        params:
+            plotting=config_provider("plotting"),
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),
+            bus_name_pattern=config_provider("plotting", "interactive_bus_balance", "bus_name_pattern"),
+        input:
+            network=RESULTS
+            + "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.nc",
+            rc="matplotlibrc",
+        output:
+            directory=directory(
+                RESULTS
+                + "graphics/interactive_bus_balance/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}"
+            ),
+        log:
+            RESULTS
+            + "logs/plot_interactive_bus_balance/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.log",
+        benchmark:
+            RESULTS
+            + "benchmarks/plot_interactive_bus_balance/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+        resources:
+            mem_mb=20000,
+        script:
+            scripts("plot_interactive_bus_balance.py")

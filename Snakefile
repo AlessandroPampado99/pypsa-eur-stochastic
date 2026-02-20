@@ -22,6 +22,20 @@ from scripts._helpers import (
 )
 from scripts.lib.validation.config import validate_config
 
+import re
+
+def _with_sc_suffix(paths, scenarios):
+    """
+    Take a list of deterministic output paths (ending in .pdf/.html)
+    and produce the corresponding list with '__sc-{scenario}' inserted before the extension.
+    """
+    out = []
+    for sc in scenarios:
+        for p in paths:
+            out.append(re.sub(r"(\.pdf|\.html)$", rf"__sc-{sc}\1", p))
+    return out
+
+
 
 configfile: "config/config.default.yaml"
 configfile: "config/plotting.default.yaml"
@@ -89,6 +103,20 @@ if config["foresight"] == "myopic":
 if config["foresight"] == "perfect":
 
     include: "rules/solve_perfect.smk"
+
+def _balance_map_paths_scenarios(kind, w, scenarios):
+    """
+    Convert deterministic balance_map outputs into scenario-specific ones by
+    inserting '__sc-<scenario>' BEFORE '-balance_map_' (so carrier stays clean).
+    """
+    base = balance_map_paths(kind, w)  # list of concrete paths (carrier already expanded)
+    out = []
+    for sc in scenarios:
+        for p in base:
+            if "-balance_map_" not in p:
+                raise ValueError(f"Unexpected balance_map path format: {p}")
+            out.append(p.replace("-balance_map_", f"__sc-{sc}-balance_map_"))
+    return out
 
 
 rule all:
@@ -222,6 +250,99 @@ rule all:
         ),
         lambda w: balance_map_paths("static", w),
         lambda w: balance_map_paths("interactive", w),
+                lambda w: expand(
+            RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-costs-all_{planning_horizons}__sc-{stoch_scenario}.pdf",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if _stoch_enabled() and pp_do_scenarios("plot_power_network")
+        else [],
+
+        # plot_hydrogen_network_scenario (only if H2 network enabled)
+        lambda w: expand(
+            RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-h2_network_{planning_horizons}__sc-{stoch_scenario}.pdf",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if (
+            _stoch_enabled()
+            and pp_do_scenarios("plot_hydrogen_network")
+            and config_provider("sector", "H2_network")(w)
+        )
+        else [],
+
+        # plot_gas_network_scenario (only if gas network enabled)
+        lambda w: expand(
+            RESULTS
+            + "maps/static/base_s_{clusters}_{opts}_{sector_opts}-ch4_network_{planning_horizons}__sc-{stoch_scenario}.pdf",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if (
+            _stoch_enabled()
+            and pp_do_scenarios("plot_gas_network")
+            and config_provider("sector", "gas_network")(w)
+        )
+        else [],
+
+        # make_summary_scenario (trigger with just ONE output; rule produces the rest)
+        lambda w: expand(
+            RESULTS
+            + "csvs/individual/metrics_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}.csv",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if _stoch_enabled() and pp_do_scenarios("make_summary")
+        else [],
+
+        # plot_balance_timeseries_scenario (directory output)
+        lambda w: expand(
+            RESULTS
+            + "graphics/balance_timeseries/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if _stoch_enabled() and pp_do_scenarios("plot_balance_timeseries")
+        else [],
+
+        # plot_heatmap_timeseries_scenario (directory output)
+        lambda w: expand(
+            RESULTS
+            + "graphics/heatmap_timeseries/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if _stoch_enabled() and pp_do_scenarios("plot_heatmap_timeseries")
+        else [],
+
+        # plot_interactive_bus_balance_scenario (directory output)
+        lambda w: expand(
+            RESULTS
+            + "graphics/interactive_bus_balance/s_{clusters}_{opts}_{sector_opts}_{planning_horizons}__sc-{stoch_scenario}",
+            run=config["run"]["name"],
+            stoch_scenario=STOCH_SCENARIOS,
+            **config["scenario"],
+        )
+        if _stoch_enabled() and pp_do_scenarios("plot_interactive_bus_balance")
+        else [],
+
+        # plot_balance_map_scenario + plot_balance_map_interactive_scenario
+        # Reuse existing balance_map_paths(...) and just suffix outputs.
+        lambda w: _balance_map_paths_scenarios("static", w, STOCH_SCENARIOS)
+        if _stoch_enabled() and pp_do_scenarios("plot_balance_map")
+        else [],
+
+        lambda w: _balance_map_paths_scenarios("interactive", w, STOCH_SCENARIOS)
+        if _stoch_enabled() and pp_do_scenarios("plot_balance_map_interactive")
+        else [],
     default_target: True
 
 

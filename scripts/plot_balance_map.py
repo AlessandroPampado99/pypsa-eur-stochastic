@@ -13,6 +13,12 @@ from packaging.version import Version, parse
 from pypsa.plot import add_legend_lines, add_legend_patches, add_legend_semicircles
 from pypsa.statistics import get_transmission_carriers
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import (
     PYPSA_V1,
     configure_logging,
@@ -29,12 +35,14 @@ if __name__ == "__main__":
         from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "plot_balance_map",
-            clusters="50",
+            "plot_balance_map_scenario",
+            clusters="adm",
             opts="",
             sector_opts="",
             planning_horizons="2050",
-            carrier="H2",
+            carrier="AC",
+            configfiles="config/test_stoch/config.yaml",
+            stoch_scenario="normal",
         )
 
     configure_logging(snakemake)
@@ -51,6 +59,16 @@ if __name__ == "__main__":
     config = snakemake.params.plotting
     carrier = snakemake.wildcards.carrier
     settings = snakemake.params.settings
+
+    if settings is None:
+        available = list((config or {}).get("balance_map", {}).keys())
+        raise KeyError(
+            f"plot_balance_map: no settings found for carrier='{carrier}' in plotting.balance_map. "
+            f"Available keys: {available}. "
+            "This usually means your wildcard 'carrier' includes a suffix like '__sc-...' or '__exp'."
+    )
+
+
     carrier = carrier.replace(
         "_", " "
     )  # needed for slurm environment where [space] is not allowed

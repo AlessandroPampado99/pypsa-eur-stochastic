@@ -400,7 +400,7 @@ if __name__ == "__main__":
     apply_stochastic_config(
         n,
         config=snakemake.config,
-        stochastic_param=snakemake.params.get("stochastic", {}),
+        stochastic_param=snakemake.params.get("stochastic_scenarios", {}),
     )
 
     # Export

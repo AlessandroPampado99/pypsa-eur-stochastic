@@ -25,14 +25,34 @@ run:
   scenarios:
     enable: false
     file: config/scenarios.yaml
-  stochastic_scenarios:
-    enable: true
-    file: config/test_stoch/stochastic_scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+stochastic_scenarios:
+  enable: true
+  file: config/test_stoch/stochastic_scenarios.yaml   
+  postprocess:
+    plot_power_network:
+      scenarios: true
+    plot_hydrogen_network:
+      scenarios: true
+    plot_gas_network:
+      scenarios: true
+    plot_balance_map:
+      scenarios: true
+    plot_balance_map_interactive:
+      scenarios: true
+    make_summary:
+      scenarios: true
+    plot_balance_timeseries:
+      scenarios: true
+    plot_heatmap_timeseries:
+      scenarios: true
+    plot_interactive_bus_balance:
+      scenarios: true
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
