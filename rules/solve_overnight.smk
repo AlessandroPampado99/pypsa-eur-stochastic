@@ -26,9 +26,10 @@ def _stoch_scenario_names():
     return list(sc.keys())
 
 def input_sector_network(w):
-    if _stoch_enabled():
-        return RESULTS + f"networks/base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
-    return resources(f"networks/base_s_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc")
+    return (
+        RESULTS
+        + f"networks/base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+    )
 
 
 STOCH_SCENARIOS = _stoch_scenario_names() if _stoch_enabled() else []

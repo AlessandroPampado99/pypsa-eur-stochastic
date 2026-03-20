@@ -1,0 +1,7 @@
+# Minimal stochastic scenario definition for PyPSA (v1.x) set_scenarios()
+
+scenarios:
+  A: 0.5
+  B: 0.3
+  D: 0.2
+

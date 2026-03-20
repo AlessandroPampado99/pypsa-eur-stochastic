@@ -8,6 +8,7 @@ This script is intended to run BEFORE solve_network.py:
 - Load the pre-solve network
 - Call prepare_network(...) to add all components that must exist before set_scenarios
 - If enabled, call n.set_scenarios(...) and apply scenario-specific patches
+- If structured scenarios are configured, dispatch scenario builders by scenario name
 - Export the "pre-solve stochastic" network to NetCDF
 """
 
@@ -23,7 +24,8 @@ import yaml
 
 import sys
 from pathlib import Path
-ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -34,12 +36,15 @@ from scripts._helpers import (
     update_config_from_wildcards,
 )
 
-# Import prepare_network from solve_network to avoid duplication
 from scripts.solve_network import prepare_network  # noqa: E402
 
 
 logger = logging.getLogger(__name__)
 
+
+# ---------------------------
+# YAML / generic helpers
+# ---------------------------
 
 def _read_yaml_maybe(path: str | None) -> dict:
     """Read a YAML file if path is provided and exists; return {} otherwise."""
@@ -68,6 +73,200 @@ def _get_level_names(idx: pd.Index) -> pd.Index:
     return idx
 
 
+def _merge_stochastic_param(stochastic_param: dict) -> dict:
+    """Merge inline stochastic config with optional external YAML."""
+    stoch = _ensure_dict(stochastic_param, "stochastic_scenarios")
+    external = _read_yaml_maybe(stoch.get("file", ""))
+    if external:
+        merged = dict(external)
+        merged.update(stoch)
+        stoch = merged
+    return stoch
+
+
+# ---------------------------
+# Structured scenario builders
+# ---------------------------
+
+def _scenario_A(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
+    """No-op scenario A used to validate scenario dispatch."""
+    if scenario is None:
+        logger.info("Structured scenario A inserted in deterministic mode.")
+    else:
+        logger.info(f"Structured scenario A inserted for stochastic scenario '{scenario}'.")
+
+
+def _scenario_B(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
+    """No-op scenario B used to validate scenario dispatch."""
+    if scenario is None:
+        logger.info("Structured scenario B inserted in deterministic mode.")
+    else:
+        logger.info(f"Structured scenario B inserted for stochastic scenario '{scenario}'.")
+
+
+def _scenario_C(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
+    """No-op scenario C used to validate scenario dispatch."""
+    if scenario is None:
+        logger.info("Structured scenario C inserted in deterministic mode.")
+    else:
+        logger.info(f"Structured scenario C inserted for stochastic scenario '{scenario}'.")
+
+
+def _scenario_D(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
+    """No-op scenario D used to validate scenario dispatch."""
+    if scenario is None:
+        logger.info("Structured scenario D inserted in deterministic mode.")
+    else:
+        logger.info(f"Structured scenario D inserted for stochastic scenario '{scenario}'.")
+
+
+STRUCTURED_SCENARIOS = {
+    "A": _scenario_A,
+    "B": _scenario_B,
+    "C": _scenario_C,
+    "D": _scenario_D,
+}
+
+
+def _apply_named_structured_scenario(
+    n: pypsa.Network,
+    scenario_name: str,
+    config: dict,
+    scenario: str | None = None,
+) -> None:
+    """Dispatch a structured scenario by name."""
+    if scenario_name not in STRUCTURED_SCENARIOS:
+        known = ", ".join(sorted(STRUCTURED_SCENARIOS))
+        raise ValueError(
+            f"Unknown structured scenario '{scenario_name}'. Known structured scenarios: {known}"
+        )
+
+    logger.info(
+        "Applying structured scenario builder '%s' (target=%s).",
+        scenario_name,
+        f"stochastic:{scenario}" if scenario is not None else "deterministic",
+    )
+    STRUCTURED_SCENARIOS[scenario_name](n=n, scenario=scenario, config=config)
+
+
+def _resolve_deterministic_structured_scenario(
+    config: dict,
+    wildcards: Mapping[str, Any] | None = None,
+) -> str | None:
+    """
+    Resolve the active structured scenario in deterministic mode.
+
+    Precedence:
+    1. config['structured_scenario']
+    2. config['scenario']['structured_name']
+    3. wildcards['run']
+    4. config['run']['name']
+
+    Only exact names present in STRUCTURED_SCENARIOS are accepted.
+    """
+    wildcards = wildcards or {}
+
+    scenario_block = config.get("scenario", {})
+    if not isinstance(scenario_block, dict):
+        scenario_block = {}
+
+    run_block = config.get("run", {})
+    if not isinstance(run_block, dict):
+        run_block = {}
+
+    candidates = [
+        config.get("structured_scenario"),
+        scenario_block.get("structured_name"),
+        wildcards.get("run"),
+        run_block.get("name"),
+    ]
+
+    for candidate in candidates:
+        if isinstance(candidate, str) and candidate in STRUCTURED_SCENARIOS:
+            return candidate
+
+    return None
+
+
+def _validate_stochastic_structured_scenarios(scenarios: Mapping[str, Any]) -> None:
+    """Ensure all stochastic scenario names have a registered structured builder."""
+    unknown = sorted(set(scenarios) - set(STRUCTURED_SCENARIOS))
+    if unknown:
+        known = ", ".join(sorted(STRUCTURED_SCENARIOS))
+        raise ValueError(
+            f"Stochastic scenario file contains unknown structured scenarios {unknown}. "
+            f"Known structured scenarios: {known}"
+        )
+
+
+def _apply_structured_scenarios(
+    n: pypsa.Network,
+    config: dict,
+    stochastic_param: dict,
+    wildcards: Mapping[str, Any] | None = None,
+) -> tuple[bool, list[str]]:
+    """
+    Apply structured scenarios in stochastic or deterministic mode.
+
+    Returns
+    -------
+    is_stochastic : bool
+        Whether the stochastic mode was enabled.
+    active_names : list[str]
+        List of structured scenario names that were applied.
+    """
+    wildcards = wildcards or {}
+    stoch = _merge_stochastic_param(stochastic_param)
+    enabled = bool(stoch.get("enable", stoch.get("enabled", False)))
+
+    if enabled:
+        scenarios = stoch.get("scenarios", None)
+        if scenarios is None:
+            raise ValueError(
+                "stochastic_scenarios.enable=true but no scenarios were provided "
+                "(inline or through the referenced YAML file)."
+            )
+
+        _validate_stochastic_structured_scenarios(scenarios)
+
+        logger.info("Enabling stochastic scenarios via n.set_scenarios(...)")
+        n.set_scenarios(scenarios)
+
+        active_names = list(scenarios.keys())
+        logger.info("Structured stochastic scenarios detected: %s", active_names)
+
+        for sc in active_names:
+            _apply_named_structured_scenario(
+                n=n,
+                scenario_name=sc,
+                config=config,
+                scenario=sc,
+            )
+
+        return True, active_names
+
+    scenario_name = _resolve_deterministic_structured_scenario(config=config, wildcards=wildcards)
+    if scenario_name is None:
+        logger.info(
+            "Stochastic mode disabled and no deterministic structured scenario detected. "
+            "No structured scenario builder will be applied."
+        )
+        return False, []
+
+    logger.info("Deterministic structured scenario detected: %s", scenario_name)
+    _apply_named_structured_scenario(
+        n=n,
+        scenario_name=scenario_name,
+        config=config,
+        scenario=None,
+    )
+    return False, [scenario_name]
+
+
+# ---------------------------
+# Patch-based selectors/helpers
+# ---------------------------
+
 def _select_names_from_component(
     n: pypsa.Network,
     comp: str,
@@ -83,16 +282,14 @@ def _select_names_from_component(
     - any other column in the component table: exact match
     """
     selector = _ensure_dict(selector, "selector")
-    df = getattr(n, comp)  # e.g. n.generators, n.links, n.loads, ...
+    df = getattr(n, comp)
 
-    # Work on base index names (no scenario)
     idx_names = _get_level_names(df.index)
     base = df.copy()
     base.index = idx_names
 
     mask = pd.Series(True, index=base.index)
 
-    # names selector (regex or explicit list)
     names_sel = selector.get("names")
     if isinstance(names_sel, str):
         pattern = re.compile(names_sel)
@@ -100,14 +297,12 @@ def _select_names_from_component(
     elif isinstance(names_sel, (list, tuple, set)):
         mask &= base.index.isin(list(names_sel))
 
-    # carrier selector
     carrier_sel = selector.get("carrier")
     if carrier_sel is not None and "carrier" in base.columns:
         if isinstance(carrier_sel, str):
             carrier_sel = [carrier_sel]
         mask &= base["carrier"].isin(list(carrier_sel))
 
-    # bus selectors
     for bcol in ("bus", "bus0", "bus1", "bus2", "bus3", "bus4"):
         if bcol in selector and bcol in base.columns:
             val = selector[bcol]
@@ -115,7 +310,6 @@ def _select_names_from_component(
                 val = [val]
             mask &= base[bcol].isin(list(val))
 
-    # other columns exact match
     for k, v in selector.items():
         if k in ("names", "carrier", "bus", "bus0", "bus1", "bus2", "bus3", "bus4"):
             continue
@@ -138,7 +332,6 @@ def _apply_patch_static(
 ) -> None:
     """Apply a scalar patch to a static component table."""
     if not isinstance(df.index, pd.MultiIndex):
-        # Deterministic case
         if op == "set":
             df.loc[names, col] = value
         elif op == "scale":
@@ -149,7 +342,6 @@ def _apply_patch_static(
             raise ValueError(f"Unsupported op: {op}")
         return
 
-    # Stochastic case: index is MultiIndex (scenario, name)
     idx = pd.MultiIndex.from_product([[scenario], names], names=["scenario", "name"])
     if op == "set":
         df.loc[idx, col] = value
@@ -177,11 +369,7 @@ def _apply_patch_timeseries(
     - array-like with length == len(ts.index)
     - DataFrame with columns matching names
     """
-
-    # Keep only names that actually exist in the target time series table
-    # (sector-coupled networks often have loads without a time-dependent p_set column)
     if isinstance(ts.columns, pd.MultiIndex):
-        # Be robust if column levels are unnamed
         if "scenario" in ts.columns.names:
             scenarios_avail = set(ts.columns.get_level_values("scenario"))
         else:
@@ -189,7 +377,8 @@ def _apply_patch_timeseries(
 
         if scenario not in scenarios_avail:
             logger.warning(
-                f"Timeseries patch: scenario '{scenario}' not found in ts.columns; skipping."
+                "Timeseries patch: scenario '%s' not found in ts.columns; skipping.",
+                scenario,
             )
             return
 
@@ -203,11 +392,11 @@ def _apply_patch_timeseries(
     names = [n for n in pd.Index(names).unique().tolist() if n in avail_names]
     if not names:
         logger.warning(
-            f"Timeseries patch matched no existing columns for scenario '{scenario}'; skipping."
+            "Timeseries patch matched no existing columns for scenario '%s'; skipping.",
+            scenario,
         )
         return
 
-    # Now build the column selector
     if not isinstance(ts.columns, pd.MultiIndex):
         cols = names
     else:
@@ -234,7 +423,7 @@ def _apply_patch_timeseries(
         v = v[names]
 
         if isinstance(ts.columns, pd.MultiIndex):
-            v.columns = cols  # lift to (scenario, name)
+            v.columns = cols
 
         if op == "set":
             ts.loc[:, cols] = v.values
@@ -261,54 +450,26 @@ def _apply_patch_timeseries(
         raise ValueError(f"Unsupported op: {op}")
 
 
-def apply_stochastic_config(n: pypsa.Network, config: dict, stochastic_param: dict) -> None:
+def _apply_patch_config_if_present(
+    n: pypsa.Network,
+    stochastic_param: dict,
+) -> None:
     """
-    Enable scenarios and apply scenario-specific patches.
+    Apply legacy patch-based stochastic configuration if patches are present.
 
-    Expected configuration structure (minimal):
-    stochastic:
-      enabled: true
-      scenarios:
-        low: 0.3
-        mid: 0.4
-        high: 0.3
-      # optional: file: "config/stochastic.yaml"  (merged with this block)
-      patches:
-        - target: "generators.marginal_cost"
-          selector: {carrier: "gas"}
-          op: "scale"
-          values: {low: 0.8, mid: 1.0, high: 1.3}
-        - target: "loads_t.p_set"
-          selector: {names: ".*"}   # regex
-          op: "scale"
-          values: {low: 0.95, mid: 1.0, high: 1.05}
+    This keeps backward compatibility with the previous patch-based interface.
+    Patches are only applied in stochastic mode because their values are keyed by scenario.
     """
-    stoch = _ensure_dict(stochastic_param, "stochastic")
+    stoch = _merge_stochastic_param(stochastic_param)
     enabled = bool(stoch.get("enable", stoch.get("enabled", False)))
     if not enabled:
-        logger.info("Stochastic disabled: skipping set_scenarios and patches.")
         return
-
-    # Merge optional external YAML
-    external = _read_yaml_maybe(stoch.get("file", ""))
-    if external:
-        merged = dict(external)
-        merged.update(stoch)  # inline overrides external
-        stoch = merged
-
-    scenarios = stoch.get("scenarios", None)
-    if scenarios is None:
-        raise ValueError("run.stochastic_scenarios.enable=true but no scenarios provided (in file or inline).")
-
-    logger.info("Enabling stochastic scenarios via n.set_scenarios(...)")
-    n.set_scenarios(scenarios)  # New API in PyPSA v1.0+ :contentReference[oaicite:0]{index=0}
 
     patches = stoch.get("patches", [])
     if not patches:
-        logger.info("No stochastic patches provided; network is stochastic but unchanged across scenarios.")
+        logger.info("No legacy stochastic patches provided.")
         return
 
-    # Map *_t tables to their base component tables
     def base_comp_from_table(table: str) -> str:
         return table[:-2] if table.endswith("_t") else table
 
@@ -316,26 +477,26 @@ def apply_stochastic_config(n: pypsa.Network, config: dict, stochastic_param: di
         patch = _ensure_dict(patch, f"patch[{i}]")
         target = patch.get("target")
         if not isinstance(target, str) or "." not in target:
-            raise ValueError(f"patch[{i}].target must be like 'generators.marginal_cost' or 'loads_t.p_set'")
+            raise ValueError(
+                f"patch[{i}].target must be like 'generators.marginal_cost' or 'loads_t.p_set'"
+            )
 
         table, attr = target.split(".", 1)
         selector = _ensure_dict(patch.get("selector", {}), f"patch[{i}].selector")
         op = patch.get("op", "set")
         values = _ensure_dict(patch.get("values", {}), f"patch[{i}].values")
 
-        # Select base names
         comp_for_selection = base_comp_from_table(table)
         names = _select_names_from_component(n, comp_for_selection, selector)
         if not names:
-            logger.warning(f"patch[{i}] matched no components; skipping. target={target}")
+            logger.warning("patch[%s] matched no components; skipping. target=%s", i, target)
             continue
 
-        logger.info(f"Applying patch[{i}] target={target} op={op} matched={len(names)}")
+        logger.info("Applying patch[%s] target=%s op=%s matched=%s", i, target, op, len(names))
 
-        # Resolve target DF
         if table.endswith("_t"):
-            ts_container = getattr(n, table)          # e.g. n.loads_t
-            ts = getattr(ts_container, attr)          # e.g. n.loads_t.p_set
+            ts_container = getattr(n, table)
+            ts = getattr(ts_container, attr)
 
             for sc, v in values.items():
                 if isinstance(v, str) and v.endswith((".csv", ".parquet", ".pq")):
@@ -351,14 +512,53 @@ def apply_stochastic_config(n: pypsa.Network, config: dict, stochastic_param: di
                     _apply_patch_timeseries(ts, sc, names, op, v)
 
         else:
-            comp_df = getattr(n, table)               # e.g. n.generators
+            comp_df = getattr(n, table)
             if attr not in comp_df.columns:
                 raise KeyError(f"patch[{i}] column not found: {table}.{attr}")
 
             for sc, v in values.items():
                 if not np.isscalar(v):
-                    raise ValueError(f"patch[{i}] static patch values must be scalar; got {type(v).__name__}")
+                    raise ValueError(
+                        f"patch[{i}] static patch values must be scalar; got {type(v).__name__}"
+                    )
                 _apply_patch_static(comp_df, attr, sc, names, op, float(v))
+
+
+def apply_stochastic_config(
+    n: pypsa.Network,
+    config: dict,
+    stochastic_param: dict,
+    wildcards: Mapping[str, Any] | None = None,
+) -> None:
+    """
+    Apply structured stochastic/deterministic scenarios and optional legacy patches.
+
+    Behavior
+    --------
+    - If stochastic mode is enabled:
+      * read scenario names from stochastic config
+      * call n.set_scenarios(...)
+      * dispatch one structured builder per scenario name
+      * optionally apply legacy patch-based modifications
+
+    - If stochastic mode is disabled:
+      * detect a single structured scenario name from config or run context
+      * apply the corresponding builder in deterministic mode
+    """
+    is_stochastic, active_names = _apply_structured_scenarios(
+        n=n,
+        config=config,
+        stochastic_param=stochastic_param,
+        wildcards=wildcards,
+    )
+
+    if is_stochastic:
+        _apply_patch_config_if_present(n=n, stochastic_param=stochastic_param)
+
+    if active_names:
+        logger.info("Applied structured scenario(s): %s", active_names)
+    else:
+        logger.info("No structured scenario was applied.")
 
 
 if __name__ == "__main__":
@@ -370,7 +570,6 @@ if __name__ == "__main__":
             opts="",
             clusters="adm",
             configfiles="config/test_stoch/config.yaml",
-            # run="__debug",
             sector_opts="",
             planning_horizons="2050",
         )
@@ -379,11 +578,9 @@ if __name__ == "__main__":
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
-    # Load network
     n = pypsa.Network(snakemake.input.network)
     planning_horizons = snakemake.wildcards.get("planning_horizons", None)
 
-    # Prepare network (must happen BEFORE set_scenarios because it can add components)
     solve_opts = snakemake.params.solving["options"]
     np.random.seed(solve_opts.get("seed", 123))
 
@@ -396,14 +593,13 @@ if __name__ == "__main__":
         limit_max_growth=snakemake.params.get("sector", {}).get("limit_max_growth"),
     )
 
-    # Enable stochastic + apply patches (if enabled)
     apply_stochastic_config(
         n,
         config=snakemake.config,
         stochastic_param=snakemake.params.get("stochastic_scenarios", {}),
+        wildcards=dict(snakemake.wildcards),
     )
 
-    # Export
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output.network)
 
@@ -416,4 +612,4 @@ if __name__ == "__main__":
             sort_keys=False,
         )
 
-    logger.info(f"Exported stochastic pre-solve network to {snakemake.output.network}")
+    logger.info("Exported stochastic pre-solve network to %s", snakemake.output.network)
