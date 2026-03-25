@@ -11,18 +11,23 @@
 #   electricity:
 #       renewable_carriers: [wind, solar] # override the list of renewable carriers
 
-normal:
-  electricity:
-    renewable_carriers:
-    - solar
-    - onwind
-    - offwind-ac
-    - offwind-dc
-    - hydro
+agriculture_full_electric:
+  structured_scenario: agriculture_full_electric
 
-no-offwind:
-  electricity:
-    renewable_carriers:
-    - solar
-    - onwind
-    - hydro
+agriculture_machinery_full_oil:
+  structured_scenario: agriculture_machinery_full_oil
+
+shipping_full_methanol:
+  structured_scenario: shipping_full_methanol
+
+urban_heat_full_central:
+  structured_scenario: urban_heat_full_central
+
+land_transport_linear_ev:
+  structured_scenario: land_transport_linear_ev
+
+electricity_optimistic:
+  structured_scenario: electricity_optimistic
+
+industry_h2:
+  structured_scenario: industry_h2

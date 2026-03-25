@@ -20,31 +20,21 @@ remote:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "stochastic_prova_workflow"
-  name: "test_stocastico"
+  prefix: "eth_results"
+  name: base
   scenarios:
     enable: false
-    file: config/scenarios.yaml
+    file: config/test_stochastic_scenarios/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
 
-structured_scenario: A
-
-scenarios:
-  enable: false
-  file: config/sensitivity_parameters/scenarios_sensitivity.yaml
-  disable_progressbar: false
-  shared_resources:
-    policy: false
-    exclude: []
-  shared_cutouts: true
-  use_shadow_directory: false
+structured_scenario: 
 
 stochastic_scenarios:
-  enable: true
+  enable: false
   file: config/test_stochastic_scenarios/stochastic_scenarios.yaml   
   postprocess:
     plot_power_network:
@@ -791,7 +781,7 @@ sector:
     2035: 0.45
     2040: 0.7
     2045: 0.85
-    2050: 1
+    2050: 0.85
   land_transport_ice_share:
     2020: 1
     2025: 0.95
@@ -799,14 +789,14 @@ sector:
     2035: 0.55
     2040: 0.3
     2045: 0.15
-    2050: 0
+    2050: 0.15
   transport_electric_efficiency: 53.19
   transport_fuel_cell_efficiency: 30.003
   transport_ice_efficiency: 16.0712
   agriculture_machinery_electric_share: 0.5
   agriculture_machinery_oil_share: 0.5
-  agriculture_machinery_fuel_efficiency: 0.7
-  agriculture_machinery_electric_efficiency: 0.3
+  agriculture_machinery_fuel_efficiency: 0.5
+  agriculture_machinery_electric_efficiency: 0.5
   shipping_hydrogen_liquefaction: false
   shipping_hydrogen_share:
     2020: 0
@@ -823,7 +813,7 @@ sector:
     2035: 0.35
     2040: 0.55
     2045: 0.8
-    2050: 1
+    2050: 0.55
   shipping_oil_share:
     2020: 1
     2025: 1
@@ -831,8 +821,8 @@ sector:
     2035: 0.65
     2040: 0.45
     2045: 0.2
-    2050: 0
-  shipping_methanol_efficiency: 0.46
+    2050: 0.45
+  shipping_methanol_efficiency: 0.4
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
   HVC_demand_factor: 1.0

@@ -14,6 +14,7 @@ This script is intended to run BEFORE solve_network.py:
 
 import logging
 import re
+import sys
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -22,20 +23,15 @@ import pandas as pd
 import pypsa
 import yaml
 
-import sys
-from pathlib import Path
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts._helpers import (
+from scripts._helpers import (  # noqa: E402
     configure_logging,
-    get,
     set_scenario_config,
     update_config_from_wildcards,
 )
-
 from scripts.solve_network import prepare_network  # noqa: E402
 
 
@@ -69,7 +65,9 @@ def _ensure_dict(x: Any, name: str) -> dict:
 def _get_level_names(idx: pd.Index) -> pd.Index:
     """Return the 'name' level if MultiIndex, else the index itself."""
     if isinstance(idx, pd.MultiIndex):
-        return idx.get_level_values("name")
+        if "name" in idx.names:
+            return idx.get_level_values("name")
+        return idx.get_level_values(-1)
     return idx
 
 
@@ -85,46 +83,628 @@ def _merge_stochastic_param(stochastic_param: dict) -> dict:
 
 
 # ---------------------------
+# Low-level helpers for loads/links
+# ---------------------------
+
+def _base_component_table(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a copy of a component table with scenario removed from the index if present."""
+    base = df.copy()
+    base.index = _get_level_names(base.index)
+    return base
+
+
+def _base_loads_table(n: pypsa.Network) -> pd.DataFrame:
+    """Return loads table indexed only by load name."""
+    return _base_component_table(n.loads)
+
+
+def _base_links_table(n: pypsa.Network) -> pd.DataFrame:
+    """Return links table indexed only by link name."""
+    return _base_component_table(n.links)
+
+
+def _ts_column_key(ts: pd.DataFrame, name: str, scenario: str | None = None):
+    """
+    Return the correct column key for a time series table.
+
+    For deterministic tables the key is the plain component name.
+    For stochastic tables the key is the tuple (scenario, name).
+    """
+    if not isinstance(ts.columns, pd.MultiIndex):
+        if name not in ts.columns:
+            raise KeyError(f"Column '{name}' not found in deterministic time series table.")
+        return name
+
+    if scenario is None:
+        raise ValueError(
+            f"Time series table is stochastic but no scenario was provided for column '{name}'."
+        )
+
+    if "scenario" in ts.columns.names:
+        scenarios = ts.columns.get_level_values("scenario")
+    else:
+        scenarios = ts.columns.get_level_values(0)
+
+    if "name" in ts.columns.names:
+        names = ts.columns.get_level_values("name")
+    else:
+        names = ts.columns.get_level_values(1)
+
+    mask = (scenarios == scenario) & (names == name)
+    matches = ts.columns[mask]
+    if len(matches) == 0:
+        raise KeyError(f"Column for scenario='{scenario}', name='{name}' not found.")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple columns found for scenario='{scenario}', name='{name}'.")
+    return matches[0]
+
+
+def _read_ts_series(ts: pd.DataFrame, name: str, scenario: str | None = None) -> pd.Series:
+    """Return a copy of one time series column."""
+    key = _ts_column_key(ts, name=name, scenario=scenario)
+    return ts.loc[:, key].copy()
+
+
+def _write_ts_series(
+    ts: pd.DataFrame,
+    name: str,
+    values: pd.Series | np.ndarray,
+    scenario: str | None = None,
+) -> None:
+    """Overwrite one time series column."""
+    key = _ts_column_key(ts, name=name, scenario=scenario)
+
+    if isinstance(values, pd.Series):
+        v = values.reindex(ts.index)
+        if v.isnull().any():
+            raise ValueError(f"NaNs encountered while writing series '{name}'.")
+        ts.loc[:, key] = v.values
+    else:
+        arr = np.asarray(values)
+        if arr.ndim != 1 or len(arr) != len(ts.index):
+            raise ValueError(
+                f"Invalid shape for series '{name}': expected ({len(ts.index)},), got {arr.shape}."
+            )
+        ts.loc[:, key] = arr
+
+def _scale_loads_by_carrier(
+    n: pypsa.Network,
+    carrier: str,
+    factor: float,
+    scenario: str | None = None,
+) -> None:
+    """Scale all loads belonging to a given carrier."""
+    names = _find_load_names_by_carrier(n, carrier)
+    if not names:
+        raise KeyError(f"No loads found for carrier '{carrier}'.")
+
+    for name in names:
+        s = _read_load_series(n, name, scenario=scenario)
+        _write_load_series(n, name, s * factor, scenario=scenario)
+
+    logger.info(
+        "Scaled %s load(s) with carrier '%s' by factor %.4f.",
+        len(names),
+        carrier,
+        factor,
+    )
+
+def _read_link_efficiency_series(
+    n: pypsa.Network,
+    link_name: str,
+    scenario: str | None = None,
+) -> pd.Series:
+    """Return one link efficiency time series."""
+    return _read_ts_series(n.links_t.efficiency, name=link_name, scenario=scenario)
+
+
+def _carrier_names_from_table(df: pd.DataFrame, carrier: str) -> list[str]:
+    """Return component names matching a carrier from a base component table."""
+    base = _base_component_table(df)
+    if "carrier" not in base.columns:
+        return []
+    mask = base["carrier"].astype(str).eq(carrier)
+    return base.index[mask].tolist()
+
+
+def _find_load_names_by_carrier(n: pypsa.Network, carrier: str) -> list[str]:
+    """Return load names whose carrier matches the requested value."""
+    return _carrier_names_from_table(n.loads, carrier)
+
+
+def _find_link_names_by_carrier(n: pypsa.Network, carrier: str) -> list[str]:
+    """Return link names whose carrier matches the requested value."""
+    return _carrier_names_from_table(n.links, carrier)
+
+
+def _extract_prefix(name: str, suffix: str) -> str:
+    """Strip a known suffix from a component name and return the prefix."""
+    if not name.endswith(suffix):
+        raise ValueError(f"Name '{name}' does not end with suffix '{suffix}'.")
+    return name[: -len(suffix)]
+
+
+def _assert_load_exists(n: pypsa.Network, load_name: str) -> None:
+    """Raise if a load is missing."""
+    loads = _base_loads_table(n)
+    if load_name not in loads.index:
+        raise KeyError(f"Required load '{load_name}' not found in n.loads.")
+
+
+def _assert_link_exists(n: pypsa.Network, link_name: str) -> None:
+    """Raise if a link is missing."""
+    links = _base_links_table(n)
+    if link_name not in links.index:
+        raise KeyError(f"Required link '{link_name}' not found in n.links.")
+
+def _load_row_key(n: pypsa.Network, load_name: str, scenario: str | None = None):
+    """
+    Return the correct row key for n.loads.
+
+    For deterministic tables the key is the plain load name.
+    For stochastic static tables the key is the tuple (scenario, name).
+    """
+    if not isinstance(n.loads.index, pd.MultiIndex):
+        if load_name not in n.loads.index:
+            raise KeyError(f"Load '{load_name}' not found in deterministic n.loads.")
+        return load_name
+
+    if scenario is None:
+        raise ValueError(
+            f"n.loads has a stochastic MultiIndex but no scenario was provided for '{load_name}'."
+        )
+
+    if "scenario" in n.loads.index.names:
+        scenarios = n.loads.index.get_level_values("scenario")
+    else:
+        scenarios = n.loads.index.get_level_values(0)
+
+    if "name" in n.loads.index.names:
+        names = n.loads.index.get_level_values("name")
+    else:
+        names = n.loads.index.get_level_values(1)
+
+    mask = (scenarios == scenario) & (names == load_name)
+    matches = n.loads.index[mask]
+    if len(matches) == 0:
+        raise KeyError(f"Static load row for scenario='{scenario}', name='{load_name}' not found.")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Multiple static load rows found for scenario='{scenario}', name='{load_name}'."
+        )
+    return matches[0]
+
+
+def _has_load_timeseries_column(
+    n: pypsa.Network,
+    load_name: str,
+    scenario: str | None = None,
+) -> bool:
+    """Return True if the load exists in n.loads_t.p_set."""
+    ts = n.loads_t.p_set
+    if not isinstance(ts.columns, pd.MultiIndex):
+        return load_name in ts.columns
+
+    if scenario is None:
+        return False
+
+    if "scenario" in ts.columns.names:
+        scenarios = ts.columns.get_level_values("scenario")
+    else:
+        scenarios = ts.columns.get_level_values(0)
+
+    if "name" in ts.columns.names:
+        names = ts.columns.get_level_values("name")
+    else:
+        names = ts.columns.get_level_values(1)
+
+    return ((scenarios == scenario) & (names == load_name)).any()
+
+
+def _read_load_series(n: pypsa.Network, load_name: str, scenario: str | None = None) -> pd.Series:
+    """
+    Return the effective load time series.
+
+    Priority:
+    1. n.loads_t.p_set column if present
+    2. broadcast static n.loads.p_set over all snapshots
+    """
+    if _has_load_timeseries_column(n, load_name, scenario=scenario):
+        return _read_ts_series(n.loads_t.p_set, name=load_name, scenario=scenario)
+
+    row_key = _load_row_key(n, load_name, scenario=scenario)
+    value = n.loads.loc[row_key, "p_set"]
+    return pd.Series(float(value), index=n.snapshots)
+
+
+def _write_static_load_value(
+    n: pypsa.Network,
+    load_name: str,
+    value: float,
+    scenario: str | None = None,
+) -> None:
+    """Write a scalar value into n.loads.p_set."""
+    row_key = _load_row_key(n, load_name, scenario=scenario)
+    n.loads.loc[row_key, "p_set"] = float(value)
+
+
+def _ensure_load_timeseries_column(
+    n: pypsa.Network,
+    load_name: str,
+    scenario: str | None = None,
+) -> None:
+    """
+    Ensure that n.loads_t.p_set contains a column for the requested load.
+
+    If missing, initialize it from the current effective series.
+    """
+    if _has_load_timeseries_column(n, load_name, scenario=scenario):
+        return
+
+    base_series = _read_load_series(n, load_name, scenario=scenario)
+
+    ts = n.loads_t.p_set
+    if not isinstance(ts.columns, pd.MultiIndex):
+        ts.loc[:, load_name] = base_series.values
+        ts.columns.name = "name"
+        return
+
+    if scenario is None:
+        raise ValueError(
+            f"Cannot create stochastic time series column for '{load_name}' without scenario."
+        )
+
+    new_col = pd.MultiIndex.from_tuples(
+        [(scenario, load_name)],
+        names=ts.columns.names,
+    )
+    new_df = pd.DataFrame(base_series.values, index=ts.index, columns=new_col)
+    n.loads_t.p_set = pd.concat([ts, new_df], axis=1)
+
+
+def _write_load_series(
+    n: pypsa.Network,
+    load_name: str,
+    values: pd.Series | np.ndarray,
+    scenario: str | None = None,
+) -> None:
+    """
+    Write a load profile.
+
+    - If the profile is constant and the load has no existing timeseries column, write to static n.loads.p_set
+    - Otherwise create/use a column in n.loads_t.p_set
+    """
+    if not isinstance(values, pd.Series):
+        arr = np.asarray(values)
+        if arr.ndim != 1 or len(arr) != len(n.snapshots):
+            raise ValueError(
+                f"Invalid shape for series '{load_name}': expected ({len(n.snapshots)},), got {arr.shape}."
+            )
+        values = pd.Series(arr, index=n.snapshots)
+    else:
+        values = values.reindex(n.snapshots)
+        if values.isnull().any():
+            raise ValueError(f"NaNs encountered while writing series '{load_name}'.")
+
+    is_constant = np.allclose(values.values, values.values[0])
+
+    if is_constant and not _has_load_timeseries_column(n, load_name, scenario=scenario):
+        _write_static_load_value(n, load_name, float(values.iloc[0]), scenario=scenario)
+        return
+
+    _ensure_load_timeseries_column(n, load_name, scenario=scenario)
+    _write_ts_series(n.loads_t.p_set, name=load_name, values=values, scenario=scenario)
+
+# ---------------------------
 # Structured scenario builders
 # ---------------------------
 
-def _scenario_A(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
-    """No-op scenario A used to validate scenario dispatch."""
-    if scenario is None:
-        logger.info("Structured scenario A inserted in deterministic mode.")
-    else:
-        logger.info(f"Structured scenario A inserted for stochastic scenario '{scenario}'.")
+TRANSPORT_ELECTRIC_EFFICIENCY = 53.19
+TRANSPORT_ICE_EFFICIENCY = 16.0712
+URBAN_HEAT_CENTRAL_ALPHA = 0.98
 
 
-def _scenario_B(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
-    """No-op scenario B used to validate scenario dispatch."""
-    if scenario is None:
-        logger.info("Structured scenario B inserted in deterministic mode.")
-    else:
-        logger.info(f"Structured scenario B inserted for stochastic scenario '{scenario}'.")
+def _scenario_agriculture_full_electric(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """
+    Electrify agriculture:
+    - move all agriculture machinery oil demand to agriculture machinery electric (1:1)
+    - convert agriculture heat demand into agriculture electricity using local rural air heat pump COP
+    """
+    del config  # unused for now
+
+    # Part 1: machinery oil -> machinery electric
+    oil_names = _find_load_names_by_carrier(n, "agriculture machinery oil")
+    if not oil_names:
+        raise KeyError("No loads found for carrier 'agriculture machinery oil'.")
+
+    count_machinery = 0
+    for oil_name in oil_names:
+        prefix = _extract_prefix(oil_name, "agriculture machinery oil")
+        elec_name = f"{prefix}agriculture machinery electric"
+
+        _assert_load_exists(n, elec_name)
+
+        oil_series = _read_load_series(n, oil_name, scenario=scenario)
+        elec_series = _read_load_series(n, elec_name, scenario=scenario)
+
+        _write_load_series(n, elec_name, elec_series + oil_series, scenario=scenario)
+        _write_load_series(
+            n, oil_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
+        )
+        count_machinery += 1
+
+    # Part 2: agriculture heat -> agriculture electricity via rural air heat pump COP
+    heat_names = _find_load_names_by_carrier(n, "agriculture heat")
+    if not heat_names:
+        raise KeyError("No loads found for carrier 'agriculture heat'.")
+
+    count_heat = 0
+    for heat_name in heat_names:
+        prefix = _extract_prefix(heat_name, "agriculture heat")
+        elec_name = f"{prefix}agriculture electricity"
+        hp_name = f"{prefix}rural air heat pump"
+
+        _assert_load_exists(n, elec_name)
+        _assert_link_exists(n, hp_name)
+
+        heat_series = _read_load_series(n, heat_name, scenario=scenario)
+        elec_series = _read_load_series(n, elec_name, scenario=scenario)
+        cop = _read_link_efficiency_series(n, hp_name, scenario=scenario)
+
+        if (cop <= 0).any():
+            raise ValueError(f"Non-positive COP detected for link '{hp_name}'.")
+
+        added_electricity = heat_series / cop
+
+        _write_load_series(n, elec_name, elec_series + added_electricity, scenario=scenario)
+        _write_load_series(
+            n, heat_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
+        )
+        count_heat += 1
+
+    logger.info(
+        "Applied scenario 'agriculture_full_electric' to %s machinery node(s) and %s heat node(s)%s.",
+        count_machinery,
+        count_heat,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
 
 
-def _scenario_C(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
-    """No-op scenario C used to validate scenario dispatch."""
-    if scenario is None:
-        logger.info("Structured scenario C inserted in deterministic mode.")
-    else:
-        logger.info(f"Structured scenario C inserted for stochastic scenario '{scenario}'.")
+def _scenario_agriculture_machinery_full_oil(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """Move all agriculture machinery electric demand to agriculture machinery oil (1:1)."""
+    del config  # unused for now
+
+    elec_names = _find_load_names_by_carrier(n, "agriculture machinery electric")
+    if not elec_names:
+        raise KeyError("No loads found for carrier 'agriculture machinery electric'.")
+
+    count = 0
+    for elec_name in elec_names:
+        prefix = _extract_prefix(elec_name, "agriculture machinery electric")
+        oil_name = f"{prefix}agriculture machinery oil"
+
+        _assert_load_exists(n, oil_name)
+
+        elec_series = _read_load_series(n, elec_name, scenario=scenario)
+        oil_series = _read_load_series(n, oil_name, scenario=scenario)
+
+        _write_load_series(n, oil_name, oil_series + elec_series, scenario=scenario)
+        _write_load_series(
+            n, elec_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
+        )
+        count += 1
+
+    logger.info(
+        "Applied scenario 'agriculture_machinery_full_oil' to %s node(s)%s.",
+        count,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
 
 
-def _scenario_D(n: pypsa.Network, scenario: str | None = None, config: dict | None = None) -> None:
-    """No-op scenario D used to validate scenario dispatch."""
-    if scenario is None:
-        logger.info("Structured scenario D inserted in deterministic mode.")
-    else:
-        logger.info(f"Structured scenario D inserted for stochastic scenario '{scenario}'.")
+def _scenario_shipping_full_methanol(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """
+    Move all shipping oil demand to the global EU shipping methanol load (1:1).
+
+    Current PyPSA-Eur structure:
+    - shipping oil is nodal
+    - shipping methanol is represented by a single global load: 'EU shipping methanol'
+    """
+    del config  # unused for now
+
+    oil_names = _find_load_names_by_carrier(n, "shipping oil")
+    if not oil_names:
+        raise KeyError("No loads found for carrier 'shipping oil'.")
+
+    methanol_name = "EU shipping methanol"
+    _assert_load_exists(n, methanol_name)
+
+    methanol_series = _read_load_series(n, methanol_name, scenario=scenario)
+    total_oil = pd.Series(0.0, index=n.snapshots)
+
+    for oil_name in oil_names:
+        total_oil = total_oil + _read_load_series(n, oil_name, scenario=scenario)
+
+    _write_load_series(n, methanol_name, methanol_series + total_oil, scenario=scenario)
+
+    zero = pd.Series(0.0, index=n.snapshots)
+    for oil_name in oil_names:
+        _write_load_series(n, oil_name, zero, scenario=scenario)
+
+    logger.info(
+        "Applied scenario 'shipping_full_methanol': moved %s nodal shipping oil load(s) into '%s'%s.",
+        len(oil_names),
+        methanol_name,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
+
+
+def _scenario_urban_heat_full_central(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """Shift 98% of urban decentral heat demand to urban central heat."""
+    del config  # unused for now
+
+    decentral_names = _find_load_names_by_carrier(n, "urban decentral heat")
+    if not decentral_names:
+        raise KeyError("No loads found for carrier 'urban decentral heat'.")
+
+    count = 0
+    for decentral_name in decentral_names:
+        prefix = _extract_prefix(decentral_name, "urban decentral heat")
+        central_name = f"{prefix}urban central heat"
+
+        _assert_load_exists(n, central_name)
+
+        decentral_series = _read_load_series(n, decentral_name, scenario=scenario)
+        central_series = _read_load_series(n, central_name, scenario=scenario)
+
+        moved = URBAN_HEAT_CENTRAL_ALPHA * decentral_series
+        remaining = (1.0 - URBAN_HEAT_CENTRAL_ALPHA) * decentral_series
+
+        _write_load_series(n, central_name, central_series + moved, scenario=scenario)
+        _write_load_series(n, decentral_name, remaining, scenario=scenario)
+        count += 1
+
+    logger.info(
+        "Applied scenario 'urban_heat_full_central' with alpha=%.2f to %s node(s)%s.",
+        URBAN_HEAT_CENTRAL_ALPHA,
+        count,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
+
+
+def _scenario_land_transport_linear_ev(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """
+    Reallocate land transport useful service:
+    - 60% EV
+    - 40% oil / ICE
+    preserving useful transport service locally at each node.
+    """
+    del config  # unused for now
+
+    ev_names = _find_load_names_by_carrier(n, "land transport EV")
+    if not ev_names:
+        raise KeyError("No loads found for carrier 'land transport EV'.")
+
+    count = 0
+    for ev_name in ev_names:
+        prefix = _extract_prefix(ev_name, "land transport EV")
+        oil_name = f"{prefix}land transport oil"
+
+        _assert_load_exists(n, oil_name)
+
+        ev_series = _read_load_series(n, ev_name, scenario=scenario)
+        oil_series = _read_load_series(n, oil_name, scenario=scenario)
+
+        useful_service = (
+            ev_series * TRANSPORT_ELECTRIC_EFFICIENCY
+            + oil_series * TRANSPORT_ICE_EFFICIENCY
+        )
+
+        ev_new = 0.60 * useful_service / TRANSPORT_ELECTRIC_EFFICIENCY
+        oil_new = 0.40 * useful_service / TRANSPORT_ICE_EFFICIENCY
+
+        _write_load_series(n, ev_name, ev_new, scenario=scenario)
+        _write_load_series(n, oil_name, oil_new, scenario=scenario)
+        count += 1
+
+    logger.info(
+        "Applied scenario 'land_transport_linear_ev' to %s node(s)%s.",
+        count,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
+
+
+def _scenario_electricity_optimistic(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """Increase generic electricity demand by 10%."""
+    del config  # unused for now
+
+    _scale_loads_by_carrier(n, carrier="electricity", factor=1.10, scenario=scenario)
+
+    logger.info(
+        "Applied scenario 'electricity_optimistic'%s.",
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
+
+
+def _scenario_industry_h2(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """
+    Move gas for industry and solid biomass for industry demand to H2 for industry (1:1).
+    """
+    del config  # unused for now
+
+    gas_names = _find_load_names_by_carrier(n, "gas for industry")
+    if not gas_names:
+        raise KeyError("No loads found for carrier 'gas for industry'.")
+
+    count = 0
+    for gas_name in gas_names:
+        prefix = _extract_prefix(gas_name, "gas for industry")
+        biomass_name = f"{prefix}solid biomass for industry"
+        h2_name = f"{prefix}H2 for industry"
+
+        _assert_load_exists(n, biomass_name)
+        _assert_load_exists(n, h2_name)
+
+        gas_series = _read_load_series(n, gas_name, scenario=scenario)
+        biomass_series = _read_load_series(n, biomass_name, scenario=scenario)
+        h2_series = _read_load_series(n, h2_name, scenario=scenario)
+
+        _write_load_series(
+            n,
+            h2_name,
+            h2_series + gas_series + biomass_series,
+            scenario=scenario,
+        )
+        _write_load_series(
+            n, gas_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
+        )
+        _write_load_series(
+            n, biomass_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
+        )
+        count += 1
+
+    logger.info(
+        "Applied scenario 'industry_h2' to %s node(s)%s.",
+        count,
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
 
 
 STRUCTURED_SCENARIOS = {
-    "A": _scenario_A,
-    "B": _scenario_B,
-    "C": _scenario_C,
-    "D": _scenario_D,
+    "agriculture_full_electric": _scenario_agriculture_full_electric,
+    "agriculture_machinery_full_oil": _scenario_agriculture_machinery_full_oil,
+    "shipping_full_methanol": _scenario_shipping_full_methanol,
+    "urban_heat_full_central": _scenario_urban_heat_full_central,
+    "land_transport_linear_ev": _scenario_land_transport_linear_ev,
+    "electricity_optimistic": _scenario_electricity_optimistic,
+    "industry_h2": _scenario_industry_h2,
 }
 
 
@@ -569,9 +1149,10 @@ if __name__ == "__main__":
             "stochasticify_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/test_stoch/config.yaml",
+            configfiles="config/test_stochastic_scenarios/config.yaml",
             sector_opts="",
             planning_horizons="2050",
+            run="land_transport_linear_ev",
         )
 
     configure_logging(snakemake)
