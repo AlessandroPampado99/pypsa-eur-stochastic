@@ -696,6 +696,18 @@ def _scenario_industry_h2(
         f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
     )
 
+def _scenario_base(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """Base scenario with no modifications."""
+    del n, config  # unused for now
+
+    logger.info(
+        "Applied scenario 'base' with no modifications%s.",
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
 
 STRUCTURED_SCENARIOS = {
     "agriculture_full_electric": _scenario_agriculture_full_electric,
@@ -705,6 +717,7 @@ STRUCTURED_SCENARIOS = {
     "land_transport_linear_ev": _scenario_land_transport_linear_ev,
     "electricity_optimistic": _scenario_electricity_optimistic,
     "industry_h2": _scenario_industry_h2,
+    "base": _scenario_base,
 }
 
 

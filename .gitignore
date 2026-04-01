@@ -15,6 +15,7 @@ gurobi.log
 .vscode
 *.orig
 .idea
+screenlog*
 
 /bak
 /resources

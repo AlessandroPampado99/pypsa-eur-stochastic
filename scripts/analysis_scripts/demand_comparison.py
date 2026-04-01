@@ -7,10 +7,11 @@ Compare total load demand by type across MANY PyPSA networks vs a chosen base ne
 What it does:
 - Scans a results prefix folder like: results/<PREFIX>/<scenario>/networks/*.nc
 - Picks ONE network file per scenario (you can constrain by filename pattern)
-- Computes total demand summed over snapshots for each load, using:
-    - loads_t.p_set (exogenous demand) if present
-    - loads_t.p     (optimized/endogenous demand) if present
-  Then sums them load-wise: (p_set + p) if both exist.
+- Computes total load demand using snapshot weights
+- Uses per-load priority:
+    1) loads_t.p
+    2) loads_t.p_set
+    3) loads.p_set expanded over snapshots
 - Aggregates by a chosen load field:
     - carrier (default)
     - bus
@@ -53,6 +54,11 @@ BASE_NAME = "__BASE__"  # column name for base in outputs
 #   "base_s_" -> substring filter (will pick first match by sorted order)
 NETWORK_PICKER: Optional[str] = None
 
+# Scenario folders to exclude from the batch analysis
+EXCLUDED_SCENARIOS = {"base", "stochastic_network"}
+# Example:
+# EXCLUDED_SCENARIOS = {"base", "debug_case"}
+
 # Group demand by: "carrier" (load type), "bus", or "load_name"
 GroupByField = Literal["carrier", "bus", "load_name"]
 GROUPBY: GroupByField = "carrier"
@@ -85,6 +91,18 @@ def read_network(path: str | Path) -> pypsa.Network:
         raise ValueError(f"Unsupported file type '{suffix}'. Use .nc or .h5/.hdf5")
 
     return n
+
+
+def _filter_excluded_scenarios(
+    scenario_paths: dict[str, Path],
+    excluded_scenarios: set[str],
+) -> dict[str, Path]:
+    """Remove scenarios whose folder name is in excluded_scenarios."""
+    if not excluded_scenarios:
+        return scenario_paths
+
+    excluded = set(excluded_scenarios)
+    return {scen: path for scen, path in scenario_paths.items() if scen not in excluded}
 
 
 def find_scenario_networks(prefix_dir: Path, picker: Optional[str]) -> dict[str, Path]:
@@ -136,34 +154,53 @@ def find_scenario_networks(prefix_dir: Path, picker: Optional[str]) -> dict[str,
 # DEMAND METRICS
 # =========================
 
+def _get_snapshot_weights(n: pypsa.Network) -> pd.Series:
+    """Return snapshot weights aligned to n.snapshots."""
+    if hasattr(n, "snapshot_weightings") and "generators" in n.snapshot_weightings:
+        return n.snapshot_weightings.generators.reindex(n.snapshots).fillna(1.0)
+    return pd.Series(1.0, index=n.snapshots)
+
+
 def total_demand_by_type(
     n: pypsa.Network,
     groupby: GroupByField = "carrier",
 ) -> pd.Series:
     """
-    Total demand summed over snapshots, aggregated by a chosen load field.
+    Total weighted load demand aggregated by a chosen load field.
 
-    Uses:
-      - loads_t.p_set (if present)
-      - loads_t.p     (if present)
-    Then sums them per load: total_by_load = p_set + p (where present).
+    Priority per load:
+      1) loads_t.p
+      2) loads_t.p_set
+      3) loads.p_set expanded over snapshots
+
+    Returns weighted energy-like totals (e.g. MWh if power is MW and weights are hours).
     """
-    series_list = []
-
-    # p_set (exogenous)
-    if hasattr(n.loads_t, "p_set") and n.loads_t.p_set is not None and not n.loads_t.p_set.empty:
-        pset_sum = n.loads_t.p_set.sum(axis=0)
-        series_list.append(pset_sum)
-
-    # p (optimized/endogenous)
-    if hasattr(n.loads_t, "p") and n.loads_t.p is not None and not n.loads_t.p.empty:
-        p_sum = n.loads_t.p.sum(axis=0)
-        series_list.append(p_sum)
-
-    if not series_list:
+    if n.loads.empty:
         return pd.Series(dtype=float)
 
-    total_by_load = pd.concat(series_list, axis=1).sum(axis=1)
+    weights = _get_snapshot_weights(n)
+
+    # Start from static p_set expanded over snapshots
+    static_p_set = n.loads["p_set"].reindex(n.loads.index).fillna(0.0)
+
+    p_load = pd.DataFrame(
+        np.tile(static_p_set.to_numpy(), (len(n.snapshots), 1)),
+        index=n.snapshots,
+        columns=n.loads.index,
+    )
+
+    # Overwrite with time-dependent p_set if available
+    if hasattr(n.loads_t, "p_set") and n.loads_t.p_set is not None and not n.loads_t.p_set.empty:
+        cols = p_load.columns.intersection(n.loads_t.p_set.columns)
+        p_load.loc[:, cols] = n.loads_t.p_set.loc[:, cols]
+
+    # Overwrite with actual p if available
+    if hasattr(n.loads_t, "p") and n.loads_t.p is not None and not n.loads_t.p.empty:
+        cols = p_load.columns.intersection(n.loads_t.p.columns)
+        p_load.loc[:, cols] = n.loads_t.p.loc[:, cols]
+
+    # Weighted sum over snapshots
+    total_by_load = p_load.mul(weights, axis=0).sum(axis=0)
 
     if groupby == "load_name":
         out = total_by_load.copy()
@@ -175,11 +212,7 @@ def total_demand_by_type(
             f"groupby='{groupby}' not found in n.loads columns: {list(n.loads.columns)}"
         )
 
-    labels = (
-        n.loads.loc[total_by_load.index, groupby]
-        .fillna("unknown")
-        .astype(str)
-    )
+    labels = n.loads.loc[total_by_load.index, groupby].fillna("unknown").astype(str)
 
     return total_by_load.groupby(labels).sum().sort_index()
 
@@ -188,7 +221,6 @@ def align_levels(series_by_scenario: dict[str, pd.Series]) -> pd.DataFrame:
     """Align series on a common index and return a wide table (index=type, columns=scenarios)."""
     df = pd.concat(series_by_scenario, axis=1).fillna(0.0)
     df.index.name = "type"
-    # nicer stable ordering
     df = df.sort_index()
     return df
 
@@ -226,17 +258,28 @@ def main():
     # --- base ---
     print(f"[BASE] Loading: {BASE_NETWORK_PATH}")
     n_base = read_network(BASE_NETWORK_PATH)
+    print(f"[BASE] Snapshots: {len(n_base.snapshots)} | Weight sum: {_get_snapshot_weights(n_base).sum()}")
     s_base = total_demand_by_type(n_base, groupby=GROUPBY).rename(BASE_NAME)
 
     # --- scenarios ---
     scenario_paths = find_scenario_networks(PREFIX_DIR, NETWORK_PICKER)
+    scenario_paths = _filter_excluded_scenarios(scenario_paths, EXCLUDED_SCENARIOS)
+
+    if not scenario_paths:
+        raise FileNotFoundError(
+            f"No scenario networks left after excluding scenarios: {sorted(EXCLUDED_SCENARIOS)}"
+        )
+
     print(f"Found {len(scenario_paths)} scenario networks under: {PREFIX_DIR}")
+    if EXCLUDED_SCENARIOS:
+        print(f"[INFO] Excluding scenarios: {sorted(EXCLUDED_SCENARIOS)}")
 
     series_by_scenario: dict[str, pd.Series] = {BASE_NAME: s_base}
 
     for scen, path in scenario_paths.items():
         print(f"[SCENARIO={scen}] Loading: {path}")
         n = read_network(path)
+        print(f"[SCENARIO={scen}] Snapshots: {len(n.snapshots)} | Weight sum: {_get_snapshot_weights(n).sum()}")
         s = total_demand_by_type(n, groupby=GROUPBY).rename(scen)
         series_by_scenario[scen] = s
 

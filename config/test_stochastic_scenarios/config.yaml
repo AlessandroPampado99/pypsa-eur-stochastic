@@ -21,7 +21,7 @@ remote:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "eth_results"
-  name: base
+  name: stochastic_network
   scenarios:
     enable: false
     file: config/test_stochastic_scenarios/scenarios.yaml
@@ -34,27 +34,27 @@ run:
 structured_scenario: 
 
 stochastic_scenarios:
-  enable: false
+  enable: true
   file: config/test_stochastic_scenarios/stochastic_scenarios.yaml   
   postprocess:
     plot_power_network:
-      scenarios: true
+      scenarios: false
     plot_hydrogen_network:
-      scenarios: true
+      scenarios: false
     plot_gas_network:
-      scenarios: true
+      scenarios: false
     plot_balance_map:
-      scenarios: true
+      scenarios: false
     plot_balance_map_interactive:
-      scenarios: true
+      scenarios: false
     make_summary:
-      scenarios: true
+      scenarios: false
     plot_balance_timeseries:
-      scenarios: true
+      scenarios: false
     plot_heatmap_timeseries:
-      scenarios: true
+      scenarios: false
     plot_interactive_bus_balance:
-      scenarios: true
+      scenarios: false
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
