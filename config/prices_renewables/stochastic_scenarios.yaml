@@ -1,0 +1,12 @@
+# Minimal stochastic scenario definition for PyPSA (v1.x) set_scenarios()
+
+scenarios:
+  base: 0.125
+  agriculture_full_electric: 0.125
+  agriculture_machinery_full_oil: 0.125
+  shipping_full_methanol: 0.125
+  urban_heat_full_central: 0.125
+  land_transport_linear_ev: 0.125
+  electricity_optimistic: 0.125
+  industry_h2: 0.125
+

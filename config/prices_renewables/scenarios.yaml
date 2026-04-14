@@ -1,0 +1,174 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
+#
+# SPDX-License-Identifier: MIT
+
+# This file is used to define the scenarios that are run by snakemake. Each entry on the first level is a scenario. Each scenario can contain configuration overrides with respect to the config/config.yaml settings.
+#
+# Example
+#
+# custom-scenario: # name of the scenario
+#   electricity:
+#       renewable_carriers: [wind, solar] # override the list of renewable carriers
+
+price_gas_3:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["gas"]
+          operation: scale
+          value: 3
+
+price_gas_5:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["gas"]
+          operation: scale
+          value: 5
+
+price_gas_8:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["gas"]
+          operation: scale
+          value: 8
+
+price_oil_3:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["oil primary"]
+          operation: scale
+          value: 3
+
+price_oil_5:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["oil primary"]
+          operation: scale
+          value: 5
+
+price_oil_8:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: marginal_cost
+          target: auto
+          carrier: ["oil primary"]
+          operation: scale
+          value: 8
+
+pmaxpu_solar_battery_0.8:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          operation: scale
+          value: 0.8
+        - component: Store
+          attribute: e_max_pu
+          target: auto
+          carrier: ["battery"]
+          operation: scale
+          value: 0.8
+
+pmaxpu_solar_battery_0.5:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          operation: scale
+          value: 0.5
+        - component: Store
+          attribute: e_max_pu
+          target: auto
+          carrier: ["battery"]
+          operation: scale
+          value: 0.5
+
+pmaxpu_solar_battery_0.2:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          operation: scale
+          value: 0.2
+        - component: Store
+          attribute: e_max_pu
+          target: auto
+          carrier: ["battery"]
+          operation: scale
+          value: 0.2
+
+pmaxpu_wind_0.8:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["onwind", "offwind-ac", "offwind-dc", "offwind-float"]
+          operation: scale
+          value: 0.8
+
+pmaxpu_wind_0.5:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["onwind", "offwind-ac", "offwind-dc", "offwind-float"]
+          operation: scale
+          value: 0.5   
+
+pmaxpu_wind_0.2:
+  structured_scenario:
+    name: modify_components
+    params:
+      rules:
+        - component: Generator
+          attribute: p_max_pu
+          target: auto
+          carrier: ["onwind", "offwind-ac", "offwind-dc", "offwind-float"]
+          operation: scale
+          value: 0.2

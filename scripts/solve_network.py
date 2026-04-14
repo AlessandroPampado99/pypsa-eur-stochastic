@@ -1621,9 +1621,10 @@ if __name__ == "__main__":
             "solve_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/test_stoch/config.yaml",
+            configfiles="config/prices_renewables/config.yaml",
             sector_opts="",
             planning_horizons="2050",
+            run="price_oil_8"
         )
     configure_logging(snakemake)
     set_scenario_config(snakemake)

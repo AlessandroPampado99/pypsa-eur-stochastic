@@ -709,22 +709,11 @@ def _scenario_base(
         f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
     )
 
-STRUCTURED_SCENARIOS = {
-    "agriculture_full_electric": _scenario_agriculture_full_electric,
-    "agriculture_machinery_full_oil": _scenario_agriculture_machinery_full_oil,
-    "shipping_full_methanol": _scenario_shipping_full_methanol,
-    "urban_heat_full_central": _scenario_urban_heat_full_central,
-    "land_transport_linear_ev": _scenario_land_transport_linear_ev,
-    "electricity_optimistic": _scenario_electricity_optimistic,
-    "industry_h2": _scenario_industry_h2,
-    "base": _scenario_base,
-}
-
 
 def _apply_named_structured_scenario(
     n: pypsa.Network,
     scenario_name: str,
-    config: dict,
+    config: dict | None,
     scenario: str | None = None,
 ) -> None:
     """Dispatch a structured scenario by name."""
@@ -739,13 +728,13 @@ def _apply_named_structured_scenario(
         scenario_name,
         f"stochastic:{scenario}" if scenario is not None else "deterministic",
     )
-    STRUCTURED_SCENARIOS[scenario_name](n=n, scenario=scenario, config=config)
+    STRUCTURED_SCENARIOS[scenario_name](n=n, scenario=scenario, config=config or {})
 
 
 def _resolve_deterministic_structured_scenario(
     config: dict,
     wildcards: Mapping[str, Any] | None = None,
-) -> str | None:
+) -> tuple[str | None, dict]:
     """
     Resolve the active structured scenario in deterministic mode.
 
@@ -755,7 +744,10 @@ def _resolve_deterministic_structured_scenario(
     3. wildcards['run']
     4. config['run']['name']
 
-    Only exact names present in STRUCTURED_SCENARIOS are accepted.
+    Returns
+    -------
+    scenario_name : str | None
+    scenario_params : dict
     """
     wildcards = wildcards or {}
 
@@ -775,22 +767,123 @@ def _resolve_deterministic_structured_scenario(
     ]
 
     for candidate in candidates:
-        if isinstance(candidate, str) and candidate in STRUCTURED_SCENARIOS:
-            return candidate
+        try:
+            scenario_name, scenario_params = _normalize_structured_scenario_spec(candidate)
+        except (TypeError, ValueError):
+            continue
 
-    return None
+        if isinstance(scenario_name, str) and scenario_name in STRUCTURED_SCENARIOS:
+            return scenario_name, scenario_params
+
+    return None, {}
 
 
 def _validate_stochastic_structured_scenarios(scenarios: Mapping[str, Any]) -> None:
-    """Ensure all stochastic scenario names have a registered structured builder."""
-    unknown = sorted(set(scenarios) - set(STRUCTURED_SCENARIOS))
-    if unknown:
-        known = ", ".join(sorted(STRUCTURED_SCENARIOS))
-        raise ValueError(
-            f"Stochastic scenario file contains unknown structured scenarios {unknown}. "
-            f"Known structured scenarios: {known}"
-        )
+    """
+    Ensure all stochastic structured_scenario specifications are valid.
 
+    Supported stochastic scenario formats
+    ------------------------------------
+    Old format:
+        scenarios:
+          base: 0.125
+          scenario_a: 0.125
+
+    New format:
+        scenarios:
+          base:
+            prob: 0.125
+            structured_scenario: null
+          gas_expensive:
+            prob: 0.125
+            structured_scenario:
+              name: modify_components
+              params: {...}
+    """
+    for sc_name, sc_spec in scenarios.items():
+        if np.isscalar(sc_spec):
+            # Legacy format: scenario name itself is used as structured scenario name
+            structured_spec = sc_name
+        elif isinstance(sc_spec, dict):
+            structured_spec = sc_spec.get("structured_scenario", sc_name)
+        else:
+            raise TypeError(
+                f"Invalid stochastic scenario specification for '{sc_name}': "
+                f"expected scalar probability or dict, got {type(sc_spec).__name__}"
+            )
+
+        scenario_name, _ = _normalize_structured_scenario_spec(structured_spec)
+
+        if scenario_name is None:
+            continue
+
+        if scenario_name not in STRUCTURED_SCENARIOS:
+            known = ", ".join(sorted(STRUCTURED_SCENARIOS))
+            raise ValueError(
+                f"Unknown structured scenario '{scenario_name}' declared for stochastic "
+                f"scenario '{sc_name}'. Known structured scenarios: {known}"
+            )
+
+def _normalize_stochastic_scenarios_definition(
+    scenarios: Mapping[str, Any],
+) -> tuple[dict[str, float], dict[str, tuple[str | None, dict]]]:
+    """
+    Normalize stochastic scenario definitions.
+
+    Returns
+    -------
+    probabilities : dict[str, float]
+        Scenario probabilities for n.set_scenarios(...)
+    structured_specs : dict[str, tuple[str | None, dict]]
+        Mapping scenario_name -> (structured_scenario_name, params)
+
+    Notes
+    -----
+    Supported formats:
+
+    1. Legacy
+       scenarios:
+         base: 0.125
+         agriculture_full_electric: 0.125
+
+    2. Extended
+       scenarios:
+         base:
+           prob: 0.125
+           structured_scenario: null
+         custom_case:
+           prob: 0.125
+           structured_scenario:
+             name: modify_components
+             params:
+               rules: [...]
+    """
+    probabilities = {}
+    structured_specs = {}
+
+    for sc_name, sc_spec in scenarios.items():
+        if np.isscalar(sc_spec):
+            probabilities[sc_name] = float(sc_spec)
+            structured_specs[sc_name] = (sc_name, {})
+            continue
+
+        if not isinstance(sc_spec, dict):
+            raise TypeError(
+                f"Invalid stochastic scenario specification for '{sc_name}': "
+                f"expected scalar or dict, got {type(sc_spec).__name__}"
+            )
+
+        if "prob" not in sc_spec:
+            raise ValueError(
+                f"Stochastic scenario '{sc_name}' is missing required key 'prob'."
+            )
+
+        probabilities[sc_name] = float(sc_spec["prob"])
+
+        structured_spec = sc_spec.get("structured_scenario", sc_name)
+        structured_specs[sc_name] = _normalize_structured_scenario_spec(structured_spec)
+
+    return probabilities, structured_specs
 
 def _apply_structured_scenarios(
     n: pypsa.Network,
@@ -821,24 +914,39 @@ def _apply_structured_scenarios(
             )
 
         _validate_stochastic_structured_scenarios(scenarios)
+        probabilities, structured_specs = _normalize_stochastic_scenarios_definition(scenarios)
 
         logger.info("Enabling stochastic scenarios via n.set_scenarios(...)")
-        n.set_scenarios(scenarios)
+        n.set_scenarios(probabilities)
 
-        active_names = list(scenarios.keys())
-        logger.info("Structured stochastic scenarios detected: %s", active_names)
+        active_names = []
+        logger.info("Structured stochastic scenarios detected: %s", list(probabilities.keys()))
 
-        for sc in active_names:
+        for sc in probabilities:
+            scenario_name, scenario_params = structured_specs[sc]
+
+            if scenario_name is None:
+                logger.info(
+                    "No structured scenario declared for stochastic scenario '%s'; skipping builder.",
+                    sc,
+                )
+                continue
+
             _apply_named_structured_scenario(
                 n=n,
-                scenario_name=sc,
-                config=config,
+                scenario_name=scenario_name,
+                config=scenario_params,
                 scenario=sc,
             )
+            active_names.append(f"{sc}->{scenario_name}")
 
         return True, active_names
 
-    scenario_name = _resolve_deterministic_structured_scenario(config=config, wildcards=wildcards)
+    scenario_name, scenario_params = _resolve_deterministic_structured_scenario(
+        config=config,
+        wildcards=wildcards,
+    )
+
     if scenario_name is None:
         logger.info(
             "Stochastic mode disabled and no deterministic structured scenario detected. "
@@ -850,7 +958,7 @@ def _apply_structured_scenarios(
     _apply_named_structured_scenario(
         n=n,
         scenario_name=scenario_name,
-        config=config,
+        config=scenario_params,
         scenario=None,
     )
     return False, [scenario_name]
@@ -1043,6 +1151,339 @@ def _apply_patch_timeseries(
         raise ValueError(f"Unsupported op: {op}")
 
 
+def _normalize_component_table_name(component: str) -> str:
+    """
+    Normalize a user-facing component name to the corresponding network table name.
+
+    Supported examples:
+    - Generator -> generators
+    - generators -> generators
+    - Link -> links
+    - Load -> loads
+    """
+    mapping = {
+        "bus": "buses",
+        "buses": "buses",
+        "carrier": "carriers",
+        "carriers": "carriers",
+        "generator": "generators",
+        "generators": "generators",
+        "load": "loads",
+        "loads": "loads",
+        "line": "lines",
+        "lines": "lines",
+        "link": "links",
+        "links": "links",
+        "store": "stores",
+        "stores": "stores",
+        "storageunit": "storage_units",
+        "storageunits": "storage_units",
+        "storage_unit": "storage_units",
+        "storage_units": "storage_units",
+        "transformer": "transformers",
+        "transformers": "transformers",
+        "shuntimpedance": "shunt_impedances",
+        "shuntimpedances": "shunt_impedances",
+        "shunt_impedance": "shunt_impedances",
+        "shunt_impedances": "shunt_impedances",
+    }
+
+    key = str(component).strip().lower().replace(" ", "").replace("-", "").replace(".", "")
+    if key not in mapping:
+        raise ValueError(f"Unsupported component '{component}'.")
+    return mapping[key]
+
+
+def _normalize_structured_scenario_spec(spec: Any) -> tuple[str | None, dict]:
+    """
+    Normalize a structured scenario specification.
+
+    Accepted forms:
+    - None
+    - "scenario_name"
+    - {"name": "scenario_name", "params": {...}}
+    """
+    if spec is None:
+        return None, {}
+
+    if isinstance(spec, str):
+        return spec, {}
+
+    if isinstance(spec, dict):
+        name = spec.get("name")
+        params = spec.get("params", {})
+        if name is None:
+            raise ValueError(
+                "Structured scenario dict must contain key 'name'."
+            )
+        if not isinstance(params, dict):
+            raise TypeError(
+                f"structured_scenario.params must be a dict; got {type(params).__name__}"
+            )
+        return name, params
+
+    raise TypeError(
+        f"structured_scenario must be None, str, or dict; got {type(spec).__name__}"
+    )
+
+
+def _get_component_attr_tables(
+    n: pypsa.Network,
+    component: str,
+    attribute: str,
+) -> tuple[str, pd.DataFrame, pd.DataFrame | None]:
+    """
+    Return static and time-series tables for a component attribute.
+
+    Returns
+    -------
+    table_name : str
+        Base component table name, e.g. 'generators'
+    static_df : pd.DataFrame
+        Static component table, e.g. n.generators
+    ts_df : pd.DataFrame | None
+        Time-series attribute table, e.g. n.generators_t.p_max_pu, if it exists
+    """
+    table_name = _normalize_component_table_name(component)
+    static_df = getattr(n, table_name)
+
+    ts_df = None
+    ts_container_name = f"{table_name}_t"
+    if hasattr(n, ts_container_name):
+        ts_container = getattr(n, ts_container_name)
+        if hasattr(ts_container, attribute):
+            ts_df = getattr(ts_container, attribute)
+
+    return table_name, static_df, ts_df
+
+
+def _available_timeseries_names(
+    ts: pd.DataFrame,
+    scenario: str | None = None,
+) -> set[str]:
+    """
+    Return component names available in a time-series table.
+
+    If scenario is provided and ts is stochastic, names are filtered to that scenario.
+    """
+    if not isinstance(ts.columns, pd.MultiIndex):
+        return set(ts.columns.astype(str))
+
+    if scenario is not None:
+        if "scenario" in ts.columns.names:
+            scenarios = ts.columns.get_level_values("scenario")
+        else:
+            scenarios = ts.columns.get_level_values(0)
+
+        if "name" in ts.columns.names:
+            names = ts.columns.get_level_values("name")
+        else:
+            names = ts.columns.get_level_values(1)
+
+        return set(pd.Index(names[scenarios == scenario]).astype(str))
+
+    if "name" in ts.columns.names:
+        return set(ts.columns.get_level_values("name").astype(str))
+    return set(ts.columns.get_level_values(-1).astype(str))
+
+
+def _split_names_by_target(
+    names: list[str],
+    ts: pd.DataFrame | None,
+    scenario: str | None = None,
+) -> tuple[list[str], list[str]]:
+    """
+    Split matched component names into time-series-backed and static-only names.
+    """
+    if ts is None:
+        return [], list(names)
+
+    ts_names_avail = _available_timeseries_names(ts, scenario=scenario)
+    names_ts = [name for name in names if str(name) in ts_names_avail]
+    names_static = [name for name in names if str(name) not in ts_names_avail]
+    return names_ts, names_static
+
+
+def _validate_modify_rule(rule: Mapping[str, Any]) -> None:
+    """Validate one generic modification rule."""
+    required = {"component", "attribute", "operation", "value"}
+    missing = sorted(required - set(rule))
+    if missing:
+        raise ValueError(f"Missing required keys in rule: {missing}")
+
+    op = str(rule["operation"]).strip().lower()
+    if op not in {"set", "scale", "add"}:
+        raise ValueError(f"Unsupported operation '{op}'. Allowed: set, scale, add")
+
+    target = str(rule.get("target", "auto")).strip().lower()
+    if target not in {"auto", "static", "timeseries"}:
+        raise ValueError(
+            f"Unsupported target '{target}'. Allowed: auto, static, timeseries"
+        )
+
+
+def _apply_modify_components_rule(
+    n: pypsa.Network,
+    rule: Mapping[str, Any],
+    scenario: str | None = None,
+) -> None:
+    """
+    Apply one generic component modification rule.
+
+    Rule format
+    -----------
+    {
+      "component": "Generator",
+      "attribute": "marginal_cost",
+      "target": "auto" | "static" | "timeseries",
+      "carrier": ["OCGT", "CCGT"],
+      "operation": "scale" | "set" | "add",
+      "value": 1.15
+    }
+    """
+    rule = _ensure_dict(rule, "rule")
+    _validate_modify_rule(rule)
+
+    component = rule["component"]
+    attribute = str(rule["attribute"])
+    operation = str(rule["operation"]).strip().lower()
+    target = str(rule.get("target", "auto")).strip().lower()
+    value = rule["value"]
+
+    table_name, static_df, ts_df = _get_component_attr_tables(
+        n=n,
+        component=component,
+        attribute=attribute,
+    )
+
+    selector = {
+        k: v
+        for k, v in rule.items()
+        if k not in {"component", "attribute", "target", "operation", "value"}
+    }
+
+    names = _select_names_from_component(n, table_name, selector)
+    if not names:
+        logger.warning(
+            "modify_components rule matched no components. component=%s attribute=%s selector=%s",
+            component,
+            attribute,
+            selector,
+        )
+        return
+
+    if target == "timeseries" and ts_df is None:
+        raise ValueError(
+            f"Rule requested timeseries target for {component}.{attribute}, "
+            f"but no time-series table exists."
+        )
+
+    if attribute == "p_max_pu" and target in {"timeseries", "auto"} and ts_df is not None:
+        if operation != "scale":
+            # Only forbid when the rule actually hits the timeseries branch
+            names_ts, _ = _split_names_by_target(names, ts_df, scenario=scenario)
+            if names_ts:
+                raise ValueError(
+                    "For timeseries p_max_pu only 'scale' is allowed."
+                )
+
+    if target == "static":
+        if attribute not in static_df.columns:
+            raise KeyError(f"Column not found in static table: {table_name}.{attribute}")
+        _apply_patch_static(static_df, attribute, scenario, names, operation, value)
+        logger.info(
+            "Applied static modify_components rule on %s.%s to %s component(s)%s.",
+            table_name,
+            attribute,
+            len(names),
+            f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+        )
+        return
+
+    if target == "timeseries":
+        _apply_patch_timeseries(ts_df, scenario, names, operation, value)
+        logger.info(
+            "Applied timeseries modify_components rule on %s_t.%s to %s component(s)%s.",
+            table_name,
+            attribute,
+            len(names),
+            f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+        )
+        return
+
+    # target == "auto"
+    if ts_df is None:
+        if attribute not in static_df.columns:
+            raise KeyError(f"Column not found in static table: {table_name}.{attribute}")
+        _apply_patch_static(static_df, attribute, scenario, names, operation, value)
+        logger.info(
+            "Applied auto->static modify_components rule on %s.%s to %s component(s)%s.",
+            table_name,
+            attribute,
+            len(names),
+            f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+        )
+        return
+
+    names_ts, names_static = _split_names_by_target(names, ts_df, scenario=scenario)
+
+    if names_ts:
+        _apply_patch_timeseries(ts_df, scenario, names_ts, operation, value)
+
+    if names_static:
+        if attribute not in static_df.columns:
+            raise KeyError(f"Column not found in static table: {table_name}.{attribute}")
+        _apply_patch_static(static_df, attribute, scenario, names_static, operation, value)
+
+    logger.info(
+        "Applied auto modify_components rule on %s.%s: %s timeseries-backed + %s static-only component(s)%s.",
+        table_name,
+        attribute,
+        len(names_ts),
+        len(names_static),
+        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    )
+
+
+def _scenario_modify_components(
+    n: pypsa.Network,
+    scenario: str | None = None,
+    config: dict | None = None,
+) -> None:
+    """
+    Generic structured scenario applying one or more component modification rules.
+
+    Expected config format
+    ----------------------
+    {
+      "rules": [
+        {
+          "component": "Generator",
+          "attribute": "marginal_cost",
+          "target": "auto",
+          "carrier": ["OCGT", "CCGT"],
+          "operation": "scale",
+          "value": 1.15
+        }
+      ]
+    }
+    """
+    cfg = _ensure_dict(config, "config") if config is not None else {}
+    rules = cfg.get("rules", None)
+    if not isinstance(rules, list) or not rules:
+        raise ValueError(
+            "modify_components requires config['rules'] as a non-empty list."
+        )
+
+    for i, rule in enumerate(rules, start=1):
+        logger.info(
+            "Applying modify_components rule %s/%s%s.",
+            i,
+            len(rules),
+            f" for stochastic scenario '{scenario}'" if scenario is not None else "",
+        )
+        _apply_modify_components_rule(n=n, rule=rule, scenario=scenario)
+
 def _apply_patch_config_if_present(
     n: pypsa.Network,
     stochastic_param: dict,
@@ -1153,6 +1594,18 @@ def apply_stochastic_config(
     else:
         logger.info("No structured scenario was applied.")
 
+
+STRUCTURED_SCENARIOS = {
+    "modify_components": _scenario_modify_components,
+    "agriculture_full_electric": _scenario_agriculture_full_electric,
+    "agriculture_machinery_full_oil": _scenario_agriculture_machinery_full_oil,
+    "shipping_full_methanol": _scenario_shipping_full_methanol,
+    "urban_heat_full_central": _scenario_urban_heat_full_central,
+    "land_transport_linear_ev": _scenario_land_transport_linear_ev,
+    "electricity_optimistic": _scenario_electricity_optimistic,
+    "industry_h2": _scenario_industry_h2,
+    "base": _scenario_base,
+}
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
