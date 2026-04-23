@@ -1,0 +1,4 @@
+validation_runs:
+  agriculture_full_electric___agriculture_machinery_full_oil:
+    capacities_from: agriculture_full_electric
+    operations_on: agriculture_machinery_full_oil

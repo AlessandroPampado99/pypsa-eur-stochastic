@@ -50,17 +50,17 @@ import pypsa
 
 # Folder containing scenario subfolders:
 # results/<PREFIX>/<scenario>/networks/*.nc
-PREFIX_DIR = Path("results/eth_results")
+PREFIX_DIR = Path("results/prices_and_renewables")  # e.g. "results/prices_and_renewables"
 
 # Base network path (explicit, can be anywhere)
-BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
+BASE_NETWORK_PATH = Path("results/prices_and_renewables/base/networks/base_s_adm___2040.nc")
 BASE_NAME = "__BASE__"
 
 # Optional: choose exactly which network file inside each scenario networks/ folder.
 # - None: pick first .nc found (sorted)
 # - "base_s_adm___2050.nc": exact filename match
 # - "base_s_"            : substring match in filename
-NETWORK_PICKER: Optional[str] = "base_s_adm___2050.nc"
+NETWORK_PICKER: Optional[str] = "base_s_adm___2040.nc"
 
 # Optional: exclude some scenario subfolders by exact folder name
 # Example:
@@ -68,7 +68,7 @@ NETWORK_PICKER: Optional[str] = "base_s_adm___2050.nc"
 EXCLUDE_SCENARIOS: list[str] = ["base"]  # exclude "base" scenario since it's already loaded as BASE_NETWORK_PATH
 
 # Output folder and filenames
-OUT_DIR = Path("results/eth_results/_postprocess_objectives")
+OUT_DIR = Path("results/prices_and_renewables/2040/_postprocess_objectives")
 OUT_STEM = "objectives"
 
 # If True, plot y-axis on log scale (only if all values > 0)

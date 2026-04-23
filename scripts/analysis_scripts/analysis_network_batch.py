@@ -37,14 +37,14 @@ from add_electricity import sanitize_carriers
 # =========================
 
 ROOT_DIR = Path("results/eth_results")
-NETWORK_GLOB = "networks/base_s_adm___2050.nc"
+NETWORK_GLOB = "networks/base_s_adm___2050__exp.nc"
 BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
-OUTPUT_EXCEL = Path("results/eth_results/csvs/analysis_networks_vs_base.xlsx")
+OUTPUT_EXCEL = Path("results/eth_results/csvs/analysis_networks_stochastic_energy.xlsx")
 
 CONFIG_YAML = Path("config/test_stochastic_scenarios/config.yaml")
 PLOTTING_YAML = Path("config/plotting.default.yaml")
 
-EXCLUDED_SCENARIOS = {"base", "stochastic_network"}
+EXCLUDED_SCENARIOS = {"base"}
 
 SCENARIO_NAME_MODE = "folder"
 

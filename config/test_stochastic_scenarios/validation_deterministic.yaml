@@ -1,0 +1,225 @@
+validation_runs:
+
+  base___agriculture_full_electric:
+    capacities_from: base
+    operations_on: agriculture_full_electric
+
+  base___agriculture_machinery_full_oil:
+    capacities_from: base
+    operations_on: agriculture_machinery_full_oil
+
+  base___shipping_full_methanol:
+    capacities_from: base
+    operations_on: shipping_full_methanol
+
+  base___urban_heat_full_central:
+    capacities_from: base
+    operations_on: urban_heat_full_central
+
+  base___land_transport_linear_ev:
+    capacities_from: base
+    operations_on: land_transport_linear_ev
+
+  base___electricity_optimistic:
+    capacities_from: base
+    operations_on: electricity_optimistic
+
+  base___industry_h2:
+    capacities_from: base
+    operations_on: industry_h2
+
+  agriculture_full_electric___base:
+    capacities_from: agriculture_full_electric
+    operations_on: base
+
+  agriculture_full_electric___agriculture_machinery_full_oil:
+    capacities_from: agriculture_full_electric
+    operations_on: agriculture_machinery_full_oil
+
+  agriculture_full_electric___shipping_full_methanol:
+    capacities_from: agriculture_full_electric
+    operations_on: shipping_full_methanol
+
+  agriculture_full_electric___urban_heat_full_central:
+    capacities_from: agriculture_full_electric
+    operations_on: urban_heat_full_central
+
+  agriculture_full_electric___land_transport_linear_ev:
+    capacities_from: agriculture_full_electric
+    operations_on: land_transport_linear_ev
+
+  agriculture_full_electric___electricity_optimistic:
+    capacities_from: agriculture_full_electric
+    operations_on: electricity_optimistic
+
+  agriculture_full_electric___industry_h2:
+    capacities_from: agriculture_full_electric
+    operations_on: industry_h2
+
+  agriculture_machinery_full_oil___base:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: base
+
+  agriculture_machinery_full_oil___agriculture_full_electric:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: agriculture_full_electric
+
+  agriculture_machinery_full_oil___shipping_full_methanol:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: shipping_full_methanol
+
+  agriculture_machinery_full_oil___urban_heat_full_central:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: urban_heat_full_central
+
+  agriculture_machinery_full_oil___land_transport_linear_ev:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: land_transport_linear_ev
+
+  agriculture_machinery_full_oil___electricity_optimistic:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: electricity_optimistic
+
+  agriculture_machinery_full_oil___industry_h2:
+    capacities_from: agriculture_machinery_full_oil
+    operations_on: industry_h2
+
+  shipping_full_methanol___base:
+    capacities_from: shipping_full_methanol
+    operations_on: base
+
+  shipping_full_methanol___agriculture_full_electric:
+    capacities_from: shipping_full_methanol
+    operations_on: agriculture_full_electric
+
+  shipping_full_methanol___agriculture_machinery_full_oil:
+    capacities_from: shipping_full_methanol
+    operations_on: agriculture_machinery_full_oil
+
+  shipping_full_methanol___urban_heat_full_central:
+    capacities_from: shipping_full_methanol
+    operations_on: urban_heat_full_central
+
+  shipping_full_methanol___land_transport_linear_ev:
+    capacities_from: shipping_full_methanol
+    operations_on: land_transport_linear_ev
+
+  shipping_full_methanol___electricity_optimistic:
+    capacities_from: shipping_full_methanol
+    operations_on: electricity_optimistic
+
+  shipping_full_methanol___industry_h2:
+    capacities_from: shipping_full_methanol
+    operations_on: industry_h2
+
+  urban_heat_full_central___base:
+    capacities_from: urban_heat_full_central
+    operations_on: base
+
+  urban_heat_full_central___agriculture_full_electric:
+    capacities_from: urban_heat_full_central
+    operations_on: agriculture_full_electric
+
+  urban_heat_full_central___agriculture_machinery_full_oil:
+    capacities_from: urban_heat_full_central
+    operations_on: agriculture_machinery_full_oil
+
+  urban_heat_full_central___shipping_full_methanol:
+    capacities_from: urban_heat_full_central
+    operations_on: shipping_full_methanol
+
+  urban_heat_full_central___land_transport_linear_ev:
+    capacities_from: urban_heat_full_central
+    operations_on: land_transport_linear_ev
+
+  urban_heat_full_central___electricity_optimistic:
+    capacities_from: urban_heat_full_central
+    operations_on: electricity_optimistic
+
+  urban_heat_full_central___industry_h2:
+    capacities_from: urban_heat_full_central
+    operations_on: industry_h2
+
+  land_transport_linear_ev___base:
+    capacities_from: land_transport_linear_ev
+    operations_on: base
+
+  land_transport_linear_ev___agriculture_full_electric:
+    capacities_from: land_transport_linear_ev
+    operations_on: agriculture_full_electric
+
+  land_transport_linear_ev___agriculture_machinery_full_oil:
+    capacities_from: land_transport_linear_ev
+    operations_on: agriculture_machinery_full_oil
+
+  land_transport_linear_ev___shipping_full_methanol:
+    capacities_from: land_transport_linear_ev
+    operations_on: shipping_full_methanol
+
+  land_transport_linear_ev___urban_heat_full_central:
+    capacities_from: land_transport_linear_ev
+    operations_on: urban_heat_full_central
+
+  land_transport_linear_ev___electricity_optimistic:
+    capacities_from: land_transport_linear_ev
+    operations_on: electricity_optimistic
+
+  land_transport_linear_ev___industry_h2:
+    capacities_from: land_transport_linear_ev
+    operations_on: industry_h2
+
+  electricity_optimistic___base:
+    capacities_from: electricity_optimistic
+    operations_on: base
+
+  electricity_optimistic___agriculture_full_electric:
+    capacities_from: electricity_optimistic
+    operations_on: agriculture_full_electric
+
+  electricity_optimistic___agriculture_machinery_full_oil:
+    capacities_from: electricity_optimistic
+    operations_on: agriculture_machinery_full_oil
+
+  electricity_optimistic___shipping_full_methanol:
+    capacities_from: electricity_optimistic
+    operations_on: shipping_full_methanol
+
+  electricity_optimistic___urban_heat_full_central:
+    capacities_from: electricity_optimistic
+    operations_on: urban_heat_full_central
+
+  electricity_optimistic___land_transport_linear_ev:
+    capacities_from: electricity_optimistic
+    operations_on: land_transport_linear_ev
+
+  electricity_optimistic___industry_h2:
+    capacities_from: electricity_optimistic
+    operations_on: industry_h2
+
+  industry_h2___base:
+    capacities_from: industry_h2
+    operations_on: base
+
+  industry_h2___agriculture_full_electric:
+    capacities_from: industry_h2
+    operations_on: agriculture_full_electric
+
+  industry_h2___agriculture_machinery_full_oil:
+    capacities_from: industry_h2
+    operations_on: agriculture_machinery_full_oil
+
+  industry_h2___shipping_full_methanol:
+    capacities_from: industry_h2
+    operations_on: shipping_full_methanol
+
+  industry_h2___urban_heat_full_central:
+    capacities_from: industry_h2
+    operations_on: urban_heat_full_central
+
+  industry_h2___land_transport_linear_ev:
+    capacities_from: industry_h2
+    operations_on: land_transport_linear_ev
+
+  industry_h2___electricity_optimistic:
+    capacities_from: industry_h2
+    operations_on: electricity_optimistic

@@ -58,7 +58,7 @@ stochastic_scenarios:
 
 validation:
   enable: true
-  config: config/test_stochastic_scenarios/validation_stochastic.yaml
+  config: config/test_stochastic_scenarios/validation_deterministic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight

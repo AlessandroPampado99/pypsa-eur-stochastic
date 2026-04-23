@@ -1,0 +1,33 @@
+validation_runs:
+
+  stochastic___agriculture_full_electric:
+    capacities_from: stochastic_network
+    operations_on: agriculture_full_electric
+
+  stochastic___agriculture_machinery_full_oil:
+    capacities_from: stochastic_network
+    operations_on: agriculture_machinery_full_oil
+
+  stochastic___shipping_full_methanol:
+    capacities_from: stochastic_network
+    operations_on: shipping_full_methanol
+
+  stochastic___urban_heat_full_central:
+    capacities_from: stochastic_network
+    operations_on: urban_heat_full_central
+
+  stochastic___land_transport_linear_ev:
+    capacities_from: stochastic_network
+    operations_on: land_transport_linear_ev
+
+  stochastic___electricity_optimistic:
+    capacities_from: stochastic_network
+    operations_on: electricity_optimistic
+
+  stochastic___industry_h2:
+    capacities_from: stochastic_network
+    operations_on: industry_h2
+
+  stochastic___base:
+    capacities_from: stochastic_network
+    operations_on: base

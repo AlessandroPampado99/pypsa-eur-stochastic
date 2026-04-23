@@ -44,9 +44,9 @@ if str(ROOT) not in sys.path:
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-EXCEL_PATH = Path("results/eth_results/csvs/analysis_networks_vs_base.xlsx")
-OUT_DIR = Path("results/eth_results/heatmaps_vs_base_out/eth_taglie")
-ZIP_NAME = Path("results/eth_results/heatmaps_vs_base.zip")
+EXCEL_PATH = Path("results/prices_and_renewables/csvs/analysis_networks_vs_base.xlsx")
+OUT_DIR = Path("results/prices_and_renewables/heatmaps_vs_base_out/eth_taglie")
+ZIP_NAME = Path("results/prices_and_renewables/heatmaps_vs_base.zip")
 
 SHEETS = {
     "consumption": "vs_base_consumption",

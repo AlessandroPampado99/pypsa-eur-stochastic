@@ -1215,109 +1215,142 @@ def add_import_limit_constraint(n: pypsa.Network, sns: pd.DatetimeIndex) -> None
 
     Stochastic-safe: enforce one constraint per scenario.
     """
-    nyears = n.snapshot_weightings.generators.sum() / 8760
-
-    import_links = n.links.loc[n.links.carrier.astype(str).str.contains("import")].index
-    import_gens = n.generators.loc[n.generators.carrier.astype(str).str.contains("import")].index
-
     limit = n.config["sector"]["imports"]["limit"]
     limit_sense = n.config["sector"]["imports"]["limit_sense"]
 
-    if (len(import_links) == 0 and len(import_gens) == 0) or not np.isfinite(limit):
+    if not np.isfinite(limit):
         return
 
     weightings = n.snapshot_weightings.loc[sns, "generators"]
-    rhs = limit * 1e6 * nyears
 
-    if not _has_scenarios(n) or not isinstance(import_links, pd.MultiIndex):
-        eff = n.links.loc[import_links, "efficiency"] if len(import_links) else 0.0
+    if not _has_scenarios(n):
+        nyears = n.snapshot_weightings.generators.sum() / 8760
+
+        import_links = n.links.index[n.links.carrier.astype(str).str.contains("import", na=False)]
+        import_gens = n.generators.index[n.generators.carrier.astype(str).str.contains("import", na=False)]
+
+        if len(import_links) == 0 and len(import_gens) == 0:
+            return
+
+        rhs = limit * 1e6 * nyears
         lhs = 0.0
+
         if len(import_gens):
-            p_g = n.model["Generator-p"].loc[sns, import_gens]
-            lhs = lhs + (p_g * weightings).sum()
+            p_g = n.model["Generator-p"].sel(name=import_gens.tolist(), snapshot=sns)
+            lhs = lhs + (p_g * xr.DataArray(weightings, dims=["snapshot"])).sum()
+
         if len(import_links):
-            p_l = n.model["Link-p"].loc[sns, import_links]
-            lhs = lhs + (p_l * eff * weightings).sum()
+            eff = n.links.loc[import_links, "efficiency"].astype(float)
+            p_l = n.model["Link-p"].sel(name=import_links.tolist(), snapshot=sns)
+            lhs = lhs + (
+                p_l * xr.DataArray(eff.values, dims=["name"], coords={"name": import_links.tolist()})
+                * xr.DataArray(weightings, dims=["snapshot"])
+            ).sum()
+
         n.model.add_constraints(lhs, limit_sense, rhs, name="import_limit")
         return
 
     scenarios = _scenario_names(n)
-    link_sc_level = _idx_level(n.links.index, "scenario", 0).astype(str)
-    gen_sc_level = _idx_level(n.generators.index, "scenario", 0).astype(str)
+    nyears = n.snapshot_weightings.generators.sum() / 8760
+    rhs = limit * 1e6 * nyears
 
     for sc in scenarios:
-        links_sc = import_links[link_sc_level.loc[import_links] == sc]
-        gens_sc = import_gens[gen_sc_level.loc[import_gens] == sc]
+        links_sc_df = _slice_scenario_df(n.links, sc)
+        gens_sc_df = _slice_scenario_df(n.generators, sc)
 
-        if len(links_sc) == 0 and len(gens_sc) == 0:
+        import_links = links_sc_df.index[links_sc_df.carrier.astype(str).str.contains("import", na=False)]
+        import_gens = gens_sc_df.index[gens_sc_df.carrier.astype(str).str.contains("import", na=False)]
+
+        if len(import_links) == 0 and len(import_gens) == 0:
             continue
 
-        eff_sc = n.links.loc[links_sc, "efficiency"] if len(links_sc) else 0.0
-
         lhs = 0.0
-        if len(gens_sc):
-            p_g = n.model["Generator-p"].loc[sns, gens_sc]
-            lhs = lhs + (p_g * weightings).sum()
-        if len(links_sc):
-            p_l = n.model["Link-p"].loc[sns, links_sc]
-            lhs = lhs + (p_l * eff_sc * weightings).sum()
+
+        if len(import_gens):
+            p_g = n.model["Generator-p"].sel(
+                scenario=sc,
+                name=import_gens.tolist(),
+                snapshot=sns,
+            )
+            lhs = lhs + (p_g * xr.DataArray(weightings, dims=["snapshot"])).sum()
+
+        if len(import_links):
+            eff = links_sc_df.loc[import_links, "efficiency"].astype(float)
+            p_l = n.model["Link-p"].sel(
+                scenario=sc,
+                name=import_links.tolist(),
+                snapshot=sns,
+            )
+            lhs = lhs + (
+                p_l
+                * xr.DataArray(eff.values, dims=["name"], coords={"name": import_links.tolist()})
+                * xr.DataArray(weightings, dims=["snapshot"])
+            ).sum()
 
         n.model.add_constraints(lhs, limit_sense, rhs, name=f"import_limit-{sc}")
 
 
 
 def add_co2_atmosphere_constraint(n: pypsa.Network, snapshots: pd.DatetimeIndex) -> None:
-    """
-    Add CO2 atmosphere constraint.
-
-    Stochastic-safe: enforce per scenario.
-    """
     glcs = n.global_constraints[n.global_constraints.type == "co2_atmosphere"]
     if glcs.empty:
         return
 
     last_i = snapshots[-1]
 
-    if not _has_scenarios(n) or not isinstance(n.stores.index, pd.MultiIndex):
+    if not _has_scenarios(n):
         for name, glc in glcs.iterrows():
             carattr = glc.carrier_attribute
             emissions = n.carriers.query(f"{carattr} != 0")[carattr]
             if emissions.empty:
                 continue
 
-            bus_carrier = n.stores.bus.map(n.buses.carrier)
-            stores = n.stores[bus_carrier.isin(emissions.index) & ~n.stores.e_cyclic]
+            bus_carrier = n.stores.bus.astype(str).map(n.buses.carrier.astype(str))
+            stores = n.stores[bus_carrier.isin(emissions.index.astype(str)) & ~n.stores.e_cyclic.fillna(False)]
             if stores.empty:
                 continue
 
-            lhs = n.model["Store-e"].loc[last_i, stores.index]
-            n.model.add_constraints(lhs <= glc.constant, name=f"GlobalConstraint-{name}")
+            lhs = n.model["Store-e"].sel(name=stores.index.tolist(), snapshot=last_i).sum()
+            n.model.add_constraints(lhs <= float(glc.constant), name=f"GlobalConstraint-{name}")
         return
 
-    scenarios = _scenario_names(n)
-
-    # Precompute emissions carriers per constraint row (usually identical, but keep generic)
-    for name, glc in glcs.iterrows():
+    for (sc, name), glc in glcs.iterrows():
         carattr = glc.carrier_attribute
-        emissions = n.carriers.query(f"{carattr} != 0")[carattr]
+
+        carriers_sc = _slice_scenario_df(n.carriers, sc)
+        emissions = carriers_sc.query(f"{carattr} != 0")[carattr]
         if emissions.empty:
+            print(f"[DEBUG] No emitting carriers found for scenario {sc}")
             continue
 
-        # Per scenario: select stores with relevant bus carrier
-        for sc in scenarios:
-            stores_sc = n.stores.loc[_idx_level(n.stores.index, "scenario", 0).astype(str) == sc]
-            buses_sc = n.buses.loc[_idx_level(n.buses.index, "scenario", 0).astype(str) == sc]
+        stores_sc = _slice_scenario_df(n.stores, sc)
+        buses_sc = _slice_scenario_df(n.buses, sc)
 
-            if stores_sc.empty or buses_sc.empty:
-                continue
+        bus_carrier = stores_sc.bus.astype(str).map(buses_sc.carrier.astype(str))
+        stores_sel = stores_sc[
+            bus_carrier.isin(emissions.index.astype(str))
+            & ~stores_sc.e_cyclic.fillna(False)
+        ]
 
-            bus_carrier = stores_sc.bus.map(buses_sc.carrier)
-            stores_sel = stores_sc[bus_carrier.isin(emissions.index) & ~stores_sc.e_cyclic]
-            if stores_sel.empty:
-                continue
+        print(f"[DEBUG] scenario={sc}")
+        print(f"[DEBUG] emissions.index={emissions.index}")
+        print(f"[DEBUG] unique bus_carrier={pd.Index(bus_carrier.dropna().unique())}")
+        print(f"[DEBUG] selected stores={stores_sel.index.tolist()}")
 
-            lhs = n.model["Store-e"].loc[last_i, stores_sel.index]
-            n.model.add_constraints(lhs <= glc.constant, name=f"GlobalConstraint-{name}-{sc}")
+        if stores_sel.empty:
+            print(f"[DEBUG] No stores selected for scenario {sc}")
+            continue
+
+        lhs = n.model["Store-e"].sel(
+            scenario=sc,
+            name=stores_sel.index.tolist(),
+            snapshot=last_i,
+        ).sum()
+
+        n.model.add_constraints(
+            lhs <= float(glc.constant),
+            name=f"GlobalConstraint-{name}-{sc}",
+        )
 
 
 
@@ -1621,10 +1654,10 @@ if __name__ == "__main__":
             "solve_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/prices_renewables/config.yaml",
+            configfiles="config/test_stochastic_scenarios/config.yaml",
             sector_opts="",
             planning_horizons="2050",
-            run="price_oil_8"
+            # run="price_oil_8"
         )
     configure_logging(snakemake)
     set_scenario_config(snakemake)

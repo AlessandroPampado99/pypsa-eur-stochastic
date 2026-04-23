@@ -48,9 +48,9 @@ if str(ROOT) not in sys.path:
 # USER SETTINGS
 # =========================
 
-EXCEL_PATH = Path("results/eth_results/csvs/analysis_component_sizes_vs_base.xlsx")
-OUT_DIR = Path("results/eth_results/heatmaps_flexible_out_energy")
-ZIP_NAME = Path("results/eth_results/heatmaps_flexible_out.zip")
+EXCEL_PATH = Path("results/prices_and_renewables/csvs/analysis_component_sizes_vs_base.xlsx")
+OUT_DIR = Path("results/prices_and_renewables/heatmaps_flexible_out_power")
+ZIP_NAME = Path("results/prices_and_renewables/heatmaps_flexible_out.zip")
 
 # You can point to any sheet(s) here
 SHEETS = {
@@ -87,7 +87,7 @@ EXCLUDED_COMPONENTS = {"Load"}
 # Example:
 # EXCLUDED_COMPONENTS = {"Load"}
 
-INCLUDED_METRICS = {"energy_final"}
+INCLUDED_METRICS = {"power_final"}
 # Example:
 # INCLUDED_METRICS = {"power_final", "energy_final"}
 
@@ -118,8 +118,8 @@ GENERAL_TITLES = {
 }
 
 KIND_TITLES = {
-    "sizes_by_component_carrier": "Optimized sizes by component [MWh]",
-    "sizes_vs_base_by_component_carrier": "Optimized sizes by component [MWh]",
+    "sizes_by_component_carrier": "Optimized sizes by component [MW]",
+    "sizes_vs_base_by_component_carrier": "Optimized sizes by component [MW]",
     "supply": "Supply",
     "consumption": "Consumption",
 }

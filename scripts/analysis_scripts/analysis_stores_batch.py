@@ -44,18 +44,17 @@ from add_electricity import sanitize_carriers
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-ROOT_DIR = Path("results/eth_results")
+ROOT_DIR = Path("results/prices_and_renewables")
 NETWORK_GLOB = "networks/base_s_adm___2050.nc"
 BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
-OUTPUT_EXCEL = Path("results/eth_results/csvs/analysis_stores_vs_base.xlsx")
+OUTPUT_EXCEL = Path("results/prices_and_renewables/csvs/analysis_component_sizes_vs_base.xlsx")
 
-CONFIG_YAML = Path("config/test_stochastic_scenarios/config.yaml")
+CONFIG_YAML = Path("config/prices_renewables/config.yaml")
 PLOTTING_YAML = Path("config/plotting.default.yaml")
 
-SCENARIO_NAME_MODE = "folder"
-
-# Scenario folders to exclude from the batch analysis
 EXCLUDED_SCENARIOS = {"base", "stochastic_network"}
+
+SCENARIO_NAME_MODE = "folder"
 # Example:
 # EXCLUDED_SCENARIOS = {"base", "debug_case"}
 
