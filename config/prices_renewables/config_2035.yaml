@@ -20,11 +20,11 @@ remote:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "eth_results"
-  name: stochastic_network
+  prefix: "prices_and_renewables"
+  name: base
   scenarios:
     enable: false
-    file: config/test_stochastic_scenarios/scenarios.yaml
+    file: config/prices_renewables/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
@@ -34,7 +34,7 @@ run:
 structured_scenario: 
 
 stochastic_scenarios:
-  enable: true
+  enable: false
   file: config/test_stochastic_scenarios/stochastic_scenarios.yaml   
   postprocess:
     plot_power_network:
@@ -44,7 +44,7 @@ stochastic_scenarios:
     plot_gas_network:
       scenarios: false
     plot_balance_map:
-      scenarios: true
+      scenarios: false
     plot_balance_map_interactive:
       scenarios: false
     make_summary:
@@ -57,8 +57,8 @@ stochastic_scenarios:
       scenarios: false
 
 validation:
-  enable: false
-  config: config/test_stochastic_scenarios/validation_stochastic.yaml
+  enable: true
+  config: config/prices_renewables/scenarios_validation_deterministic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
@@ -72,7 +72,7 @@ scenario:
   sector_opts:
   - ""
   planning_horizons:
-  - 2050
+  - 2035
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#countries
 countries:
@@ -1098,7 +1098,7 @@ industry:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#costs
 costs:
-  year: 2050
+  year: 2035
   social_discountrate: 0.02
   fill_values:
     FOM: 0
@@ -1169,12 +1169,7 @@ solving:
     dispatch_exclude_carriers:
       - co2 stored
       - co2 sequestered
-      - co2 atmosphere
-      - oil primary
-      - gas
-      
-
-    validation_missing_capacity_policy: keep_extendable
+      - load shedding
     clip_p_max_pu: 0.01
     load_shedding: true
     curtailment_mode: false

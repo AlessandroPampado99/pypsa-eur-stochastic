@@ -16,7 +16,7 @@ Outputs (per kind: supply/consumption):
 - heatmap_<kind>_levels_topN.png
 - heatmap_<kind>_delta_all.png
 - heatmap_<kind>_delta_topN.png
-- top_<kind>.csv  (ranking by max |delta|)
+- top_<kind>.csv  (ranking by variability metrics)
 
 All heatmaps show:
 - technologies on x-axis
@@ -44,9 +44,11 @@ if str(ROOT) not in sys.path:
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-EXCEL_PATH = Path("results/prices_and_renewables/csvs/analysis_networks_vs_base.xlsx")
-OUT_DIR = Path("results/prices_and_renewables/heatmaps_vs_base_out/eth_taglie")
-ZIP_NAME = Path("results/prices_and_renewables/heatmaps_vs_base.zip")
+EXCEL_PATH = Path("results/eth_results/csvs/analysis_networks_vs_base.xlsx")
+OUT_DIR = Path("results/eth_results/heatmaps_vs_base_out/eth_taglie")
+ZIP_NAME = Path("results/eth_results/heatmaps_vs_base.zip")
+
+
 
 SHEETS = {
     "consumption": "vs_base_consumption",
@@ -59,6 +61,7 @@ TOP_N = 40
 # Scenario filtering
 # -------------------------
 SHOW_BASE_IN_HEATMAP = False
+
 # If INCLUDED_SCENARIOS is not None, only these scenarios are kept.
 # Names must match the suffix after "delta_value__".
 INCLUDED_SCENARIOS = None
@@ -71,14 +74,59 @@ EXCLUDED_SCENARIOS = {"__BASE__"}
 # EXCLUDED_SCENARIOS = {"stochastic_network", "test_case"}
 
 # -------------------------
+# Unit scaling
+# -------------------------
+# Input values are assumed to be in MWh.
+# They are internally converted to TWh for ranking, filtering, CSV, and plotting.
+ENABLE_UNIT_SCALING = True
+VALUE_SCALE = 1e6
+VALUE_UNIT_LABEL = "TWh"
+
+# -------------------------
+# Technology filtering
+# -------------------------
+# Remove technologies whose mean absolute delta across kept scenarios
+# is lower than MIN_MEAN_ABS_DELTA_THRESHOLD.
+# Threshold is interpreted in TWh when ENABLE_UNIT_SCALING = True.
+ENABLE_MIN_MEAN_ABS_DELTA_FILTER = True
+MIN_MEAN_ABS_DELTA_THRESHOLD = 1.0
+
+# Remove technologies whose name contains any of these substrings.
+# Example: ["discharger", "dummy", "backup"]
+ENABLE_TECHNOLOGY_SUBSTRING_EXCLUSION = True
+EXCLUDED_TECHNOLOGY_SUBSTRINGS = ["discharger"]
+
+# Case-insensitive matching for technology substring exclusion.
+TECHNOLOGY_SUBSTRING_CASE_INSENSITIVE = True
+
+# -------------------------
+# Technology ordering
+# -------------------------
+# Sort technologies by mean absolute delta (descending).
+# Most variable technologies will be on the left.
+SORT_TECHNOLOGIES_BY_MEAN_ABS_DELTA = True
+
+# Fallback sorting metric if the previous flag is False:
+# True  -> sort by max absolute delta descending
+# False -> keep original aggregated order
+SORT_TECHNOLOGIES_BY_MAX_ABS_DELTA = False
+
+# -------------------------
 # Scenario labels
 # -------------------------
 SHORTEN_SCENARIO_LABELS = False
 
 # Optional explicit renaming for plot labels
 SCENARIO_LABEL_MAP = {
-    # "agriculture_elec": "Agriculture elec",
-    # "electricity_high": "Electricity +10%",
+    "base": "BASE",
+    "agriculture_full_electric": "AFE",
+    "agriculture_machinery_full_oil": "AMFO",
+    "electricity_optimistic": "EO",
+    "industry_h2": "IH2",
+    "land_transport_linear_ev": "LTLEV",
+    "shipping_full_methanol": "SFM",
+    "urban_heat_full_central": "UHFC",
+    "stochastic_network": "SP",
 }
 
 BASE_LABEL = "BASE"
@@ -99,20 +147,20 @@ KIND_TITLES = {
 AXIS_LABELS = {
     "x": "Technology",
     "y": "Scenario",
-    "cbar": "Transformed scale",
+    "cbar": f"Transformed log scale ({VALUE_UNIT_LABEL})",
 }
 
 # Optional custom full titles per kind
 # If provided, they override automatic title construction
 CUSTOM_TITLES = {
-    # "consumption": {
-    #     "levels": "Consumption – Installed capacities",
-    #     "delta": "Consumption – Difference from base",
-    # },
-    # "supply": {
-    #     "levels": "Supply – Installed capacities",
-    #     "delta": "Supply – Difference from base",
-    # },
+    "consumption": {
+        "levels": f"Energy consumption levels [{VALUE_UNIT_LABEL}]",
+        "delta": f"Energy consumption compared to the base scenario [{VALUE_UNIT_LABEL}]",
+    },
+    "supply": {
+        "levels": f"Energy supply levels [{VALUE_UNIT_LABEL}]",
+        "delta": f"Energy supply compared to the base scenario [{VALUE_UNIT_LABEL}]",
+    },
 }
 
 # File suffixes
@@ -194,75 +242,180 @@ def coerce_numeric(df: pd.DataFrame, cols: list[str]) -> None:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
 
-def rank_technologies_by_max_abs_delta(
+def aggregate_technologies(
     df: pd.DataFrame,
     delta_cols: list[str],
 ) -> pd.DataFrame:
-    """Rank technologies by maximum absolute delta across scenarios."""
-    tmp = df.copy()
-    coerce_numeric(tmp, delta_cols + [BASE_VALUE_COL])
+    """
+    Aggregate values by technology after cleaning unnamed columns
+    and coercing numeric values.
+    """
+    if BASE_VALUE_COL not in df.columns:
+        raise KeyError(f"Missing column '{BASE_VALUE_COL}' in sheet.")
+    if "technology" not in df.columns:
+        raise KeyError("Missing column 'technology' in sheet.")
 
-    agg = tmp.groupby("technology", as_index=False)[[BASE_VALUE_COL] + delta_cols].sum(min_count=1)
+    tmp = df.copy()
+    tmp = tmp[[c for c in tmp.columns if not (isinstance(c, str) and c.startswith("Unnamed:"))]].copy()
+
+    cols_to_keep = ["technology", BASE_VALUE_COL] + delta_cols
+    cols_to_keep = [c for c in cols_to_keep if c in tmp.columns]
+    tmp = tmp[cols_to_keep].copy()
+
+    tmp["technology"] = tmp["technology"].astype(str)
+    coerce_numeric(tmp, [BASE_VALUE_COL] + delta_cols)
+
+    agg = tmp.groupby("technology", as_index=True)[[BASE_VALUE_COL] + delta_cols].sum(min_count=1)
+    return agg
+
+
+def exclude_technologies_by_substrings(
+    agg: pd.DataFrame,
+    excluded_substrings: list[str] | None = None,
+    case_insensitive: bool = True,
+) -> pd.DataFrame:
+    """
+    Remove technologies whose index contains any of the provided substrings.
+    """
+    if not excluded_substrings:
+        return agg
+
+    excluded_substrings = [str(x) for x in excluded_substrings if str(x).strip()]
+    if not excluded_substrings:
+        return agg
+
+    idx = agg.index.astype(str)
+
+    if case_insensitive:
+        idx_cmp = idx.str.lower()
+        excluded_cmp = [s.lower() for s in excluded_substrings]
+    else:
+        idx_cmp = idx
+        excluded_cmp = excluded_substrings
+
+    mask_excluded = pd.Series(False, index=agg.index)
+
+    for sub in excluded_cmp:
+        mask_excluded = mask_excluded | idx_cmp.str.contains(sub, regex=False)
+
+    return agg.loc[~mask_excluded].copy()
+
+
+def apply_unit_scaling(agg: pd.DataFrame, delta_cols: list[str]) -> pd.DataFrame:
+    """
+    Scale BASE and delta columns in the aggregated dataframe.
+    Used to convert from MWh to TWh when requested.
+    """
+    if not ENABLE_UNIT_SCALING:
+        return agg
+
+    out = agg.copy()
+    cols_to_scale = [BASE_VALUE_COL] + list(delta_cols)
+    for c in cols_to_scale:
+        if c in out.columns:
+            out[c] = out[c] / VALUE_SCALE
+
+    return out
+
+
+def compute_variability_metrics(
+    agg: pd.DataFrame,
+    delta_cols: list[str],
+) -> pd.DataFrame:
+    """
+    Compute variability metrics from aggregated delta columns.
+    """
+    if len(agg) == 0:
+        return pd.DataFrame(
+            columns=[
+                "technology",
+                "mean_abs_delta",
+                "max_abs_delta",
+                "sum_abs_delta",
+                "nonzero_count",
+            ]
+        )
 
     if delta_cols:
         M = agg[delta_cols].to_numpy(dtype=float)
         mags = np.abs(M)
+        mean_abs_delta = np.nanmean(mags, axis=1)
         max_abs_delta = np.nanmax(mags, axis=1)
         sum_abs_delta = np.nansum(mags, axis=1)
         nonzero_count = np.sum(np.nan_to_num(mags, nan=0.0) > 0.0, axis=1)
     else:
+        mean_abs_delta = np.zeros(len(agg), dtype=float)
         max_abs_delta = np.zeros(len(agg), dtype=float)
         sum_abs_delta = np.zeros(len(agg), dtype=float)
         nonzero_count = np.zeros(len(agg), dtype=int)
 
     out = pd.DataFrame({
-        "technology": agg["technology"].astype(str).map(safe_label),
+        "technology": agg.index.astype(str).map(safe_label),
+        "mean_abs_delta": mean_abs_delta,
         "max_abs_delta": max_abs_delta,
         "sum_abs_delta": sum_abs_delta,
         "nonzero_count": nonzero_count,
-    }).sort_values(["max_abs_delta", "sum_abs_delta"], ascending=False)
+    })
 
     return out
 
 
-def build_matrices(
-    df: pd.DataFrame,
-    included_scenarios: set[str] | None = None,
-    excluded_scenarios: set[str] | None = None,
-    show_base: bool = True,
-) -> tuple[pd.Index, list[str], np.ndarray, np.ndarray, list[str]]:
+def apply_min_mean_abs_delta_filter(
+    agg: pd.DataFrame,
+    delta_cols: list[str],
+    threshold: float,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
+    Remove technologies whose mean absolute delta is below threshold.
+    Returns filtered aggregated dataframe and variability metrics.
+    """
+    metrics = compute_variability_metrics(agg, delta_cols)
+
+    if len(metrics) == 0:
+        return agg.copy(), metrics
+
+    keep_mask = metrics["mean_abs_delta"] >= threshold
+    kept_techs = metrics.loc[keep_mask, "technology"].astype(str).tolist()
+
+    agg_filtered = agg.loc[agg.index.astype(str).isin(kept_techs)].copy()
+    metrics_filtered = metrics.loc[keep_mask].copy()
+
+    return agg_filtered, metrics_filtered
+
+
+def rank_technologies(
+    agg: pd.DataFrame,
+    delta_cols: list[str],
+) -> pd.DataFrame:
+    """
+    Rank technologies using variability metrics.
+    """
+    metrics = compute_variability_metrics(agg, delta_cols)
+
+    if len(metrics) == 0:
+        return metrics
+
+    return metrics.sort_values(
+        ["mean_abs_delta", "max_abs_delta", "sum_abs_delta"],
+        ascending=False,
+    ).reset_index(drop=True)
+
+
+def build_matrices_from_agg(
+    agg: pd.DataFrame,
+    delta_cols: list[str],
+    scenarios: list[str],
+    show_base: bool = True,
+) -> tuple[pd.Index, list[str], np.ndarray, np.ndarray]:
+    """
+    Build levels and deltas matrices starting from an already aggregated dataframe.
+
     Returns:
       tech_index: Index of technologies
       row_labels: [BASE, scenario1, ...] or [scenario1, ...]
       levels: matrix [n_tech x n_rows]
       deltas: matrix [n_tech x n_rows]
-      scenarios: list of kept scenario names (without BASE)
     """
-    if BASE_VALUE_COL not in df.columns:
-        raise KeyError(f"Missing column '{BASE_VALUE_COL}' in sheet.")
-
-    delta_cols, scenarios = get_delta_cols(df)
-    delta_cols, scenarios = filter_delta_cols(
-        delta_cols,
-        scenarios,
-        included_scenarios=included_scenarios,
-        excluded_scenarios=excluded_scenarios,
-    )
-
-    if not delta_cols:
-        raise KeyError(
-            "No delta scenario columns left after filtering. "
-            f"Check INCLUDED_SCENARIOS={included_scenarios} and EXCLUDED_SCENARIOS={excluded_scenarios}."
-        )
-
-    tmp = df.copy()
-    tmp = tmp[[c for c in tmp.columns if not (isinstance(c, str) and c.startswith("Unnamed:"))]].copy()
-
-    coerce_numeric(tmp, [BASE_VALUE_COL] + delta_cols)
-
-    agg = tmp.groupby("technology", as_index=True)[[BASE_VALUE_COL] + delta_cols].sum(min_count=1)
-
     base = agg[BASE_VALUE_COL].to_numpy(dtype=float)
     deltas_only = agg[delta_cols].to_numpy(dtype=float)
 
@@ -275,7 +428,7 @@ def build_matrices(
         deltas = deltas_only
         row_labels = [maybe_shorten(s) for s in scenarios]
 
-    return agg.index, row_labels, levels, deltas, scenarios
+    return agg.index, row_labels, levels, deltas
 
 
 def log1p_pos(M: np.ndarray) -> np.ndarray:
@@ -389,27 +542,56 @@ def main():
         )
 
         if not delta_cols_kept:
-            print(
-                f"[WARNING] Sheet '{sheet}' ({kind}): no scenarios left after filtering. Skipping."
-            )
+            print(f"[WARNING] Sheet '{sheet}' ({kind}): no scenarios left after filtering. Skipping.")
             continue
 
-        ranking = rank_technologies_by_max_abs_delta(df, delta_cols_kept)
+        agg = aggregate_technologies(df, delta_cols_kept)
+
+        n_before_substring_filter = len(agg)
+        if ENABLE_TECHNOLOGY_SUBSTRING_EXCLUSION:
+            agg = exclude_technologies_by_substrings(
+                agg,
+                excluded_substrings=EXCLUDED_TECHNOLOGY_SUBSTRINGS,
+                case_insensitive=TECHNOLOGY_SUBSTRING_CASE_INSENSITIVE,
+            )
+        n_after_substring_filter = len(agg)
+
+        # Convert from MWh to TWh before ranking/filtering/plotting
+        agg = apply_unit_scaling(agg, delta_cols_kept)
+
+        n_before_mean_filter = len(agg)
+        if ENABLE_MIN_MEAN_ABS_DELTA_FILTER:
+            agg, metrics_after_filter = apply_min_mean_abs_delta_filter(
+                agg,
+                delta_cols_kept,
+                threshold=MIN_MEAN_ABS_DELTA_THRESHOLD,
+            )
+        else:
+            metrics_after_filter = compute_variability_metrics(agg, delta_cols_kept)
+        n_after_mean_filter = len(agg)
+
+        if len(agg) == 0:
+            print(f"[WARNING] Sheet '{sheet}' ({kind}): no technologies left after technology filtering. Skipping.")
+            continue
+
+        ranking = rank_technologies(agg, delta_cols_kept)
         ranking.to_csv(OUT_DIR / f"top_{kind}.csv", index=False)
 
-        tech_index, row_labels, levels, deltas, scenarios = build_matrices(
-            df,
-            included_scenarios=INCLUDED_SCENARIOS,
-            excluded_scenarios=EXCLUDED_SCENARIOS,
+        tech_index, row_labels, levels, deltas = build_matrices_from_agg(
+            agg,
+            delta_cols=delta_cols_kept,
+            scenarios=scenarios_kept,
             show_base=SHOW_BASE_IN_HEATMAP,
         )
 
-        if deltas.shape[1] > 0:
-            score = np.nanmax(np.abs(deltas), axis=1)
+        if SORT_TECHNOLOGIES_BY_MEAN_ABS_DELTA:
+            score = ranking.set_index("technology").reindex(tech_index.astype(str))["mean_abs_delta"].to_numpy(dtype=float)
+            order = np.argsort(-np.nan_to_num(score, nan=0.0))
+        elif SORT_TECHNOLOGIES_BY_MAX_ABS_DELTA:
+            score = ranking.set_index("technology").reindex(tech_index.astype(str))["max_abs_delta"].to_numpy(dtype=float)
+            order = np.argsort(-np.nan_to_num(score, nan=0.0))
         else:
-            score = np.zeros(deltas.shape[0], dtype=float)
-
-        order = np.argsort(-np.nan_to_num(score, nan=0.0))
+            order = np.arange(len(tech_index))
 
         tech_sorted = [safe_label(t) for t in tech_index.to_numpy(dtype=str)[order]]
         levels_sorted = levels[order, :]
@@ -460,6 +642,12 @@ def main():
         print(
             f"[OK] {kind}: kept {len(scenarios_kept)} scenarios "
             f"-> {', '.join(scenarios_kept)}"
+        )
+        print(
+            f"     Technologies: {len(df['technology'].dropna().astype(str).unique())} raw unique "
+            f"-> {n_before_substring_filter} aggregated "
+            f"-> {n_after_substring_filter} after substring filter "
+            f"-> {n_after_mean_filter} after mean-abs-delta filter"
         )
 
     save_zip(OUT_DIR, ZIP_NAME)

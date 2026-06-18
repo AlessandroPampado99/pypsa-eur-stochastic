@@ -48,9 +48,9 @@ if str(ROOT) not in sys.path:
 # USER SETTINGS
 # =========================
 
-EXCEL_PATH = Path("results/prices_and_renewables/csvs/analysis_component_sizes_vs_base.xlsx")
-OUT_DIR = Path("results/prices_and_renewables/heatmaps_flexible_out_power")
-ZIP_NAME = Path("results/prices_and_renewables/heatmaps_flexible_out.zip")
+EXCEL_PATH = Path("results/eth_results/csvs/analysis_component_sizes_vs_base.xlsx")
+OUT_DIR = Path("results/eth_results/heatmaps_flexible_out_power")
+ZIP_NAME = Path("results/eth_results/heatmaps_flexible_out.zip")
 
 # You can point to any sheet(s) here
 SHEETS = {
@@ -69,7 +69,7 @@ INCLUDED_SCENARIOS = None
 # Example:
 # INCLUDED_SCENARIOS = {"industry_h2", "urban_heat_full_central"}
 
-EXCLUDED_SCENARIOS = set()
+EXCLUDED_SCENARIOS = ["base"]
 # Example:
 # EXCLUDED_SCENARIOS = {"test_case"}
 
@@ -96,6 +96,21 @@ EXCLUDED_METRICS = set()
 INCLUDED_CARRIERS = None
 EXCLUDED_CARRIERS = set()
 
+# Optional substring exclusion on metadata columns
+ENABLE_METADATA_SUBSTRING_EXCLUSION = False
+METADATA_SUBSTRING_CASE_INSENSITIVE = True
+
+EXCLUDED_COMPONENT_SUBSTRINGS = []
+EXCLUDED_CARRIER_SUBSTRINGS = ["discharger"]
+EXCLUDED_METRIC_SUBSTRINGS = []
+
+# Optional exclusion on the final plotted x-label
+ENABLE_ITEM_LABEL_SUBSTRING_EXCLUSION = False
+ITEM_LABEL_SUBSTRING_CASE_INSENSITIVE = True
+EXCLUDED_ITEM_LABEL_SUBSTRINGS = []
+# Example:
+# EXCLUDED_ITEM_LABEL_SUBSTRINGS = ["discharger", "dummy"]
+
 # Exclude rows if any used numeric value is infinite
 EXCLUDE_INFINITE_ROWS = True
 
@@ -104,12 +119,43 @@ DROP_ALL_ZERO_ROWS = True
 ZERO_TOL = 1e-12
 
 # -------------------------
+# Unit scaling
+# -------------------------
+DIVIDE_VALUES_BY_1E3 = True
+VALUE_SCALE = 1e3
+VALUE_UNIT_LABEL = "GW"
+
+# -------------------------
+# Variability filtering
+# -------------------------
+# Remove plotted items whose mean absolute delta across kept scenarios
+# is smaller than MIN_MEAN_ABS_DELTA_THRESHOLD.
+ENABLE_MIN_MEAN_ABS_DELTA_FILTER = True
+MIN_MEAN_ABS_DELTA_THRESHOLD = 1.0
+
+# -------------------------
+# Ordering
+# -------------------------
+# Sort plotted items by mean absolute delta descending.
+SORT_ITEMS_BY_MEAN_ABS_DELTA = True
+
+# Fallback sorting metric if the previous flag is False.
+SORT_ITEMS_BY_MAX_ABS_DELTA = False
+
+# -------------------------
 # Labels and titles
 # -------------------------
 SHORTEN_SCENARIO_LABELS = False
 SCENARIO_LABEL_MAP = {
-    # "industry_h2": "Industry H2",
-    # "urban_heat_full_central": "Urban heat central",
+    "base": "BASE",
+    "agriculture_full_electric": "AFE",
+    "agriculture_machinery_full_oil": "AMFO",
+    "electricity_optimistic": "EO",
+    "industry_h2": "IH2",
+    "land_transport_linear_ev": "LTLEV",
+    "shipping_full_methanol": "SFM",
+    "urban_heat_full_central": "UHFC",
+    "stochastic_network": "SP",
 }
 
 GENERAL_TITLES = {
@@ -118,8 +164,8 @@ GENERAL_TITLES = {
 }
 
 KIND_TITLES = {
-    "sizes_by_component_carrier": "Optimized sizes by component [MW]",
-    "sizes_vs_base_by_component_carrier": "Optimized sizes by component [MW]",
+    "sizes_by_component_carrier": "Optimized sizes by component [GW]",
+    "sizes_vs_base_by_component_carrier": "Optimized sizes by component [GW]",
     "supply": "Supply",
     "consumption": "Consumption",
 }
@@ -133,14 +179,14 @@ CUSTOM_TITLES = {
 
 # Columns to use for x-axis labels.
 # If None, all identifier columns are used.
-LABEL_COLUMNS = ["component", "carrier"]
+LABEL_COLUMNS = ["carrier"]
 # LABEL_COLUMNS = ["technology"]
 # LABEL_COLUMNS = ["component"]
 
 AXIS_LABELS = {
     "x": "Item",
     "y": "Scenario",
-    "cbar": "Transformed scale",
+    "cbar": "Transformed log scale",
 }
 
 # How to compose x labels from identifier columns
@@ -223,10 +269,6 @@ def scenario_from_delta_col(col: str) -> str:
 def get_value_cols(df: pd.DataFrame) -> tuple[list[str], list[str]]:
     """
     Return scenario value columns excluding BASE.
-
-    Example:
-    - value__industry_h2
-    - value__urban_heat_full_central
     """
     value_cols = [
         c for c in df.columns
@@ -276,6 +318,27 @@ def filter_scenarios(
     return kept_cols, kept_scenarios
 
 
+def contains_any_substring(
+    s: str,
+    substrings: list[str] | set[str] | tuple[str, ...] | None,
+    case_insensitive: bool = True,
+) -> bool:
+    """Check whether a string contains any substring from a collection."""
+    if not substrings:
+        return False
+
+    text = "" if pd.isna(s) else str(s)
+
+    if case_insensitive:
+        text_cmp = text.lower()
+        substrings_cmp = [str(x).lower() for x in substrings if str(x).strip()]
+    else:
+        text_cmp = text
+        substrings_cmp = [str(x) for x in substrings if str(x).strip()]
+
+    return any(sub in text_cmp for sub in substrings_cmp)
+
+
 def filter_rows_by_metadata(df: pd.DataFrame) -> pd.DataFrame:
     """Optional filtering by component / carrier / metric."""
     out = df.copy()
@@ -286,17 +349,47 @@ def filter_rows_by_metadata(df: pd.DataFrame) -> pd.DataFrame:
         if EXCLUDED_COMPONENTS:
             out = out[~out["component"].isin(EXCLUDED_COMPONENTS)]
 
+        if ENABLE_METADATA_SUBSTRING_EXCLUSION and EXCLUDED_COMPONENT_SUBSTRINGS:
+            mask = out["component"].astype(str).map(
+                lambda x: contains_any_substring(
+                    x,
+                    EXCLUDED_COMPONENT_SUBSTRINGS,
+                    case_insensitive=METADATA_SUBSTRING_CASE_INSENSITIVE,
+                )
+            )
+            out = out.loc[~mask].copy()
+
     if "metric" in out.columns:
         if INCLUDED_METRICS is not None:
             out = out[out["metric"].isin(INCLUDED_METRICS)]
         if EXCLUDED_METRICS:
             out = out[~out["metric"].isin(EXCLUDED_METRICS)]
 
+        if ENABLE_METADATA_SUBSTRING_EXCLUSION and EXCLUDED_METRIC_SUBSTRINGS:
+            mask = out["metric"].astype(str).map(
+                lambda x: contains_any_substring(
+                    x,
+                    EXCLUDED_METRIC_SUBSTRINGS,
+                    case_insensitive=METADATA_SUBSTRING_CASE_INSENSITIVE,
+                )
+            )
+            out = out.loc[~mask].copy()
+
     if "carrier" in out.columns:
         if INCLUDED_CARRIERS is not None:
             out = out[out["carrier"].isin(INCLUDED_CARRIERS)]
         if EXCLUDED_CARRIERS:
             out = out[~out["carrier"].isin(EXCLUDED_CARRIERS)]
+
+        if ENABLE_METADATA_SUBSTRING_EXCLUSION and EXCLUDED_CARRIER_SUBSTRINGS:
+            mask = out["carrier"].astype(str).map(
+                lambda x: contains_any_substring(
+                    x,
+                    EXCLUDED_CARRIER_SUBSTRINGS,
+                    case_insensitive=METADATA_SUBSTRING_CASE_INSENSITIVE,
+                )
+            )
+            out = out.loc[~mask].copy()
 
     return out
 
@@ -377,6 +470,74 @@ def detect_sheet_mode(df: pd.DataFrame) -> str:
     )
 
 
+def compute_variability_metrics(
+    item_index: pd.Index,
+    deltas: np.ndarray,
+) -> pd.DataFrame:
+    """
+    Compute variability metrics from delta matrix.
+    """
+    if deltas.size == 0:
+        mags = np.zeros((len(item_index), 0))
+    else:
+        mags = np.abs(np.asarray(deltas, dtype=float))
+
+    if mags.shape[1] == 0:
+        mean_abs_delta = np.zeros(len(item_index), dtype=float)
+        max_abs_delta = np.zeros(len(item_index), dtype=float)
+        sum_abs_delta = np.zeros(len(item_index), dtype=float)
+        nonzero_count = np.zeros(len(item_index), dtype=int)
+    else:
+        mean_abs_delta = np.nanmean(mags, axis=1)
+        max_abs_delta = np.nanmax(mags, axis=1)
+        sum_abs_delta = np.nansum(mags, axis=1)
+        nonzero_count = np.sum(np.nan_to_num(mags, nan=0.0) > 0.0, axis=1)
+
+    return pd.DataFrame({
+        "item": item_index.astype(str),
+        "mean_abs_delta": mean_abs_delta,
+        "max_abs_delta": max_abs_delta,
+        "sum_abs_delta": sum_abs_delta,
+        "nonzero_count": nonzero_count,
+    })
+
+
+def filter_items_by_label_substrings(
+    item_index: pd.Index,
+    levels: np.ndarray,
+    deltas: np.ndarray,
+    excluded_substrings: list[str] | None,
+    case_insensitive: bool = True,
+) -> tuple[pd.Index, np.ndarray, np.ndarray]:
+    """
+    Exclude plotted items based on substrings in the final item label.
+    """
+    if not excluded_substrings:
+        return item_index, levels, deltas
+
+    keep_mask = np.array([
+        not contains_any_substring(lbl, excluded_substrings, case_insensitive=case_insensitive)
+        for lbl in item_index.astype(str)
+    ], dtype=bool)
+
+    return item_index[keep_mask], levels[keep_mask, :], deltas[keep_mask, :]
+
+
+def filter_items_by_min_mean_abs_delta(
+    item_index: pd.Index,
+    levels: np.ndarray,
+    deltas: np.ndarray,
+    threshold: float,
+) -> tuple[pd.Index, np.ndarray, np.ndarray]:
+    """
+    Remove plotted items whose mean absolute delta is below threshold.
+    """
+    metrics = compute_variability_metrics(item_index, deltas)
+    keep_mask = metrics["mean_abs_delta"].to_numpy(dtype=float) >= threshold
+
+    return item_index[keep_mask], levels[keep_mask, :], deltas[keep_mask, :]
+
+
 def build_matrices(
     df: pd.DataFrame,
     included_scenarios: set[str] | None = None,
@@ -434,6 +595,11 @@ def build_matrices(
         deltas_only = agg[delta_cols].to_numpy(dtype=float)
         levels_only = base[:, None] + deltas_only
 
+        if DIVIDE_VALUES_BY_1E3:
+            base = base / VALUE_SCALE
+            deltas_only = deltas_only / VALUE_SCALE
+            levels_only = levels_only / VALUE_SCALE
+
     elif mode == "levels":
         value_cols, scenarios = get_value_cols(tmp)
         value_cols, scenarios = filter_scenarios(
@@ -466,6 +632,11 @@ def build_matrices(
         levels_only = agg[value_cols].to_numpy(dtype=float)
         deltas_only = levels_only - base[:, None]
 
+        if DIVIDE_VALUES_BY_1E3:
+            base = base / VALUE_SCALE
+            levels_only = levels_only / VALUE_SCALE
+            deltas_only = deltas_only / VALUE_SCALE
+
     else:
         raise RuntimeError(f"Unexpected mode: {mode}")
 
@@ -481,33 +652,19 @@ def build_matrices(
     return agg.index, row_labels, levels, deltas, scenarios, id_cols
 
 
-def rank_items_by_max_abs_delta(
+def rank_items(
     item_index: pd.Index,
     deltas: np.ndarray,
 ) -> pd.DataFrame:
     """
-    Rank plotted items by max absolute delta.
+    Rank plotted items by variability.
     """
-    if deltas.size == 0:
-        mags = np.zeros((len(item_index), 0))
-    else:
-        mags = np.abs(np.asarray(deltas, dtype=float))
+    metrics = compute_variability_metrics(item_index, deltas)
 
-    if mags.shape[1] == 0:
-        max_abs_delta = np.zeros(len(item_index), dtype=float)
-        sum_abs_delta = np.zeros(len(item_index), dtype=float)
-        nonzero_count = np.zeros(len(item_index), dtype=int)
-    else:
-        max_abs_delta = np.nanmax(mags, axis=1)
-        sum_abs_delta = np.nansum(mags, axis=1)
-        nonzero_count = np.sum(np.nan_to_num(mags, nan=0.0) > 0.0, axis=1)
-
-    return pd.DataFrame({
-        "item": item_index.astype(str),
-        "max_abs_delta": max_abs_delta,
-        "sum_abs_delta": sum_abs_delta,
-        "nonzero_count": nonzero_count,
-    }).sort_values(["max_abs_delta", "sum_abs_delta"], ascending=False)
+    return metrics.sort_values(
+        ["mean_abs_delta", "max_abs_delta", "sum_abs_delta"],
+        ascending=False,
+    ).reset_index(drop=True)
 
 
 def log1p_pos(M: np.ndarray) -> np.ndarray:
@@ -615,15 +772,44 @@ def main():
             print(f"[WARNING] Skipping sheet '{sheet}': {e}")
             continue
 
-        ranking = rank_items_by_max_abs_delta(item_index, deltas)
+        n_initial = len(item_index)
+
+        if ENABLE_ITEM_LABEL_SUBSTRING_EXCLUSION:
+            item_index, levels, deltas = filter_items_by_label_substrings(
+                item_index,
+                levels,
+                deltas,
+                excluded_substrings=EXCLUDED_ITEM_LABEL_SUBSTRINGS,
+                case_insensitive=ITEM_LABEL_SUBSTRING_CASE_INSENSITIVE,
+            )
+
+        n_after_label_filter = len(item_index)
+
+        if ENABLE_MIN_MEAN_ABS_DELTA_FILTER:
+            item_index, levels, deltas = filter_items_by_min_mean_abs_delta(
+                item_index,
+                levels,
+                deltas,
+                threshold=MIN_MEAN_ABS_DELTA_THRESHOLD,
+            )
+
+        n_after_mean_filter = len(item_index)
+
+        if len(item_index) == 0:
+            print(f"[WARNING] Skipping sheet '{sheet}': no items left after item filtering.")
+            continue
+
+        ranking = rank_items(item_index, deltas)
         ranking.to_csv(OUT_DIR / f"top_{kind}.csv", index=False)
 
-        if deltas.shape[1] > 0:
-            score = np.nanmax(np.abs(deltas), axis=1)
+        if SORT_ITEMS_BY_MEAN_ABS_DELTA:
+            score = ranking.set_index("item").reindex(item_index.astype(str))["mean_abs_delta"].to_numpy(dtype=float)
+            order = np.argsort(-np.nan_to_num(score, nan=0.0))
+        elif SORT_ITEMS_BY_MAX_ABS_DELTA:
+            score = ranking.set_index("item").reindex(item_index.astype(str))["max_abs_delta"].to_numpy(dtype=float)
+            order = np.argsort(-np.nan_to_num(score, nan=0.0))
         else:
-            score = np.zeros(deltas.shape[0], dtype=float)
-
-        order = np.argsort(-np.nan_to_num(score, nan=0.0))
+            order = np.arange(len(item_index))
 
         items_sorted = [safe_label(t) for t in item_index.to_numpy(dtype=str)[order]]
         levels_sorted = levels[order, :]
@@ -672,6 +858,11 @@ def main():
         print(
             f"[OK] {sheet}: {len(items_sorted)} items plotted, "
             f"{len(scenarios)} scenarios kept, id columns = {id_cols}"
+        )
+        print(
+            f"     Items: {n_initial} before item filters "
+            f"-> {n_after_label_filter} after label substring filter "
+            f"-> {n_after_mean_filter} after mean-abs-delta filter"
         )
 
     save_zip(OUT_DIR, ZIP_NAME)

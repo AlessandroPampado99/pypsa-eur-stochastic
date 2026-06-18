@@ -20,10 +20,10 @@ remote:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "eth_results"
-  name: stochastic_network
+  prefix: "eth_results_biomass"
+  name: all
   scenarios:
-    enable: false
+    enable: true
     file: config/test_stochastic_scenarios/scenarios.yaml
   disable_progressbar: false
   shared_resources:
@@ -34,7 +34,7 @@ run:
 structured_scenario: 
 
 stochastic_scenarios:
-  enable: true
+  enable: false
   file: config/test_stochastic_scenarios/stochastic_scenarios.yaml   
   postprocess:
     plot_power_network:
@@ -44,7 +44,7 @@ stochastic_scenarios:
     plot_gas_network:
       scenarios: false
     plot_balance_map:
-      scenarios: true
+      scenarios: false
     plot_balance_map_interactive:
       scenarios: false
     make_summary:
@@ -171,6 +171,7 @@ electricity:
     - "offwind-float"
     - OCGT
     - CCGT
+    - nuclear
     StorageUnit: []
     Store:
     - battery
@@ -178,7 +179,7 @@ electricity:
     Link: []
   powerplants_filter: "(DateOut > 2025 or DateOut != DateOut) and (DateIn < 2026 or DateIn != DateIn)"
   custom_powerplants: false
-  everywhere_powerplants: []
+  everywhere_powerplants: [nuclear]
   conventional_carriers:
   - nuclear
   - oil
@@ -920,7 +921,7 @@ sector:
       ocgt: true
       allam: false
     biomass_to_methanol: true
-    biomass_to_methanol_cc: false
+    biomass_to_methanol_cc: true
   ammonia: true
   min_part_load_electrolysis: 0
   min_part_load_fischer_tropsch: 0.5
@@ -961,19 +962,19 @@ sector:
   gas_distribution_grid: true
   gas_distribution_grid_cost_factor: 1.0
   biomass_spatial: true
-  biomass_transport: false
+  biomass_transport: true
   biogas_upgrading: true
-  biogas_upgrading_cc: false
+  biogas_upgrading_cc: true
   conventional_generation:
     OCGT: gas
     CCGT: gas
   biomass_to_liquid: true
-  biomass_to_liquid_cc: false
+  biomass_to_liquid_cc: true
   electrobiofuels: true
-  biosng: false
-  biosng_cc: false
-  bioH2: false
-  municipal_solid_waste: false
+  biosng: true
+  biosng_cc: true
+  bioH2: true
+  municipal_solid_waste: true
   limit_max_growth:
     enable: false
     factor: 1.3

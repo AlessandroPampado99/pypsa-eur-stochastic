@@ -36,10 +36,10 @@ from add_electricity import sanitize_carriers
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-ROOT_DIR = Path("results/eth_results")
-NETWORK_GLOB = "networks/base_s_adm___2050__exp.nc"
+ROOT_DIR = Path("results/eth_results_nuclear")  # where to look for networks
+NETWORK_GLOB = "networks/base_s_adm___2050.nc"
 BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
-OUTPUT_EXCEL = Path("results/eth_results/csvs/analysis_networks_stochastic_energy.xlsx")
+OUTPUT_EXCEL = Path("results/eth_results_nuclear/2050/csvs/analysis_networks_stochastic_energy.xlsx")
 
 CONFIG_YAML = Path("config/test_stochastic_scenarios/config.yaml")
 PLOTTING_YAML = Path("config/plotting.default.yaml")

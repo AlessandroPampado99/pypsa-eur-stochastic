@@ -57,8 +57,8 @@ stochastic_scenarios:
       scenarios: false
 
 validation:
-  enable: false
-  config: config/validation.yaml
+  enable: true
+  config: config/prices_renewables/scenarios_validation_deterministic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#foresight
 foresight: overnight
@@ -127,7 +127,7 @@ co2_budget:
   2025: 0.648
   2030: 0.45
   2035: 0.25
-  2040: 0.1
+  2040: 0.25
   2045: 0.05
   2050: 0.0
 
@@ -171,6 +171,7 @@ electricity:
     - "offwind-float"
     - OCGT
     - CCGT
+    - nuclear
     StorageUnit: []
     Store:
     - battery

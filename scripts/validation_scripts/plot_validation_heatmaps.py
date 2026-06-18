@@ -94,14 +94,14 @@ SCENARIO_LABELS = {
     "electricity_optimistic": "EO",
     "industry_h2": "IH2",
     "land_transport_linear_ev": "LTLEV",
-    "shipping_full_methanol": "SM",
+    "shipping_full_methanol": "SFM",
     "urban_heat_full_central": "UHFC",
     "stochastic_network": "SP",
 }
 
 # Metrics
-OBJECTIVE_SCALE = 1e9
-OBJECTIVE_UNIT = "bn. €/a"
+TOTAL_COST_SCALE = 1e9
+TOTAL_COST_UNIT = "bn. €/a"
 
 LOAD_CURTAILMENT_SCALE = 1e6
 LOAD_CURTAILMENT_UNIT = "TWh"
@@ -109,10 +109,10 @@ LOAD_CURTAILMENT_UNIT = "TWh"
 RES_CURTAILMENT_SCALE = 1e6
 RES_CURTAILMENT_UNIT = "TWh"
 
-FIGSIZE = (10, 8)
+FIGSIZE = (18, 6)
 DPI = 240
 
-OBJECTIVE_FMT = "{:.0f}"
+TOTAL_COST_FMT = "{:.0f}"
 LOAD_CURTAILMENT_FMT = "{:.2f}"
 RES_CURTAILMENT_FMT = "{:.2f}"
 
@@ -133,23 +133,61 @@ RENEWABLE_CARRIERS = {
     "ror",
 }
 
-# Plot settings
-FIGSIZE = (18, 6)
-DPI = 220
-
-# Annotation formatting
-OBJECTIVE_FMT = "{:.1f}"
-LOAD_CURTAILMENT_FMT = "{:.2f}"
-RES_CURTAILMENT_FMT = "{:.2f}"
-
 # If True, missing files become NaN and are left blank in the heatmap.
 # If False, the script raises an error.
 ALLOW_MISSING_FILES = True
+
+INVALID_TEXT = "NaN"
 
 
 # =========================
 # INTERNAL HELPERS
 # =========================
+
+def _network_has_invalid_solution(n: pypsa.Network) -> bool:
+    """
+    Detect whether the exported network contains NaN values in typical solved outputs.
+
+    This is used to flag invalid validation runs that would otherwise appear
+    as zero total cost because PyPSA statistics can collapse to zero.
+    """
+    static_checks = [
+        ("generators", "p_nom_opt"),
+        ("links", "p_nom_opt"),
+        ("stores", "e_nom_opt"),
+        ("storage_units", "p_nom_opt"),
+        ("lines", "s_nom_opt"),
+        ("transformers", "s_nom_opt"),
+    ]
+
+    for comp_name, col in static_checks:
+        df = getattr(n, comp_name, None)
+        if df is None or df.empty or col not in df.columns:
+            continue
+        vals = pd.to_numeric(df[col], errors="coerce")
+        if vals.notna().any() and vals.isna().any():
+            return True
+
+    time_series_checks = [
+        ("generators_t", "p"),
+        ("links_t", "p0"),
+        ("links_t", "p1"),
+        ("stores_t", "e"),
+        ("storage_units_t", "p"),
+        ("storage_units_t", "state_of_charge"),
+    ]
+
+    for ts_name, attr in time_series_checks:
+        ts_obj = getattr(n, ts_name, None)
+        if ts_obj is None or not hasattr(ts_obj, attr):
+            continue
+        df = getattr(ts_obj, attr)
+        if df is None or df.empty:
+            continue
+        if df.notna().any().any() and df.isna().any().any():
+            return True
+
+    return False
 
 def _scenario_display_name(name: str) -> str:
     """Return the scenario label used in the plot."""
@@ -227,18 +265,24 @@ def _get_snapshot_weightings(n: pypsa.Network) -> pd.Series:
 
     raise TypeError(f"Unsupported snapshot_weightings type: {type(sw)}")
 
+def _compute_total_cost(n: pypsa.Network) -> float:
+    """
+    Compute total cost as CAPEX + OPEX from PyPSA statistics.
 
-def _get_objective_value(n: pypsa.Network) -> float:
-    """Return objective value from a solved network."""
-    if hasattr(n, "objective") and n.objective is not None:
-        return float(n.objective)
+    If the resulting total cost is zero (or numerically close to zero),
+    treat the solution as invalid and return NaN.
+    """
+    capex = float(n.statistics.capex().sum())
+    opex = float(n.statistics.opex().sum())
+    total = capex + opex
 
-    if hasattr(n, "meta") and isinstance(n.meta, dict):
-        if "objective" in n.meta:
-            return float(n.meta["objective"])
+    if not np.isfinite(total):
+        return np.nan
 
-    raise ValueError("Objective value not found in network.")
+    if np.isclose(total, 0.0, atol=1e-12, rtol=0.0):
+        return np.nan
 
+    return total
 
 def _compute_load_curtailment_from_generators(n: pypsa.Network) -> float:
     """
@@ -309,7 +353,7 @@ def _compute_renewable_curtailment(n: pypsa.Network) -> float:
 def _extract_metrics(n: pypsa.Network) -> dict[str, float]:
     """Extract all metrics from one network."""
     return {
-        "objective": _get_objective_value(n) / OBJECTIVE_SCALE,
+        "total_cost": _compute_total_cost(n) / TOTAL_COST_SCALE,
         "load_curtailment": _compute_load_curtailment_from_generators(n) / LOAD_CURTAILMENT_SCALE,
         "renewable_curtailment": _compute_renewable_curtailment(n) / RES_CURTAILMENT_SCALE,
     }
@@ -329,12 +373,23 @@ def _safe_load_network(path: Path) -> pypsa.Network | None:
 def _build_metric_matrices(
     root_dir: Path,
     scenarios: list[str],
-) -> dict[str, pd.DataFrame]:
-    """Build one matrix per metric."""
-    metric_names = ["objective", "load_curtailment", "renewable_curtailment"]
+) -> tuple[dict[str, pd.DataFrame], dict[str, pd.DataFrame]]:
+    """
+    Build one matrix per metric and one boolean mask per metric for invalid
+    existing networks.
+
+    Missing files stay as NaN in the metric matrix and False in the invalid mask.
+    Existing files with invalid metrics are marked True in the invalid mask.
+    """
+    metric_names = ["total_cost", "load_curtailment", "renewable_curtailment"]
 
     matrices = {
         m: pd.DataFrame(index=scenarios, columns=scenarios, dtype=float)
+        for m in metric_names
+    }
+
+    invalid_masks = {
+        m: pd.DataFrame(False, index=scenarios, columns=scenarios, dtype=bool)
         for m in metric_names
     }
 
@@ -347,29 +402,40 @@ def _build_metric_matrices(
             if n is None:
                 for m in metric_names:
                     matrices[m].loc[cap_source, op_source] = np.nan
+                    invalid_masks[m].loc[cap_source, op_source] = False
                 continue
 
             vals = _extract_metrics(n)
+
             for m in metric_names:
-                matrices[m].loc[cap_source, op_source] = vals[m]
+                val = vals[m]
+                matrices[m].loc[cap_source, op_source] = val
+                invalid_masks[m].loc[cap_source, op_source] = pd.isna(val)
 
-    return matrices
+    return matrices, invalid_masks
 
 
-def _format_annotation(val: float, fmt: str) -> str:
-    """Format cell annotation."""
+def _format_annotation(
+    val: float,
+    fmt: str,
+    is_invalid: bool = False,
+    invalid_text: str = "NaN",
+) -> str:
+    """Format cell annotation distinguishing invalid existing files from missing files."""
     if pd.isna(val):
-        return ""
+        return invalid_text if is_invalid else ""
     return fmt.format(val)
 
 
 def _plot_single_heatmap(
     ax,
     df: pd.DataFrame,
+    invalid_mask: pd.DataFrame,
     title: str,
     unit: str,
     cmap: str,
     fmt: str,
+    invalid_text: str = "NaN",
 ):
     """Plot one annotated heatmap with matplotlib only."""
     data = df.to_numpy(dtype=float)
@@ -426,11 +492,20 @@ def _plot_single_heatmap(
     for i in range(df.shape[0]):
         for j in range(df.shape[1]):
             val = data[i, j]
-            txt = _format_annotation(val, fmt)
+            is_invalid = bool(invalid_mask.iloc[i, j])
+            txt = _format_annotation(
+                val,
+                fmt,
+                is_invalid=is_invalid,
+                invalid_text=invalid_text,
+            )
             if txt == "":
                 continue
 
-            color = "white" if val >= threshold else "black"
+            if pd.isna(val):
+                color = "black"
+            else:
+                color = "white" if val >= threshold else "black"
             ax.text(
                 j,
                 i,
@@ -459,12 +534,12 @@ def _write_excel(matrices: dict[str, pd.DataFrame], output_excel: Path) -> None:
 def _metric_plot_settings(metric_name: str) -> dict:
     """Return plot settings for each metric."""
     settings = {
-        "objective": {
-            "title": "Objective",
-            "unit": OBJECTIVE_UNIT,
+        "total_cost": {
+            "title": "Total cost",
+            "unit": TOTAL_COST_UNIT,
             "cmap": "Reds",
-            "fmt": OBJECTIVE_FMT,
-            "filename": "validation_heatmap_objective.png",
+            "fmt": TOTAL_COST_FMT,
+            "filename": "validation_heatmap_total_cost.png",
         },
         "load_curtailment": {
             "title": "Load curtailment",
@@ -484,7 +559,12 @@ def _metric_plot_settings(metric_name: str) -> dict:
     return settings[metric_name]
 
 
-def _plot_metric_heatmap(metric_name: str, df: pd.DataFrame, output_dir: Path) -> None:
+def _plot_metric_heatmap(
+    metric_name: str,
+    df: pd.DataFrame,
+    invalid_mask: pd.DataFrame,
+    output_dir: Path,
+) -> None:
     """Create one figure per metric."""
     cfg = _metric_plot_settings(metric_name)
 
@@ -496,10 +576,12 @@ def _plot_metric_heatmap(metric_name: str, df: pd.DataFrame, output_dir: Path) -
     _plot_single_heatmap(
         ax=ax,
         df=df,
+        invalid_mask=invalid_mask,
         title=cfg["title"],
         unit=cfg["unit"],
         cmap=cfg["cmap"],
         fmt=cfg["fmt"],
+        invalid_text=INVALID_TEXT,
     )
 
     fig.savefig(output_path, dpi=DPI, bbox_inches="tight")
@@ -513,12 +595,17 @@ def main():
     for s in scenarios:
         print(f"  - {s}")
 
-    matrices = _build_metric_matrices(ROOT_DIR, scenarios)
+    matrices, invalid_masks = _build_metric_matrices(ROOT_DIR, scenarios)
 
     _write_excel(matrices, OUTPUT_EXCEL)
 
     for metric_name, df in matrices.items():
-        _plot_metric_heatmap(metric_name, df, OUTPUT_DIR)
+        _plot_metric_heatmap(
+            metric_name,
+            df,
+            invalid_masks[metric_name],
+            OUTPUT_DIR,
+        )
 
     print(f"✔ Excel written to: {OUTPUT_EXCEL}")
     print(f"✔ Figures written to: {OUTPUT_DIR}")

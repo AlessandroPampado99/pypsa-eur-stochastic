@@ -34,15 +34,15 @@ from add_electricity import sanitize_carriers
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-ROOT_DIR = Path("results/prices_and_renewables")
-NETWORK_GLOB = "networks/base_s_adm___2050.nc"
+ROOT_DIR = Path("results/prices_and_renewables")  # where to look for networks
+NETWORK_GLOB = "networks/base_s_adm___2040.nc"
 BASE_NETWORK_PATH = Path("results/prices_and_renewables/base/networks/base_s_adm___2040.nc")
-OUTPUT_EXCEL = Path("results/prices_and_renewables/2040/csvs/analysis_networks_powers.xlsx")
+OUTPUT_EXCEL = Path("results/prices_and_renewables/2040/csvs/analysis_networks_power.xlsx")
 
-CONFIG_YAML = Path("config/prices_renewables/config_2040.yaml")
+CONFIG_YAML = Path("config/prices_renewables/config.yaml")
 PLOTTING_YAML = Path("config/plotting.default.yaml")
 
-EXCLUDED_SCENARIOS = {"base", "stochastic_network"}
+EXCLUDED_SCENARIOS = {"base"}
 
 SCENARIO_NAME_MODE = "folder"
 

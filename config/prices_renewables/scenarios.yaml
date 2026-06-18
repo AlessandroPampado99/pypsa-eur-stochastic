@@ -91,7 +91,7 @@ pmaxpu_solar_battery_0.8:
         - component: Generator
           attribute: p_max_pu
           target: auto
-          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          carrier: ["solar", "solar-hsat", "solar rooftop"]
           operation: scale
           value: 0.8
         - component: Store
@@ -109,7 +109,7 @@ pmaxpu_solar_battery_0.5:
         - component: Generator
           attribute: p_max_pu
           target: auto
-          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          carrier: ["solar", "solar-hsat", "solar rooftop"]
           operation: scale
           value: 0.5
         - component: Store
@@ -127,7 +127,7 @@ pmaxpu_solar_battery_0.2:
         - component: Generator
           attribute: p_max_pu
           target: auto
-          carrier: ["solar", "solar-hsat", "solar-rooftop"]
+          carrier: ["solar", "solar-hsat", "solar rooftop"]
           operation: scale
           value: 0.2
         - component: Store

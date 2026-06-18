@@ -112,8 +112,11 @@ plotting:
     - urban_central_heat
     AC:
       cmap: Greens
-      vmin:
-      vmax:
+      show_legend: true
+      carrier_legend_fontsize: 8
+      carrier_legend_title_fontsize: 10.0
+      vmin: 0
+      vmax: 90
       region_unit: €/MWh
       branch_color: darkseagreen
       unit: TWh
@@ -144,8 +147,8 @@ plotting:
       branch_sizes:
     co2_stored:
       cmap: Purples
-      vmin:
-      vmax:
+      vmin: -405
+      vmax: 170
       region_unit: €/t_${CO_2}$
       branch_color: orange
       unit: Mt
@@ -160,11 +163,11 @@ plotting:
       - 5
       - 2
     gas:
-      cmap: Oranges
-      vmin:
-      vmax:
+      cmap: Greys
+      vmin: -22
+      vmax: 18
       region_unit: €/MWh
-      branch_color: darkred
+      branch_color: yellow
       unit: TWh
       unit_conversion: 1_000_000
       bus_factor: 0.002
@@ -178,8 +181,8 @@ plotting:
       - 50
     H2:
       cmap: Blues
-      vmin:
-      vmax:
+      vmin: 0
+      vmax: 125
       region_unit: €/MWh
       branch_color: pink
       unit: TWh
@@ -240,8 +243,8 @@ plotting:
       branch_sizes:
     urban_central_heat:
       cmap: Oranges
-      vmin:
-      vmax:
+      vmin: -13
+      vmax: 47
       region_unit: €/MWh
       branch_color: darkred
       unit: TWh
