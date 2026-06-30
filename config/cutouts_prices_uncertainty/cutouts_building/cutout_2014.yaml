@@ -1,0 +1,44 @@
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
+run:
+  prefix: ""
+  name: ""
+  scenarios:
+    enable: false
+    file: config/scenarios.yaml
+  disable_progressbar: false
+  shared_resources:
+    policy: false
+    exclude: []
+  use_shadow_directory: false
+
+  # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#atlite
+atlite:
+  default_cutout: "europe-2014-era5"
+  nprocesses: 16
+  show_progress: true
+  cutouts:
+    "europe-2014-era5":
+      module: era5
+      x:
+      - -12.0
+      - 42.0
+      'y':
+      - 33.0
+      - 72.0
+      dx: 0.3
+      dy: 0.3
+      time:
+      - '2014'
+      - '2014'
+      chunks:
+        time: 500
+      prepare_kwargs:
+        features: []
+        monthly_requests: true
+        tmpdir: ./cutouts_tmp/
+
+data:
+  cutout:
+    source: build
+    folder: data/cutout
+

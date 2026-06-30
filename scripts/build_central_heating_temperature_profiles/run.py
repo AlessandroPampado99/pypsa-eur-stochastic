@@ -39,6 +39,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[2]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import get_snapshots, set_scenario_config
 from scripts.build_central_heating_temperature_profiles.central_heating_temperature_approximator import (
     CentralHeatingTemperatureApproximator,
@@ -192,9 +198,10 @@ if __name__ == "__main__":
         from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_cop_profiles",
-            clusters=48,
+            "build_central_heating_temperature_profiles",
+            clusters=50,
             planning_horizons="2050",
+            configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"]
         )
 
     set_scenario_config(snakemake)

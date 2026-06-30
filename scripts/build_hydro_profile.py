@@ -25,6 +25,12 @@ Outputs
 
 import logging
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import country_converter as coco
 import geopandas as gpd
 import pandas as pd
@@ -147,7 +153,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_hydro_profile")
+        snakemake = mock_snakemake("build_hydro_profile", configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"])
     configure_logging(snakemake)
     set_scenario_config(snakemake)
 

@@ -190,6 +190,10 @@ rule build_shapes:
     script:
         scripts("build_shapes.py")
 
+from pathlib import Path
+
+# print("DEBUG CUTOUT_DATASET =", CUTOUT_DATASET)
+# print("DEBUG config data cutout =", config["data"]["cutout"])
 
 if CUTOUT_DATASET["source"] in ["build"]:
 
@@ -199,7 +203,7 @@ if CUTOUT_DATASET["source"] in ["build"]:
         params:
             cutouts=config_provider("atlite", "cutouts"),
         output:
-            cutout=CUTOUT_DATASET["folder"] / "{cutout}.nc",
+            cutout=Path(CUTOUT_DATASET["folder"]) / "{cutout}.nc",
         log:
             "logs/build_cutout/{cutout}.log",
         benchmark:

@@ -15,6 +15,12 @@ import pandas as pd
 import pypsa
 from pypsa.plot import add_legend_circles, add_legend_lines, add_legend_patches
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import configure_logging, rename_techs, retry, set_scenario_config
 from scripts.make_summary import assign_locations
 from scripts.plot_summary import preferred_order
@@ -242,8 +248,9 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             "plot_power_network",
             opts="",
-            clusters="37",
-            sector_opts="4380H-T-H-B-I-A-dist1",
+            clusters="adm",
+            sector_opts="",
+            configfile="config/demand_uncertainty/config_base.yaml",
         )
 
     configure_logging(snakemake)

@@ -36,15 +36,15 @@ from add_electricity import sanitize_carriers
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-ROOT_DIR = Path("results/eth_results_nuclear")  # where to look for networks
+ROOT_DIR = Path("results/demand_uncertainty_")  # where to look for networks
 NETWORK_GLOB = "networks/base_s_adm___2050.nc"
-BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
-OUTPUT_EXCEL = Path("results/eth_results_nuclear/2050/csvs/analysis_networks_stochastic_energy.xlsx")
+BASE_NETWORK_PATH = Path("/home/pampado/stochastic/pypsa-eur/results/demand_uncertainty_/BASE/networks/base_s_adm___2050.nc")
+OUTPUT_EXCEL = Path("results/demand_uncertainty_/analysis_output/energy_flows.xlsx")
 
-CONFIG_YAML = Path("config/test_stochastic_scenarios/config.yaml")
+CONFIG_YAML = Path("config/demand_uncertainty/config_base.yaml")
 PLOTTING_YAML = Path("config/plotting.default.yaml")
 
-EXCLUDED_SCENARIOS = {"base"}
+EXCLUDED_SCENARIOS = {"BASE"}
 
 SCENARIO_NAME_MODE = "folder"
 

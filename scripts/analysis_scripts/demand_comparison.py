@@ -41,10 +41,10 @@ import pypsa
 
 # Folder containing scenario subfolders:
 # results/<PREFIX>/<scenario>/networks/*.nc
-PREFIX_DIR = Path("results/prices_and_renewables")  # e.g. "results/prices_and_renewables"
+PREFIX_DIR = Path("results/demand_uncertainty_")  # e.g. "results/prices_and_renewables"
 
 # Choose the base network explicitly (can be anywhere)
-BASE_NETWORK_PATH = Path("results/eth_results/base/networks/base_s_adm___2050.nc")
+BASE_NETWORK_PATH = Path("/home/pampado/stochastic/pypsa-eur/results/demand_uncertainty_/BASE/networks/base_s_adm___2050.nc")
 BASE_NAME = "__BASE__"  # column name for base in outputs
 
 # If each scenario has multiple .nc in networks/, constrain which one to pick.
@@ -55,7 +55,7 @@ BASE_NAME = "__BASE__"  # column name for base in outputs
 NETWORK_PICKER: Optional[str] = None
 
 # Scenario folders to exclude from the batch analysis
-EXCLUDED_SCENARIOS = {"base", "stochastic_network"}
+EXCLUDED_SCENARIOS = {"BASE", "stochastic_network"}
 # Example:
 # EXCLUDED_SCENARIOS = {"base", "debug_case"}
 
@@ -64,7 +64,7 @@ GroupByField = Literal["carrier", "bus", "load_name"]
 GROUPBY: GroupByField = "carrier"
 
 # Output folder (will contain three Excel files)
-OUT_DIR = Path("results/prices_and_renewables/postprocess_demand_compare")
+OUT_DIR = Path("results/demand_uncertainty_/postprocess_demand_compare")
 
 # File name prefix for exported Excel files
 OUT_STEM = "demand_compare"

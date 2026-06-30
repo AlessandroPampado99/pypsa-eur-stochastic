@@ -20,6 +20,12 @@ import numpy as np
 import xarray as xr
 from dask.distributed import Client, LocalCluster
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import (
     configure_logging,
     get_snapshots,
@@ -35,7 +41,8 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_temperature_profiles",
-            clusters=48,
+            clusters=50,
+            configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"],
         )
     configure_logging(snakemake)
     set_scenario_config(snakemake)
@@ -46,7 +53,18 @@ if __name__ == "__main__":
 
     time = get_snapshots(snakemake.params.snapshots, snakemake.params.drop_leap_day)
 
+    print("snapshots param:", snakemake.params.snapshots)
+    print("drop_leap_day:", snakemake.params.drop_leap_day)
+    print("n snapshots:", len(time))
+    print("first snapshots:", time[:5])
+    print("last snapshots:", time[-5:])
+    print("cutout path:", snakemake.input.cutout)
+
     cutout = load_cutout(snakemake.input.cutout, time=time)
+
+    print("cutout time size:", cutout.data.sizes.get("time"))
+    print("cutout first times:", cutout.data.time.values[:5])
+    print("cutout last times:", cutout.data.time.values[-5:])
 
     clustered_regions = (
         gpd.read_file(snakemake.input.regions_onshore).set_index("name").buffer(0)

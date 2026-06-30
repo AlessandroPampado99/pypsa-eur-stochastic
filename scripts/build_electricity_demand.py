@@ -15,6 +15,12 @@ import numpy as np
 import pandas as pd
 from pandas import Timedelta as Delta
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import configure_logging, get_snapshots, set_scenario_config
 
 logger = logging.getLogger(__name__)
@@ -223,7 +229,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_electricity_demand")
+        snakemake = mock_snakemake("build_electricity_demand", configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"])
 
     configure_logging(snakemake)
     set_scenario_config(snakemake)
@@ -231,6 +237,15 @@ if __name__ == "__main__":
     snapshots = get_snapshots(
         snakemake.params.snapshots, snakemake.params.drop_leap_day
     )
+
+    fixed_year = snakemake.params["load"].get("fixed_year", False)
+
+    if fixed_year:
+        data_snapshots = pd.DatetimeIndex(
+            [t.replace(year=int(fixed_year)) for t in snapshots]
+        )
+    else:
+        data_snapshots = snapshots
 
     # supported year ranges
     years = slice("2010", "2025")
@@ -311,7 +326,7 @@ if __name__ == "__main__":
         synthetic_load = pd.read_csv(fn, index_col=0, parse_dates=True)
         # UA, MD, XK, CY, MT do not appear in synthetic load data
         countries = list(set(countries) - set(["UA", "MD", "XK", "CY", "MT"]))
-        synthetic_load = synthetic_load.loc[snapshots, countries]
+        synthetic_load = synthetic_load.loc[data_snapshots, countries]
         load = load.combine_first(synthetic_load)
 
     assert not load.isna().any().any(), (
@@ -320,17 +335,10 @@ if __name__ == "__main__":
         "for implementing the needed load data modifications."
     )
 
-    fixed_year = snakemake.params["load"].get("fixed_year", False)
-    years = (
-        slice(str(fixed_year), str(fixed_year))
-        if fixed_year
-        else slice(snapshots[0], snapshots[-1])
-    )
+    load = load.loc[data_snapshots[0]:data_snapshots[-1]].reindex(index=data_snapshots)
 
-    load = load.loc[years].reindex(index=snapshots)
-
-    # need to reindex load time series to target year
+    # Reindex load time series back to the target model snapshots.
     if fixed_year:
-        load.index = load.index.map(lambda t: t.replace(year=snapshots.year[0]))
+        load.index = snapshots
 
     load.to_csv(snakemake.output[0])

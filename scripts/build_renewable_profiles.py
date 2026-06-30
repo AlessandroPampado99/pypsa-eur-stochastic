@@ -99,6 +99,12 @@ import xarray as xr
 from atlite.gis import ExclusionContainer
 from dask.distributed import Client
 
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]  # points to /dati/pampado/pypsa-eur
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts._helpers import (
     configure_logging,
     get_snapshots,
@@ -115,7 +121,7 @@ if __name__ == "__main__":
         from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_renewable_profiles", clusters=38, technology="offwind-ac"
+            "build_renewable_profiles", clusters=50, technology="offwind-ac", configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"] 
         )
     configure_logging(snakemake)
     set_scenario_config(snakemake)

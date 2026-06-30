@@ -115,8 +115,8 @@ plotting:
       show_legend: true
       carrier_legend_fontsize: 8
       carrier_legend_title_fontsize: 10.0
-      vmin: 0
-      vmax: 90
+      vmin: #0
+      vmax: #90
       region_unit: €/MWh
       branch_color: darkseagreen
       unit: TWh
@@ -147,8 +147,8 @@ plotting:
       branch_sizes:
     co2_stored:
       cmap: Purples
-      vmin: -405
-      vmax: 170
+      vmin: #-405
+      vmax: #170
       region_unit: €/t_${CO_2}$
       branch_color: orange
       unit: Mt
@@ -164,8 +164,8 @@ plotting:
       - 2
     gas:
       cmap: Greys
-      vmin: -22
-      vmax: 18
+      vmin: #-22
+      vmax: #18
       region_unit: €/MWh
       branch_color: yellow
       unit: TWh
@@ -181,8 +181,8 @@ plotting:
       - 50
     H2:
       cmap: Blues
-      vmin: 0
-      vmax: 125
+      vmin: #0
+      vmax: #125
       region_unit: €/MWh
       branch_color: pink
       unit: TWh
@@ -243,8 +243,8 @@ plotting:
       branch_sizes:
     urban_central_heat:
       cmap: Oranges
-      vmin: -13
-      vmax: 47
+      vmin: #-13
+      vmax: #47
       region_unit: €/MWh
       branch_color: darkred
       unit: TWh
@@ -448,6 +448,7 @@ plotting:
     CCGT: '#a85522'
     CCGT marginal: '#a85522'
     allam: '#B98F76'
+    allam gas: "#8B0000"
     gas for industry co2 to atmosphere: '#692e0a'
     gas for industry co2 to stored: '#8a3400'
     gas for industry: '#853403'
