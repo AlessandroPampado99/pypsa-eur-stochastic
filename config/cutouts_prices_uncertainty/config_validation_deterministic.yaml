@@ -3,13 +3,17 @@ run:
   prefix: "cutouts_det_capexp_"
   name: all
   scenarios:
-    enable: true
+    enable: false
     file: config/cutouts_prices_uncertainty/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+validation:
+  enable: true
+  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml 
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -197,4 +201,14 @@ clustering:
     resolution_sector: 3H
 
 solving:
-  load_shedding: true
+  options:
+    load_shedding: true
+    dispatch_exclude_carriers:
+      - co2 stored
+      - co2 sequestered
+      - co2 atmosphere
+      - oil primary
+      - gas
+      
+
+    validation_missing_capacity_policy: keep_extendable

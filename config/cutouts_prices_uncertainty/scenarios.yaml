@@ -1,0 +1,789 @@
+# -*- coding: utf-8 -*-
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
+#
+# SPDX-License-Identifier: MIT
+
+# This file is used to define the scenarios that are run by snakemake. Each entry on the first level is a scenario. Each scenario can contain configuration overrides with respect to the config/config.yaml settings.
+#
+# Example
+#
+# custom-scenario: # name of the scenario
+#   electricity:
+#       renewable_carriers: [wind, solar] # override the list of renewable carriers
+
+# Scenarios for capacity expansion cutouts and prices uncertainty.
+
+d_2000:
+  snapshots:
+    start: "2000-01-01"
+    end: "2001-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2000-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2000-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2000'
+        - '2000'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2001:
+  snapshots:
+    start: "2001-01-01"
+    end: "2002-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2001-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2001-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2001'
+        - '2001'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2002:
+  snapshots:
+    start: "2002-01-01"
+    end: "2003-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2002-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2002-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2002'
+        - '2002'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2003:
+  snapshots:
+    start: "2003-01-01"
+    end: "2004-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2003-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2003-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2003'
+        - '2003'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2004:
+  snapshots:
+    start: "2004-01-01"
+    end: "2005-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2004-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2004-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2004'
+        - '2004'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2005:
+  snapshots:
+    start: "2005-01-01"
+    end: "2006-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2005-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2005-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2005'
+        - '2005'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2006:
+  snapshots:
+    start: "2006-01-01"
+    end: "2007-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2006-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2006-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2006'
+        - '2006'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2007:
+  snapshots:
+    start: "2007-01-01"
+    end: "2008-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2007-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2007-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2007'
+        - '2007'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2008:
+  snapshots:
+    start: "2008-01-01"
+    end: "2009-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2008-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2008-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2008'
+        - '2008'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2009:
+  snapshots:
+    start: "2009-01-01"
+    end: "2010-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2009-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2009-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2009'
+        - '2009'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2010:
+  snapshots:
+    start: "2010-01-01"
+    end: "2011-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2010-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2010-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2010'
+        - '2010'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2011:
+  snapshots:
+    start: "2011-01-01"
+    end: "2012-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2011-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2011-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2011'
+        - '2011'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2012:
+  snapshots:
+    start: "2012-01-01"
+    end: "2013-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2012-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2012-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2012'
+        - '2012'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2013:
+  snapshots:
+    start: "2013-01-01"
+    end: "2014-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2013-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2013-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2013'
+        - '2013'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2014:
+  snapshots:
+    start: "2014-01-01"
+    end: "2015-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2014-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2014-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2014'
+        - '2014'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2015:
+  snapshots:
+    start: "2015-01-01"
+    end: "2016-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2015-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2015-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2015'
+        - '2015'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2016:
+  snapshots:
+    start: "2016-01-01"
+    end: "2017-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2016-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2016-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2016'
+        - '2016'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2017:
+  snapshots:
+    start: "2017-01-01"
+    end: "2018-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2017-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2017-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2017'
+        - '2017'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2018:
+  snapshots:
+    start: "2018-01-01"
+    end: "2019-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2018-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2018-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2018'
+        - '2018'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2019:
+  snapshots:
+    start: "2019-01-01"
+    end: "2020-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2019-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2019-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2019'
+        - '2019'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2020:
+  snapshots:
+    start: "2020-01-01"
+    end: "2021-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2020-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2020-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2020'
+        - '2020'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2021:
+  snapshots:
+    start: "2021-01-01"
+    end: "2022-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2021-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2021-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2021'
+        - '2021'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2022:
+  snapshots:
+    start: "2022-01-01"
+    end: "2023-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2022-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2022-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2022'
+        - '2022'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2023:
+  snapshots:
+    start: "2023-01-01"
+    end: "2024-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2023-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2023-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2023'
+        - '2023'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_2024:
+  snapshots:
+    start: "2024-01-01"
+    end: "2025-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2024-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2024-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2024'
+        - '2024'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/

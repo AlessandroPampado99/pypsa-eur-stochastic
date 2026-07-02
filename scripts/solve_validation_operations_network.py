@@ -147,6 +147,137 @@ def load_capacity_source_network(path: str) -> pypsa.Network:
 
     return n
 
+
+def log_snapshot_compatibility(
+    n_target: pypsa.Network,
+    n_source: pypsa.Network,
+) -> None:
+    """
+    Log whether target and source networks use the same snapshot index.
+
+    Different snapshot labels are acceptable for validation because only static
+    nominal capacities are copied from the source network. The target network
+    keeps its own time series and snapshot weightings for the dispatch solve.
+    """
+    target_snapshots = n_target.snapshots
+    source_snapshots = n_source.snapshots
+
+    same_index = target_snapshots.equals(source_snapshots)
+    same_length = len(target_snapshots) == len(source_snapshots)
+
+    if same_index:
+        logger.info(
+            "Operation and capacity-source networks have identical snapshot indexes "
+            "(%s snapshots).",
+            len(target_snapshots),
+        )
+        return
+
+    logger.warning(
+        "Operation and capacity-source networks have different snapshot indexes. "
+        "This is expected for cross-cutout validation/regret matrices because only "
+        "static nominal capacities are copied. Dispatch time series and snapshot "
+        "weightings are taken from the operation network. "
+        "same_length=%s, operation_snapshots=%s, capacity_snapshots=%s.",
+        same_length,
+        len(target_snapshots),
+        len(source_snapshots),
+    )
+
+    if len(target_snapshots) > 0 and len(source_snapshots) > 0:
+        logger.info(
+            "Operation snapshot range: %s -> %s; capacity-source snapshot range: %s -> %s.",
+            target_snapshots[0],
+            target_snapshots[-1],
+            source_snapshots[0],
+            source_snapshots[-1],
+        )
+
+    target_weight_sum = n_target.snapshot_weightings.sum(numeric_only=True)
+    source_weight_sum = n_source.snapshot_weightings.sum(numeric_only=True)
+    logger.info(
+        "Snapshot weighting sums: operation=%s; capacity-source=%s.",
+        target_weight_sum.to_dict(),
+        source_weight_sum.to_dict(),
+    )
+
+def build_validation_solve_options(snakemake) -> dict:
+    """
+    Return solve options for the validation run.
+
+    PyPSA-Eur's prepare_network() reads load_shedding from solve_opts.
+    In the standard config this should live under solving.options, but this
+    helper also supports the legacy/accidental placement under solving.
+    """
+    solving_cfg = snakemake.params.solving
+    solve_opts = dict((solving_cfg.get("options", {}) or {}))
+
+    if "load_shedding" not in solve_opts and "load_shedding" in solving_cfg:
+        solve_opts["load_shedding"] = solving_cfg["load_shedding"]
+        logger.warning(
+            "Found 'load_shedding' under 'solving' instead of 'solving.options'. "
+            "Using it for validation, but consider moving it under solving.options."
+        )
+
+    return solve_opts
+
+
+def ensure_load_shedding_generators(
+    n: pypsa.Network,
+    solve_opts: dict,
+) -> None:
+    """
+    Ensure that load-shedding generators are present before model creation.
+
+    prepare_network() normally adds them when solve_opts['load_shedding'] is set.
+    This function is a safety net for validation runs: if load shedding is enabled
+    but no load-shedding generators are present, add one generator per bus using
+    the same convention as scripts.solve_network.prepare_network().
+    """
+    load_shedding = solve_opts.get("load_shedding", False)
+
+    if not load_shedding:
+        logger.info("Load shedding is disabled in validation solve options.")
+        return
+
+    if "carrier" in n.generators.columns:
+        existing_load_gens = n.generators.index[n.generators["carrier"].eq("load")]
+    else:
+        existing_load_gens = pd.Index([])
+
+    if len(existing_load_gens) > 0:
+        logger.info(
+            "Load shedding is enabled and %s load-shedding generators are already present. "
+            "No manual generators added.",
+            len(existing_load_gens),
+        )
+        return
+
+    if isinstance(load_shedding, bool):
+        load_shedding = 1e5  # Eur/MWh
+
+    if "load" not in n.carriers.index:
+        n.add("Carrier", "load")
+
+    buses_i = n.buses.index
+
+    n.add(
+        "Generator",
+        buses_i,
+        " load",
+        bus=buses_i,
+        carrier="load",
+        marginal_cost=load_shedding,
+        p_nom=np.inf,
+    )
+
+    logger.warning(
+        "Load shedding was enabled but no load-shedding generators were found. "
+        "Added %s generators manually with marginal_cost=%s EUR/MWh.",
+        len(buses_i),
+        load_shedding,
+    )
+
 def copy_capacities_from_source_network(
     n_target: pypsa.Network,
     n_source: pypsa.Network,
@@ -275,6 +406,9 @@ def copy_capacities_from_source_network(
                 continue
 
             df_target.at[asset, attr] = source_value
+            if opt_col in df_target.columns:
+                # Keep exported solved nominal capacity columns consistent with the fixed nominal value.
+                df_target.at[asset, opt_col] = source_value
             df_target.at[asset, extendable_col] = False
             fixed_assets.append(asset)
 
@@ -369,22 +503,22 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "solve_validation_operations_network",
-            configfiles=["config/test_stochastic_scenarios/config.yaml"],
+            configfiles=["config/cutouts_prices_uncertainty/config_validation_deterministic.yaml"],
             clusters="adm",
             opts="",
             sector_opts="",
             planning_horizons="2050",
-            cap_source="stochastic_network",
-            op_source="agriculture_full_electric",
-            run_prefix="eth_results"
+            cap_source="d_2000",
+            op_source="d_2001",
+            run_prefix="cutouts_det_capexp_",
         )
 
     configure_logging(snakemake)
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
-    solve_opts = snakemake.params.options
-    cf_solving = snakemake.params.solving["options"]
+    solve_opts = build_validation_solve_options(snakemake)
+    cf_solving = solve_opts
 
     np.random.seed(solve_opts.get("seed", 123))
 
@@ -392,6 +526,7 @@ if __name__ == "__main__":
 
     n_operation = pypsa.Network(snakemake.input.operation_network)
     n_capacity = load_capacity_source_network(snakemake.input.capacity_network)
+    log_snapshot_compatibility(n_operation, n_capacity)
 
     dispatch_exclude_carriers = cf_solving.get("dispatch_exclude_carriers", [])
     dispatch_exclude_components = cf_solving.get("dispatch_exclude_components", [])
@@ -425,12 +560,14 @@ if __name__ == "__main__":
 
     prepare_network(
         n_operation,
-        solve_opts=snakemake.params.solving["options"],
+        solve_opts=solve_opts,
         foresight=snakemake.params.foresight,
         planning_horizons=planning_horizons,
         co2_sequestration_potential=snakemake.params["co2_sequestration_potential"],
         limit_max_growth=snakemake.params.get("sector", {}).get("limit_max_growth"),
     )
+
+    ensure_load_shedding_generators(n_operation, solve_opts)
 
     rolling_horizon = cf_solving.get("rolling_horizon", False)
     mode = "rolling_horizon" if rolling_horizon else "single"
