@@ -800,6 +800,14 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
+  aviation_methanol_kerosene_share:
+    2020: 0
+    2025: 0
+    2030: 0
+    2035: 0
+    2040: 0
+    2045: 0
+    2050: 0
   HVC_demand_factor: 1.0
   time_dep_hp_cop: true
   heat_pump_sink_T_individual_heating: 55.0

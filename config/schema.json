@@ -4394,6 +4394,13 @@
           "description": "The proportion of demand for aviation compared to today's consumption.",
           "type": "number"
         },
+        "aviation_methanol_kerosene_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "The share of aviation kerosene demand served by methanol-derived kerosene in a given year.",
+          "type": "object"
+        },
         "HVC_demand_factor": {
           "default": 1.0,
           "description": "The proportion of demand for high-value chemicals compared to today's consumption.",
@@ -10659,6 +10666,13 @@
           "default": 1.0,
           "description": "The proportion of demand for aviation compared to today's consumption.",
           "type": "number"
+        },
+        "aviation_methanol_kerosene_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "The share of aviation kerosene demand served by methanol-derived kerosene in a given year.",
+          "type": "object"
         },
         "HVC_demand_factor": {
           "default": 1.0,

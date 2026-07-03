@@ -182,6 +182,7 @@ def define_spatial(nodes, options):
         spatial.oil.naphtha = nodes + " naphtha for industry"
         spatial.oil.non_sequestered_hvc = nodes + " non-sequestered HVC"
         spatial.oil.kerosene = nodes + " kerosene for aviation"
+        spatial.oil.methanol_kerosene = nodes + " methanol kerosene for aviation"
         spatial.oil.shipping = nodes + " shipping oil"
         spatial.oil.agriculture_machinery = nodes + " agriculture machinery oil"
         spatial.oil.land_transport = nodes + " land transport oil"
@@ -190,6 +191,7 @@ def define_spatial(nodes, options):
         spatial.oil.naphtha = ["EU naphtha for industry"]
         spatial.oil.non_sequestered_hvc = ["EU non-sequestered HVC"]
         spatial.oil.kerosene = ["EU kerosene for aviation"]
+        spatial.oil.methanol_kerosene = ["EU methanol kerosene for aviation"]
         spatial.oil.shipping = ["EU shipping oil"]
         spatial.oil.agriculture_machinery = ["EU agriculture machinery oil"]
         spatial.oil.land_transport = ["EU land transport oil"]
@@ -5137,6 +5139,7 @@ def add_aviation(
     pop_weighted_energy_totals: pd.DataFrame,
     options: dict,
     spatial: SimpleNamespace,
+    investment_year: int,
 ) -> None:
     logger.info("Add aviation")
 
@@ -5150,16 +5153,33 @@ def add_aviation(
         )
 
     all_aviation = ["total international aviation", "total domestic aviation"]
+    methanol_kerosene_share = get(
+        options["aviation_methanol_kerosene_share"], investment_year
+    )
+    kerosene_share = 1 - methanol_kerosene_share
+    if methanol_kerosene_share and not options["methanol"]["methanol_to_kerosene"]:
+        raise ValueError(
+            "sector.methanol.methanol_to_kerosene must be true when "
+            "sector.aviation_methanol_kerosene_share contains non-zero values."
+        )
 
-    p_set = (
+    aviation_demand = (
         demand_factor
         * pop_weighted_energy_totals.loc[nodes, all_aviation].sum(axis=1)
         * 1e6
         / nhours
-    ).rename(lambda x: x + " kerosene for aviation")
+    )
+
+    p_set = (kerosene_share * aviation_demand).rename(
+        lambda x: x + " kerosene for aviation"
+    )
+    p_set_methanol = (methanol_kerosene_share * aviation_demand).rename(
+        lambda x: x + " methanol kerosene for aviation"
+    )
 
     if not options["regional_oil_demand"]:
         p_set = p_set.sum()
+        p_set_methanol = p_set_methanol.sum()
 
     n.add(
         "Bus",
@@ -5177,6 +5197,23 @@ def add_aviation(
         p_set=p_set,
     )
 
+    if methanol_kerosene_share:
+        n.add(
+            "Bus",
+            spatial.oil.methanol_kerosene,
+            location=spatial.oil.demand_locations,
+            carrier="methanol kerosene for aviation",
+            unit="MWh_LHV",
+        )
+
+        n.add(
+            "Load",
+            spatial.oil.methanol_kerosene,
+            bus=spatial.oil.methanol_kerosene,
+            carrier="methanol kerosene for aviation",
+            p_set=p_set_methanol,
+        )
+
     n.add(
         "Link",
         spatial.oil.kerosene,
@@ -5193,6 +5230,13 @@ def add_aviation(
 
         logger.info(f"Adding {tech}.")
 
+        if not methanol_kerosene_share:
+            logger.warning(
+                "Skipping methanol-to-kerosene links because "
+                "`sector.aviation_methanol_kerosene_share` is zero."
+            )
+            return
+
         capital_cost = costs.at[tech, "capital_cost"] / costs.at[tech, "methanol-input"]
 
         n.add(
@@ -5203,7 +5247,7 @@ def add_aviation(
             capital_cost=capital_cost,
             marginal_cost=costs.at[tech, "VOM"] / costs.at[tech, "methanol-input"],
             bus0=spatial.methanol.nodes,
-            bus1=spatial.oil.kerosene,
+            bus1=spatial.oil.methanol_kerosene,
             bus2=spatial.h2.nodes,
             bus3="co2 atmosphere",
             efficiency=1 / costs.at[tech, "methanol-input"],
@@ -6473,6 +6517,7 @@ if __name__ == "__main__":
             pop_weighted_energy_totals=pop_weighted_energy_totals,
             options=options,
             spatial=spatial,
+            investment_year=investment_year,
         )
 
     if options["heating"]:

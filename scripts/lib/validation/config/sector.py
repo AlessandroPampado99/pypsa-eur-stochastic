@@ -10,7 +10,7 @@ See docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from scripts.lib.validation.config._base import ConfigModel
 
@@ -583,10 +583,36 @@ class SectorConfig(BaseModel):
         1.0,
         description="The proportion of demand for aviation compared to today's consumption.",
     )
+    aviation_methanol_kerosene_share: dict[int, float] = Field(
+        default_factory=lambda: {
+            2020: 0,
+            2025: 0,
+            2030: 0,
+            2035: 0,
+            2040: 0,
+            2045: 0,
+            2050: 0,
+        },
+        description="The share of aviation kerosene demand served by methanol-derived kerosene in a given year.",
+    )
     HVC_demand_factor: float = Field(
         1.0,
         description="The proportion of demand for high-value chemicals compared to today's consumption.",
     )
+
+    @field_validator("aviation_methanol_kerosene_share")
+    @classmethod
+    def validate_aviation_methanol_kerosene_share(
+        cls, shares: dict[int, float]
+    ) -> dict[int, float]:
+        if invalid := {
+            year: share for year, share in shares.items() if not 0 <= share <= 1
+        }:
+            raise ValueError(
+                "All aviation_methanol_kerosene_share values must be between 0 and 1; "
+                f"got {invalid}."
+            )
+        return shares
 
     time_dep_hp_cop: bool = Field(
         True,
@@ -910,3 +936,15 @@ class SectorConfig(BaseModel):
     imports: _ImportsConfig = Field(
         default_factory=_ImportsConfig, description="Imports configuration."
     )
+
+    @model_validator(mode="after")
+    def validate_aviation_methanol_kerosene_enabled(self) -> "SectorConfig":
+        if (
+            any(self.aviation_methanol_kerosene_share.values())
+            and not self.methanol.methanol_to_kerosene
+        ):
+            raise ValueError(
+                "sector.methanol.methanol_to_kerosene must be true when "
+                "sector.aviation_methanol_kerosene_share contains non-zero values."
+            )
+        return self
