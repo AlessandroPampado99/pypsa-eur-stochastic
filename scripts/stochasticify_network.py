@@ -433,6 +433,18 @@ def _load_annual_energy_twh(
     )
 
 
+def _load_has_positive_energy(
+    n: pypsa.Network,
+    load_name: str,
+    scenario: str | None,
+    weighting: str,
+) -> bool:
+    """Return whether an existing load has positive annual energy."""
+    return _load_annual_energy_twh(
+        n, load_name, scenario=scenario, weighting=weighting
+    ) > 0.0
+
+
 def _select_load_names(n: pypsa.Network, selector: Mapping[str, Any]) -> list[str]:
     """Select load names using the generic component selector."""
     return _select_names_from_component(n, "loads", selector)
@@ -1107,7 +1119,6 @@ def _normalize_transition_entry(entry: Mapping[str, Any], entry_name: str) -> di
         "strict_target_available",
         "create_missing_load",
         "copy_source_bus",
-        "allow_flat_fallback",
         "cop",
     }
     for key in transform_keys:
@@ -1252,6 +1263,13 @@ def _apply_shift_like_entry(
             target_carrier,
         )
         _ensure_target_load(n, source_name, target_name, target_carrier, transformation)
+        if not _load_has_positive_energy(n, target_name, scenario, weighting):
+            logger.warning(
+                "Target load '%s' has zero annual energy; leaving it and source '%s' unchanged.",
+                target_name,
+                source_name,
+            )
+            continue
 
         reduction = _reduce_load_energy(
             n, source_name, share_delta, scenario, weighting, nonneg
@@ -1282,7 +1300,7 @@ def _apply_shift_like_entry(
         )
 
     return {
-        "applied_delta_twh": delta_twh,
+        "applied_delta_twh": sum(x["source_delta_twh"] for x in affected),
         "transformed_target_twh": transformed,
         "affected_loads": affected,
     }
@@ -1322,12 +1340,17 @@ def _apply_reverse_shift_entry(
             if transformation.get("strict_target_available", False):
                 raise KeyError(f"Target load '{target_name}' for reverse_shift is missing.")
             continue
+        source_energy = max(_load_annual_energy_twh(n, source_name, scenario, weighting), 0.0)
+        if source_energy <= 0.0:
+            logger.warning(
+                "Source load '%s' has zero annual energy; leaving it unchanged for reverse_shift.",
+                source_name,
+            )
+            continue
         target_energy = _load_annual_energy_twh(n, target_name, scenario, weighting)
         dynamic_caps[source_name] = max_target_fraction * target_energy * target_eff / source_eff
         target_by_source[source_name] = target_name
-        source_energies[source_name] = max(
-            _load_annual_energy_twh(n, source_name, scenario, weighting), 0.0
-        )
+        source_energies[source_name] = source_energy
 
     dynamic_cap = sum(dynamic_caps.values())
     applied = min(delta_twh, dynamic_cap)
@@ -1401,19 +1424,31 @@ def _apply_add_entry(
         name: max(_load_annual_energy_twh(n, name, scenario, weighting), 0.0)
         for name in target_names
     }
-    total = sum(energies.values())
-    if total <= 0 and not transformation.get("allow_flat_fallback", False):
-        raise ValueError("add transformation needs positive target energy or allow_flat_fallback: true.")
+    positive_names = [name for name in target_names if energies[name] > 0.0]
+    total = sum(energies[name] for name in positive_names)
+    if total <= 0:
+        logger.warning(
+            "add transformation matched target loads but all have zero annual energy; "
+            "leaving them unchanged. entry=%s",
+            entry,
+        )
+        return {
+            "applied_delta_twh": 0.0,
+            "transformed_target_twh": 0.0,
+            "affected_loads": [],
+            "warnings": ["all matched add targets have zero annual energy"],
+        }
+
     affected = []
-    for name in target_names:
-        share = delta_twh / len(target_names) if total <= 0 else delta_twh * energies[name] / total
+    for name in positive_names:
+        share = delta_twh * energies[name] / total
         addition = _load_profile_for_energy(
             n,
             name,
             share,
             scenario,
             weighting,
-            allow_flat_fallback=bool(transformation.get("allow_flat_fallback", False)),
+            allow_flat_fallback=False,
         )
         _increase_load_by_profile(n, name, addition, scenario=scenario)
         affected.append({"target": name, "target_delta_twh": share})
@@ -1453,7 +1488,6 @@ def _apply_electrify_heat_entry(
         if cop.isnull().any() or (cop <= 0).any():
             raise ValueError(f"COP for link '{hp_name}' must be finite and strictly positive.")
         share = delta_twh * energy / total
-        reduction = _reduce_load_energy(n, source_name, share, scenario, weighting, nonneg)
         target_name = _target_load_for_source(
             source_name,
             source_carrier,
@@ -1461,6 +1495,14 @@ def _apply_electrify_heat_entry(
             transformation.get("target_carrier"),
         )
         _ensure_target_load(n, source_name, target_name, transformation.get("target_carrier"), transformation)
+        if not _load_has_positive_energy(n, target_name, scenario, weighting):
+            logger.warning(
+                "Target load '%s' has zero annual energy; leaving it and source '%s' unchanged.",
+                target_name,
+                source_name,
+            )
+            continue
+        reduction = _reduce_load_energy(n, source_name, share, scenario, weighting, nonneg)
         addition = reduction / cop.reindex(n.snapshots)
         _increase_load_by_profile(n, target_name, addition, scenario=scenario)
         target_delta = _series_energy_twh(n, addition, weighting=weighting)
@@ -1474,7 +1516,11 @@ def _apply_electrify_heat_entry(
                 "target_delta_twh": target_delta,
             }
         )
-    return {"applied_delta_twh": delta_twh, "transformed_target_twh": transformed, "affected_loads": affected}
+    return {
+        "applied_delta_twh": sum(x["source_delta_twh"] for x in affected),
+        "transformed_target_twh": transformed,
+        "affected_loads": affected,
+    }
 
 
 def _apply_transition_entry(
@@ -1512,6 +1558,8 @@ def _apply_transition_entry(
             if target_name not in loads.index:
                 if transformation.get("strict_target_available", False):
                     raise KeyError(f"Target load '{target_name}' for reverse_shift is missing.")
+                continue
+            if _load_annual_energy_twh(n, source_name, scenario, weighting) <= 0.0:
                 continue
             target_energy = _load_annual_energy_twh(n, target_name, scenario, weighting)
             caps.append(max_frac * target_energy * target_eff / source_eff)

@@ -1,0 +1,342 @@
+# Source-based demand-transition scenario catalogue for deterministic runs.
+#
+# Usage in the main config:
+#   stochastic_scenarios:
+#     enable: false
+#     file: config/.../source_based_demand_scenarios_deterministic.yaml
+#     active_scenario: ELEC_HEAT   # change this label to run one scenario at a time
+#
+# This file intentionally does not define scenario probabilities. It only defines
+# the common methodology (settings + families + caps) and the available scenario
+# labels. The active_scenario is selected from the main config.
+
+settings:
+  units: TWh
+  weighting: generators
+  allow_unmet_target: false
+  tolerance_twh: 1.0e-4
+  non_negative_tolerance: 1.0e-8
+
+families:
+  ELEC:
+    # Conservative/high caps are expressed as TWh/a of BASE final demand shifted,
+    # not as additional electricity generation. The realised electricity increase
+    # is efficiency-adjusted by the transformation type.
+    targets:
+      conservative: 400
+      high: 600
+    entries:
+      building_heat:
+        source:
+          - rural heat
+          - urban central heat
+          - urban decentral heat
+        target: electricity
+        cap: 0.20
+        type: electrify_heat
+        cop:
+          rural heat: rural air heat pump
+          urban central heat: urban central air heat pump
+          urban decentral heat: urban decentral air heat pump
+
+      agriculture_heat:
+        source: agriculture heat
+        target: agriculture electricity
+        cap: 0.15
+        type: electrify_heat
+        cop:
+          agriculture heat: rural air heat pump
+
+      land_transport_oil:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.20
+        type: electrify_transport
+        source_efficiency: 16.0712
+        target_efficiency: 53.19
+
+      agriculture_machinery_oil:
+        source: agriculture machinery oil
+        target: agriculture machinery electric
+        cap: 0.15
+        type: shift
+        efficiency_factor: 1.0
+        max_source_reduction_fraction: 1.0
+
+      gas_for_industry:
+        source: gas for industry
+        target: electricity
+        cap: 0.30
+        type: shift
+        efficiency_factor: 1.0
+        max_source_reduction_fraction: 1.0
+
+      low_temperature_heat_for_industry:
+        source: low-temperature heat for industry
+        target: electricity
+        cap: 0.40
+        type: shift
+        efficiency_factor: 1.0
+        max_source_reduction_fraction: 1.0
+
+  OILGAS:
+    # Delayed-transition stress around an already decarbonised BASE case.
+    # reverse_shift automatically checks that the low-carbon target can be reduced
+    # without becoming negative.
+    targets:
+      conservative: 100
+      high: 150
+    entries:
+      land_transport_oil:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.15
+        type: reverse_shift
+        source_efficiency: 16.0712
+        target_efficiency: 53.19
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+      gas_for_industry:
+        source: gas for industry
+        target: H2 for industry
+        cap: 0.20
+        type: reverse_shift
+        source_efficiency: 1.0
+        target_efficiency: 1.0
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+      shipping_oil:
+        source: shipping oil
+        target:
+          name: EU shipping methanol
+        cap: 0.40
+        type: reverse_shift
+        source_efficiency: 1.0
+        target_efficiency: 1.0
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+      agriculture_machinery_oil:
+        source: agriculture machinery oil
+        target: agriculture machinery electric
+        cap: 0.15
+        type: reverse_shift
+        source_efficiency: 1.0
+        target_efficiency: 1.0
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+  MEOH:
+    # Renewable/synthetic liquid-fuel platform. Aviation and chemicals are the
+    # central use cases; shipping oil is only the small residual oil component.
+    targets:
+      conservative: 250
+      high: 350
+    entries:
+      aviation_kerosene:
+        source: kerosene for aviation
+        # IMPORTANT: this load/carrier must be connected to the methanol-to-kerosene
+        # or synthetic-kerosene route in the network. Keep create_missing_load false
+        # unless the corresponding conversion pathway is already present.
+        target: kerosene for aviation from methanol
+        cap: 0.25
+        type: split
+        efficiency_factor: 1.0
+        create_missing_load: false
+        copy_source_bus: true
+
+      naphtha_for_industry:
+        source: naphtha for industry
+        target: industry methanol
+        cap: 0.25
+        type: shift
+        efficiency_factor: 1.0
+        max_source_reduction_fraction: 1.0
+
+      shipping_oil_to_methanol:
+        source: shipping oil
+        target:
+          name: EU shipping methanol
+        cap: 1.00
+        type: shift
+        efficiency_factor: 1.0
+        max_source_reduction_fraction: 1.0
+
+      shipping_methanol_extra:
+        target:
+          name: EU shipping methanol
+        cap: 0.10
+        type: add
+
+  H2:
+    # Direct final hydrogen-related demand only. Intermediate H2 for synthetic
+    # fuels, storage or other conversion chains remains endogenous.
+    targets:
+      conservative: 50
+      high: 80
+    entries:
+      h2_for_industry:
+        target: H2 for industry
+        cap: 0.40
+        type: add
+
+      nh3:
+        target: NH3
+        cap: 0.40
+        type: add
+
+      h2_shipping:
+        target: H2 for shipping
+        cap: 0.40
+        type: add
+
+      land_transport_fuel_cell:
+        target: land transport fuel cell
+        cap: 0.20
+        type: add
+
+scenario_definitions:
+  BASE: base
+
+  # Conservative electrification scenarios
+  ELEC_HEAT:
+    demand_transition:
+      family: ELEC
+      target: conservative
+      priority:
+        - building_heat
+
+  ELEC_ROAD:
+    demand_transition:
+      family: ELEC
+      target: conservative
+      priority:
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+
+  ELEC_IND:
+    demand_transition:
+      family: ELEC
+      target: conservative
+      priority:
+        - gas_for_industry
+        - low_temperature_heat_for_industry
+        - building_heat
+
+  # Conservative delayed oil/gas persistence scenarios
+  OILGAS_ROAD:
+    demand_transition:
+      family: OILGAS
+      target: conservative
+      priority:
+        - land_transport_oil
+
+  OILGAS_IND:
+    demand_transition:
+      family: OILGAS
+      target: conservative
+      priority:
+        - gas_for_industry
+        - land_transport_oil
+
+  OILGAS_SHIP:
+    demand_transition:
+      family: OILGAS
+      target: conservative
+      priority:
+        - shipping_oil
+        - land_transport_oil
+
+  # Conservative methanol / renewable-liquid scenarios
+  MEOH_AIR:
+    demand_transition:
+      family: MEOH
+      target: conservative
+      priority:
+        - aviation_kerosene
+        - naphtha_for_industry
+        - shipping_oil_to_methanol
+
+  MEOH_HVC:
+    demand_transition:
+      family: MEOH
+      target: conservative
+      priority:
+        - naphtha_for_industry
+        - aviation_kerosene
+        - shipping_oil_to_methanol
+
+  MEOH_SHIP:
+    demand_transition:
+      family: MEOH
+      target: conservative
+      priority:
+        - shipping_oil_to_methanol
+        - aviation_kerosene
+
+  # Conservative direct-H2 scenarios
+  H2_IND:
+    demand_transition:
+      family: H2
+      target: conservative
+      priority:
+        - h2_for_industry
+        - nh3
+
+  H2_NH3:
+    demand_transition:
+      family: H2
+      target: conservative
+      priority:
+        - nh3
+        - h2_for_industry
+
+  H2_TRANS:
+    demand_transition:
+      family: H2
+      target: conservative
+      priority:
+        - land_transport_fuel_cell
+        - h2_shipping
+        - h2_for_industry
+        - nh3
+
+  # High out-of-sample stress scenarios
+  ELEC_HIGH:
+    demand_transition:
+      family: ELEC
+      target: high
+      priority:
+        - building_heat
+        - land_transport_oil
+
+  OILGAS_HIGH:
+    demand_transition:
+      family: OILGAS
+      target: high
+      priority:
+        - land_transport_oil
+        - gas_for_industry
+
+  MEOH_HIGH:
+    demand_transition:
+      family: MEOH
+      target: high
+      priority:
+        - aviation_kerosene
+        - naphtha_for_industry
+        - shipping_oil_to_methanol
+        - shipping_methanol_extra
+
+  H2_HIGH:
+    demand_transition:
+      family: H2
+      target: high
+      priority:
+        - h2_for_industry
+        - nh3
+        - h2_shipping
+        - land_transport_fuel_cell

@@ -1,15 +1,19 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_"
-  name: BASE
+  name: stochastic_network
   scenarios:
     enable: false
-    file: config/demand_uncertainty/scenarios_demand_uncertainty.yaml
+    file: config/demand_uncertainty/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+stochastic_scenarios:
+  enable: true
+  file: config/demand_uncertainty/scenario_stochastic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -42,6 +46,9 @@ electricity:
 
 biomass:
   year: 2050
+
+costs:
+  year: 2040
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
@@ -104,6 +111,14 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
+  aviation_methanol_kerosene_share:
+    2020: 0.0
+    2025: 0.0
+    2030: 0.0
+    2035: 0.0
+    2040: 0.0
+    2045: 0.0
+    2050: 0.5
   allam_cycle_gas: true
   methanol:
     regional_methanol_demand: true
@@ -137,10 +152,8 @@ sector:
   biosng: true
   biosng_cc: false
   bioH2: false
-  municipal_solid_waste: true
+  municipal_solid_waste: false
 
-costs:
-  year: 2040
 
 clustering:
   mode: administrative

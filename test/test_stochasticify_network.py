@@ -165,6 +165,37 @@ def test_modify_components_still_works():
 
 
 
+
+def test_add_transformation_leaves_zero_targets_unchanged_when_unmet_allowed():
+    n = _network()
+    n.loads_t.p_set.loc[:, "DE H2 for industry"] = 0.0
+    cfg = _catalogue(enable=False, active_scenario="H2_IND")
+    cfg["settings"]["allow_unmet_target"] = True
+    cfg["families"]["H2"] = {
+        "targets": {"small": 10.0},
+        "entries": {
+            "h2_for_industry": {
+                "target": "H2 for industry",
+                "cap": 1.0,
+                "type": "add",
+            }
+        },
+    }
+    cfg["scenario_definitions"]["H2_IND"] = {
+        "demand_transition": {
+            "family": "H2",
+            "target": "small",
+            "priority": ["h2_for_industry"],
+        }
+    }
+
+    apply_stochastic_config(n, {}, cfg)
+
+    assert _load_annual_energy_twh(n, "DE H2 for industry") == pytest.approx(0.0)
+    report = n.meta["demand_transition_reports"]["deterministic"]
+    assert report["applied_total_twh"] == pytest.approx(0.0)
+    assert report["unmet_target_twh"] == pytest.approx(10.0)
+
 def test_definitions_alias_is_accepted():
     n = _network()
     cfg = _catalogue(enable=False, active_scenario="PRICE_GAS_HIGH")

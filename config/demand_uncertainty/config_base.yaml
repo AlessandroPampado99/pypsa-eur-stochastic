@@ -1,15 +1,20 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_"
-  name: BASE_methanol_aviation
+  name: ELEC_HEAT
   scenarios:
     enable: false
-    file: config/demand_uncertainty/scenarios_demand_uncertainty.yaml
+    file: config/demand_uncertainty/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+stochastic_scenarios:
+  enable: false
+  file: config/demand_uncertainty/scenario_deterministic.yaml
+  active_scenario: ELEC_HEAT   # change this label to run one scenario at a time
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
