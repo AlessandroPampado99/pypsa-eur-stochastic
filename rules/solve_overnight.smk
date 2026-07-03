@@ -13,6 +13,12 @@ def _stoch_cfg():
 def _stoch_enabled():
     return bool(_stoch_cfg().get("enable", False))
 
+def _stoch_active_scenario():
+    return _stoch_cfg().get("active_scenario", None)
+
+def _stoch_preprocess_enabled():
+    return _stoch_enabled() or _stoch_active_scenario() is not None
+
 def _stoch_file():
     return _stoch_cfg().get("file", None)
 
@@ -27,9 +33,13 @@ def _stoch_scenario_names():
     return list(sc.keys())
 
 def input_sector_network(w):
-    return (
-        RESULTS
-        + f"networks/base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+    if _stoch_preprocess_enabled():
+        return (
+            RESULTS
+            + f"networks/base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+        )
+    return resources(
+        "networks/base_s_{clusters}_{opts}_{sector_opts}_{planning_horizons}.nc"
     )
 
 
