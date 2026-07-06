@@ -28,7 +28,7 @@ def _network():
     for name, (carrier, values) in loads.items():
         n.add("Load", name, bus="DE", carrier=carrier)
         n.loads_t.p_set.loc[:, name] = values
-    n.add("Link", "DE rural air heat pump", bus0="DE", bus1="DE heat", carrier="rural air heat pump")
+    n.add("Link", "DE rural air heat pump", bus0="DE", bus1="DE heat", carrier="rural air heat pump", p_min_pu=0.0, p_max_pu=1.0)
     n.links_t.efficiency.loc[:, "DE rural air heat pump"] = [2.0, 2.0]
     n.add("Link", "DE gas boiler", bus0="DE", bus1="DE heat", carrier="gas boiler", marginal_cost=10.0)
     return n
@@ -165,6 +165,123 @@ def test_modify_components_still_works():
 
 
 
+
+
+def test_electrify_heat_resolves_country_named_electricity_load():
+    n = pypsa.Network()
+    snapshots = pd.date_range("2020-01-01", periods=2, freq="h")
+    n.set_snapshots(snapshots)
+    n.snapshot_weightings.loc[:, "generators"] = 500_000.0
+    n.add("Bus", "AL")
+    n.add("Bus", "AL heat")
+    n.add("Load", "AL", bus="AL", carrier="electricity")
+    n.loads_t.p_set.loc[:, "AL"] = [100.0, 100.0]
+    n.add("Load", "AL rural heat", bus="AL heat", carrier="rural heat")
+    n.loads_t.p_set.loc[:, "AL rural heat"] = [1000.0, 1000.0]
+    n.add("Link", "AL rural air heat pump", bus0="AL", bus1="AL heat", carrier="rural air heat pump", p_min_pu=0.0, p_max_pu=1.0)
+    n.links_t.efficiency.loc[:, "AL rural air heat pump"] = [2.0, 2.0]
+    cfg = {
+        "enable": False,
+        "active_scenario": "ELEC_HEAT",
+        "settings": {
+            "weighting": "generators",
+            "allow_unmet_target": False,
+            "tolerance_twh": 1e-6,
+            "non_negative_tolerance": 1e-8,
+        },
+        "families": {
+            "ELEC": {
+                "targets": {"small": 100.0},
+                "entries": {
+                    "building_heat": {
+                        "source": "rural heat",
+                        "target": "electricity",
+                        "cap": 1.0,
+                        "type": "electrify_heat",
+                        "cop": {"rural heat": "rural air heat pump"},
+                    }
+                },
+            }
+        },
+        "scenario_definitions": {
+            "ELEC_HEAT": {
+                "demand_transition": {
+                    "family": "ELEC",
+                    "target": "small",
+                    "priority": ["building_heat"],
+                }
+            }
+        },
+    }
+
+    apply_stochastic_config(n, {}, cfg)
+
+    assert "AL electricity" not in n.loads.index
+    assert _load_annual_energy_twh(n, "AL") == pytest.approx(150.0)
+    assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(900.0)
+
+
+def test_electrify_heat_uses_inverse_cop_for_reversed_heat_pump_link():
+    n = pypsa.Network()
+    snapshots = pd.date_range("2020-01-01", periods=2, freq="h")
+    n.set_snapshots(snapshots)
+    n.snapshot_weightings.loc[:, "generators"] = 500_000.0
+    n.add("Bus", "AL", carrier="electricity")
+    n.add("Bus", "AL heat", carrier="heat")
+    n.add("Load", "AL", bus="AL", carrier="electricity")
+    n.loads_t.p_set.loc[:, "AL"] = [100.0, 100.0]
+    n.add("Load", "AL rural heat", bus="AL heat", carrier="rural heat")
+    n.loads_t.p_set.loc[:, "AL rural heat"] = [1000.0, 1000.0]
+    n.add(
+        "Link",
+        "AL rural air heat pump",
+        bus0="AL heat",
+        bus1="AL",
+        carrier="rural air heat pump",
+        p_min_pu=-1.0,
+        p_max_pu=0.0,
+    )
+    n.links_t.efficiency.loc[:, "AL rural air heat pump"] = [0.5, 0.5]
+    cfg = {
+        "enable": False,
+        "active_scenario": "ELEC_HEAT",
+        "settings": {
+            "weighting": "generators",
+            "allow_unmet_target": False,
+            "tolerance_twh": 1e-6,
+            "non_negative_tolerance": 1e-8,
+        },
+        "families": {
+            "ELEC": {
+                "targets": {"small": 100.0},
+                "entries": {
+                    "building_heat": {
+                        "source": "rural heat",
+                        "target": "electricity",
+                        "cap": 1.0,
+                        "type": "electrify_heat",
+                        "cop": {"rural heat": "rural air heat pump"},
+                    }
+                },
+            }
+        },
+        "scenario_definitions": {
+            "ELEC_HEAT": {
+                "demand_transition": {
+                    "family": "ELEC",
+                    "target": "small",
+                    "priority": ["building_heat"],
+                }
+            }
+        },
+    }
+
+    apply_stochastic_config(n, {}, cfg)
+
+    assert _load_annual_energy_twh(n, "AL") == pytest.approx(150.0)
+    report = n.meta["demand_transition_reports"]["deterministic"]
+    affected = report["entries"][0]["affected_loads"][0]
+    assert affected["heat_pump_efficiency_mode"] == "inverse_cop"
 
 def test_add_transformation_leaves_zero_targets_unchanged_when_unmet_allowed():
     n = _network()

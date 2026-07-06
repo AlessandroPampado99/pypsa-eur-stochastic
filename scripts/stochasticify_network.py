@@ -198,6 +198,62 @@ def _read_link_efficiency_series(
     return _read_ts_series(n.links_t.efficiency, name=link_name, scenario=scenario)
 
 
+def _link_static_value(n: pypsa.Network, link_name: str, column: str) -> Any:
+    """Return one static link value from deterministic or stochastic tables."""
+    links = _base_links_table(n)
+    if link_name not in links.index:
+        raise KeyError(f"Required link '{link_name}' not found in n.links.")
+    return _component_value(links, link_name, column)
+
+
+def _link_carrier_hint(n: pypsa.Network, bus_name: Any) -> str:
+    """Return a lowercase carrier-like hint for a bus, if available."""
+    bus_name = str(bus_name)
+    buses = _base_component_table(n.buses)
+    hints = [bus_name.lower()]
+    if bus_name in buses.index and "carrier" in buses.columns:
+        carrier = _component_value(buses, bus_name, "carrier")
+        if pd.notna(carrier):
+            hints.append(str(carrier).lower())
+    return " ".join(hints)
+
+
+def _is_reversed_heat_pump_link(n: pypsa.Network, link_name: str) -> bool:
+    """Detect PyPSA-Eur reversed heat-pump links where efficiency is 1/COP."""
+    try:
+        p_min_pu = float(_link_static_value(n, link_name, "p_min_pu"))
+        p_max_pu = float(_link_static_value(n, link_name, "p_max_pu"))
+        bus0 = _link_static_value(n, link_name, "bus0")
+        bus1 = _link_static_value(n, link_name, "bus1")
+    except (KeyError, TypeError, ValueError):
+        return False
+
+    bus0_hint = _link_carrier_hint(n, bus0)
+    bus1_hint = _link_carrier_hint(n, bus1)
+    return (
+        p_min_pu < 0.0
+        and p_max_pu <= 0.0
+        and "heat" in bus0_hint
+        and "electric" in bus1_hint
+    )
+
+
+def _heat_pump_electricity_addition(
+    n: pypsa.Network,
+    link_name: str,
+    heat_reduction: pd.Series,
+    scenario: str | None = None,
+) -> tuple[pd.Series, str]:
+    """Convert heat reduction into electricity demand for heat-pump orientation."""
+    efficiency = _read_link_efficiency_series(n, link_name, scenario=scenario).reindex(n.snapshots)
+    if efficiency.isnull().any() or (efficiency <= 0).any():
+        raise ValueError(f"Efficiency/COP for link '{link_name}' must be finite and strictly positive.")
+
+    if _is_reversed_heat_pump_link(n, link_name):
+        return heat_reduction * efficiency, "inverse_cop"
+    return heat_reduction / efficiency, "cop"
+
+
 def _carrier_names_from_table(df: pd.DataFrame, carrier: str) -> list[str]:
     """Return component names matching a carrier from a base component table."""
     base = _base_component_table(df)
@@ -474,6 +530,77 @@ def _target_load_for_source(
         f"Cannot infer target load for source '{source_name}'. Provide target.name, "
         "a single target.names entry, or target_carrier."
     )
+
+
+
+
+def _target_selector_is_explicit(target_selector: Mapping[str, Any] | None) -> bool:
+    """Return whether the selector names a specific load rather than a carrier class."""
+    target_selector = target_selector or {}
+    return "name" in target_selector or "names" in target_selector
+
+
+def _resolve_target_load_for_source(
+    n: pypsa.Network,
+    source_name: str,
+    source_carrier: str | None,
+    target_selector: Mapping[str, Any] | None,
+    target_carrier: str | None,
+) -> str:
+    """
+    Resolve a target load name for source-to-target demand transitions.
+
+    Carrier shorthand normally maps by suffix, e.g. "AL rural heat" ->
+    "AL electricity". Some PyPSA-Eur loads, notably high-voltage electricity,
+    are named by bus/country only ("AL") while carrying carrier="electricity".
+    For carrier-based targets, fall back to such same-prefix existing loads.
+    """
+    target_selector = target_selector or {}
+    proposed = _target_load_for_source(
+        source_name, source_carrier, target_selector, target_carrier
+    )
+    loads = _base_loads_table(n)
+    if proposed in loads.index:
+        return proposed
+
+    if _target_selector_is_explicit(target_selector) or not target_carrier:
+        return proposed
+
+    carrier_matches = (
+        loads["carrier"].astype(str).eq(str(target_carrier))
+        if "carrier" in loads.columns
+        else pd.Series(False, index=loads.index)
+    )
+
+    if source_carrier and source_name.endswith(source_carrier):
+        prefix = _extract_prefix(source_name, source_carrier)
+        candidates = []
+        for candidate in (prefix.rstrip(), prefix.strip(), prefix.rstrip(" _-")):
+            if candidate and candidate not in candidates:
+                candidates.append(candidate)
+        for candidate in candidates:
+            if candidate in loads.index and bool(carrier_matches.loc[candidate].any() if isinstance(carrier_matches.loc[candidate], pd.Series) else carrier_matches.loc[candidate]):
+                logger.info(
+                    "Resolved target load '%s' to existing load '%s' with carrier '%s'.",
+                    proposed,
+                    candidate,
+                    target_carrier,
+                )
+                return candidate
+
+    if "bus" in loads.columns:
+        source_bus = _component_value(loads, source_name, "bus")
+        same_bus = loads.index[carrier_matches & loads["bus"].eq(source_bus)].unique().tolist()
+        if len(same_bus) == 1:
+            logger.info(
+                "Resolved target load '%s' to same-bus load '%s' with carrier '%s'.",
+                proposed,
+                same_bus[0],
+                target_carrier,
+            )
+            return same_bus[0]
+
+    return proposed
 
 
 def _load_profile_for_energy(
@@ -1256,7 +1383,8 @@ def _apply_shift_like_entry(
         share_delta = delta_twh * energy / total_source
         source_carrier = str(_component_value(loads, source_name, "carrier"))
         target_carrier = transformation.get("target_carrier")
-        target_name = _target_load_for_source(
+        target_name = _resolve_target_load_for_source(
+            n,
             source_name,
             source_carrier,
             _target_selector(entry, transformation),
@@ -1330,7 +1458,8 @@ def _apply_reverse_shift_entry(
     for source_name in source_names:
         source_carrier = str(_component_value(loads, source_name, "carrier"))
         target_carrier = (_target_selector(entry, transformation) or {}).get("carrier")
-        target_name = _target_load_for_source(
+        target_name = _resolve_target_load_for_source(
+            n,
             source_name,
             source_carrier,
             _target_selector(entry, transformation),
@@ -1484,11 +1613,9 @@ def _apply_electrify_heat_entry(
         prefix = _extract_prefix(source_name, source_carrier)
         hp_name = f"{prefix}{hp_suffix}"
         _assert_link_exists(n, hp_name)
-        cop = _read_link_efficiency_series(n, hp_name, scenario=scenario)
-        if cop.isnull().any() or (cop <= 0).any():
-            raise ValueError(f"COP for link '{hp_name}' must be finite and strictly positive.")
         share = delta_twh * energy / total
-        target_name = _target_load_for_source(
+        target_name = _resolve_target_load_for_source(
+            n,
             source_name,
             source_carrier,
             _target_selector(entry, transformation),
@@ -1503,7 +1630,9 @@ def _apply_electrify_heat_entry(
             )
             continue
         reduction = _reduce_load_energy(n, source_name, share, scenario, weighting, nonneg)
-        addition = reduction / cop.reindex(n.snapshots)
+        addition, hp_efficiency_mode = _heat_pump_electricity_addition(
+            n, hp_name, reduction, scenario=scenario
+        )
         _increase_load_by_profile(n, target_name, addition, scenario=scenario)
         target_delta = _series_energy_twh(n, addition, weighting=weighting)
         transformed += target_delta
@@ -1512,6 +1641,7 @@ def _apply_electrify_heat_entry(
                 "source": source_name,
                 "target": target_name,
                 "heat_pump": hp_name,
+                "heat_pump_efficiency_mode": hp_efficiency_mode,
                 "source_delta_twh": _series_energy_twh(n, reduction, weighting),
                 "target_delta_twh": target_delta,
             }
@@ -1552,8 +1682,8 @@ def _apply_transition_entry(
         caps = []
         for source_name in source_names:
             source_carrier = str(_component_value(loads, source_name, "carrier"))
-            target_name = _target_load_for_source(
-                source_name, source_carrier, target_selector, target_selector.get("carrier")
+            target_name = _resolve_target_load_for_source(
+                n, source_name, source_carrier, target_selector, target_selector.get("carrier")
             )
             if target_name not in loads.index:
                 if transformation.get("strict_target_available", False):
@@ -1592,10 +1722,12 @@ def _validate_loads_after_transition(
     n: pypsa.Network,
     scenario: str | None,
     settings: Mapping[str, Any],
+    names: list[str] | None = None,
 ) -> None:
     tol = float(settings.get("non_negative_tolerance", 1e-8))
-    names = _base_loads_table(n).index.unique().tolist()
-    for name in names:
+    if names is None:
+        names = _base_loads_table(n).index.unique().tolist()
+    for name in pd.Index(names).drop_duplicates().tolist():
         series = _read_load_series(n, name, scenario=scenario)
         values = series.to_numpy(dtype=float)
         if np.isnan(values).any():
@@ -1693,7 +1825,15 @@ def _action_demand_transition(
             remaining,
             f" in scenario '{scenario}'" if scenario else "",
         )
-    _validate_loads_after_transition(n, scenario=scenario, settings=settings)
+    touched_loads = []
+    for entry_report in entry_reports:
+        for affected in entry_report.get("affected_loads", []):
+            for key in ("source", "target"):
+                if affected.get(key):
+                    touched_loads.append(affected[key])
+    _validate_loads_after_transition(
+        n, scenario=scenario, settings=settings, names=touched_loads
+    )
     n.meta.setdefault("demand_transition_reports", {})[scenario or "deterministic"] = report
     logger.info(
         "Demand-transition %s/%s applied %.6g of %.6g TWh%s.",
@@ -1899,10 +2039,10 @@ if __name__ == "__main__":
             "stochasticify_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/test_stochastic_scenarios/config.yaml",
+            configfiles="config/demand_uncertainty/config_base.yaml",
             sector_opts="",
             planning_horizons="2050",
-            run="BASE",
+            # run="BASE",
         )
 
     configure_logging(snakemake)
