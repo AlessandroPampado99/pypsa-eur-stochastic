@@ -50,7 +50,7 @@ def _catalogue(enable=False, active_scenario=None):
                     "land_transport_oil": {
                         "source": "land transport oil",
                         "target": "land transport EV",
-                        "cap": 0.2,
+                        "cap": 1.0,
                         "type": "electrify_transport",
                         "source_efficiency": 16.0712,
                         "target_efficiency": 53.19,
@@ -132,8 +132,8 @@ def test_deterministic_active_scenario_modifies_loads_without_set_scenarios(monk
     apply_stochastic_config(n, {}, _catalogue(enable=False, active_scenario="ELEC_HEAT"))
 
     assert not called
-    assert _load_annual_energy_twh(n, "DE land transport oil") == pytest.approx(900.0)
-    assert _load_annual_energy_twh(n, "DE land transport EV") > 100.0
+    assert _load_annual_energy_twh(n, "DE land transport EV") == pytest.approx(200.0)
+    assert _load_annual_energy_twh(n, "DE land transport oil") == pytest.approx(1000.0 - 100.0 * 53.19 / 16.0712)
 
 
 def test_stochastic_catalogue_applies_only_corresponding_scenario():
@@ -144,7 +144,7 @@ def test_stochastic_catalogue_applies_only_corresponding_scenario():
     base_oil = _load_annual_energy_twh(n, "DE land transport oil", scenario="BASE")
     elec_oil = _load_annual_energy_twh(n, "DE land transport oil", scenario="ELEC_HEAT")
     assert base_oil == pytest.approx(1000.0)
-    assert elec_oil == pytest.approx(900.0)
+    assert elec_oil == pytest.approx(1000.0 - 100.0 * 53.19 / 16.0712)
 
 
 def test_reverse_shift_caps_target_and_continues_priority():
@@ -217,8 +217,8 @@ def test_electrify_heat_resolves_country_named_electricity_load():
     apply_stochastic_config(n, {}, cfg)
 
     assert "AL electricity" not in n.loads.index
-    assert _load_annual_energy_twh(n, "AL") == pytest.approx(150.0)
-    assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(900.0)
+    assert _load_annual_energy_twh(n, "AL") == pytest.approx(200.0)
+    assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(800.0)
 
 
 def test_electrify_heat_uses_inverse_cop_for_reversed_heat_pump_link():
@@ -278,10 +278,78 @@ def test_electrify_heat_uses_inverse_cop_for_reversed_heat_pump_link():
 
     apply_stochastic_config(n, {}, cfg)
 
-    assert _load_annual_energy_twh(n, "AL") == pytest.approx(150.0)
+    assert _load_annual_energy_twh(n, "AL") == pytest.approx(200.0)
+    assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(800.0)
     report = n.meta["demand_transition_reports"]["deterministic"]
     affected = report["entries"][0]["affected_loads"][0]
     assert affected["heat_pump_efficiency_mode"] == "inverse_cop"
+
+
+def test_shift_with_inverse_cop_converts_electricity_back_to_heat():
+    n = pypsa.Network()
+    snapshots = pd.date_range("2020-01-01", periods=2, freq="h")
+    n.set_snapshots(snapshots)
+    n.snapshot_weightings.loc[:, "generators"] = 500_000.0
+    n.add("Bus", "AL", carrier="electricity")
+    n.add("Bus", "AL heat", carrier="heat")
+    n.add("Load", "AL", bus="AL", carrier="electricity")
+    n.loads_t.p_set.loc[:, "AL"] = [-10.0, 210.0]
+    n.add("Load", "AL rural heat", bus="AL heat", carrier="rural heat")
+    n.loads_t.p_set.loc[:, "AL rural heat"] = [1000.0, 1000.0]
+    n.add(
+        "Link",
+        "AL rural air heat pump",
+        bus0="AL heat",
+        bus1="AL",
+        carrier="rural air heat pump",
+        p_min_pu=-1.0,
+        p_max_pu=0.0,
+    )
+    n.links_t.efficiency.loc[:, "AL rural air heat pump"] = [0.5, 0.5]
+    cfg = {
+        "enable": False,
+        "active_scenario": "OILGAS_HEAT",
+        "settings": {
+            "weighting": "generators",
+            "allow_unmet_target": False,
+            "tolerance_twh": 1e-6,
+            "non_negative_tolerance": 1e-8,
+        },
+        "families": {
+            "OILGAS": {
+                "targets": {"small": 100.0},
+                "entries": {
+                    "low_temperature_heat": {
+                        "source": "electricity",
+                        "target": "rural heat",
+                        "cap": 1.0,
+                        "type": "shift",
+                        "cop_mode": "inverse",
+                        "cop": {"rural heat": "rural air heat pump"},
+                    }
+                },
+            }
+        },
+        "scenario_definitions": {
+            "OILGAS_HEAT": {
+                "demand_transition": {
+                    "family": "OILGAS",
+                    "target": "small",
+                    "priority": ["low_temperature_heat"],
+                }
+            }
+        },
+    }
+
+    apply_stochastic_config(n, {}, cfg)
+
+    assert _load_annual_energy_twh(n, "AL") == pytest.approx(50.0)
+    assert n.loads_t.p_set["AL"].min() == pytest.approx(-10.0)
+    assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(1100.0)
+    report = n.meta["demand_transition_reports"]["deterministic"]
+    affected = report["entries"][0]["affected_loads"][0]
+    assert affected["heat_pump_efficiency_mode"] == "inverse_cop"
+
 
 def test_add_transformation_leaves_zero_targets_unchanged_when_unmet_allowed():
     n = _network()

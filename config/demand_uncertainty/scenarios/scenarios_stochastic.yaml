@@ -1,14 +1,18 @@
-# Source-based demand-transition scenario catalogue for deterministic runs.
-#
-# Usage in the main config:
+# Simplified demand-transition scenario catalogue for stochastic in-sample runs.
+# Enable with:
 #   stochastic_scenarios:
-#     enable: false
-#     file: config/.../source_based_demand_scenarios_deterministic.yaml
-#     active_scenario: ELEC_HEAT   # change this label to run one scenario at a time
+#     enable: true
+#     file: config/demand_uncertainty/scenario_stochastic.yaml
 #
-# This file intentionally does not define scenario probabilities. It only defines
-# the common methodology (settings + families + caps) and the available scenario
-# labels. The active_scenario is selected from the main config.
+# The probabilities below define the in-sample stochastic cases. The same
+# scenario_definitions block can also be reused for deterministic validation.
+
+scenarios:
+  BASE: 0.20
+  ELEC_HEAT: 0.20
+  OILGAS_ROAD: 0.20
+  MEOH_AIR: 0.20
+  H2_IND: 0.20
 
 settings:
   units: TWh
@@ -19,9 +23,8 @@ settings:
 
 families:
   ELEC:
-    # Conservative/high caps are expressed as TWh/a of BASE final demand shifted,
-    # not as additional electricity generation. The realised electricity increase
-    # is efficiency-adjusted by the transformation type.
+    # Targets are target/output demand additions in TWh/a. For heat, this is
+    # additional electricity demand after COP conversion, not heat removed.
     targets:
       conservative: 400
       high: 600
@@ -33,7 +36,7 @@ families:
           - urban decentral heat
         target: electricity
         cap: 0.20
-        type: electrify_heat
+        type: shift
         cop:
           rural heat: rural air heat pump
           urban central heat: urban central air heat pump
@@ -42,8 +45,8 @@ families:
       agriculture_heat:
         source: agriculture heat
         target: agriculture electricity
-        cap: 0.15
-        type: electrify_heat
+        cap: 0.20
+        type: shift
         cop:
           agriculture heat: rural air heat pump
 
@@ -51,156 +54,153 @@ families:
         source: land transport oil
         target: land transport EV
         cap: 0.20
-        type: electrify_transport
-        source_efficiency: 16.0712
-        target_efficiency: 53.19
+        type: shift
+        efficiency_factor: 0.302145139124
 
       agriculture_machinery_oil:
         source: agriculture machinery oil
         target: agriculture machinery electric
-        cap: 0.15
+        cap: 0.20
         type: shift
-        efficiency_factor: 1.0
-        max_source_reduction_fraction: 1.0
+        efficiency_factor: 2.333333333333
 
-      gas_for_industry:
-        source: gas for industry
+      solid_biomass_for_industry:
+        source: solid biomass for industry
         target: electricity
-        cap: 0.30
+        cap: 0.20
         type: shift
         efficiency_factor: 1.0
-        max_source_reduction_fraction: 1.0
 
       low_temperature_heat_for_industry:
         source: low-temperature heat for industry
         target: electricity
-        cap: 0.40
+        cap: 0.20
         type: shift
-        efficiency_factor: 1.0
-        max_source_reduction_fraction: 1.0
+        cop:
+          low-temperature heat for industry: urban central air heat pump
 
   OILGAS:
-    # Delayed-transition stress around an already decarbonised BASE case.
-    # reverse_shift automatically checks that the low-carbon target can be reduced
-    # without becoming negative.
+    # Delayed-transition cases are written as ordinary shifts from the existing
+    # low-carbon demand back to fossil demand. The source reduction is capped and
+    # cannot become negative, so no reverse_shift-specific controls are needed.
     targets:
       conservative: 100
       high: 150
     entries:
       land_transport_oil:
-        source: land transport oil
-        target: land transport EV
-        cap: 0.15
-        type: reverse_shift
-        source_efficiency: 16.0712
-        target_efficiency: 53.19
-        max_target_reduction_fraction: 0.95
-        strict_target_available: true
+        source: land transport EV
+        target: land transport oil
+        cap: 0.95
+        type: shift
+        efficiency_factor: 3.309644857175
 
       gas_for_industry:
-        source: gas for industry
-        target: H2 for industry
-        cap: 0.20
-        type: reverse_shift
-        source_efficiency: 1.0
-        target_efficiency: 1.0
-        max_target_reduction_fraction: 0.95
-        strict_target_available: true
+        source: H2 for industry
+        target: gas for industry
+        cap: 0.95
+        type: shift
+        efficiency_factor: 1.0
 
       shipping_oil:
-        source: shipping oil
-        target:
-          name: EU shipping methanol
-        cap: 0.40
-        type: reverse_shift
-        source_efficiency: 1.0
-        target_efficiency: 1.0
-        max_target_reduction_fraction: 0.95
-        strict_target_available: true
+        source:
+          carrier: shipping methanol
+        target: shipping oil
+        cap: 0.95
+        type: shift
+        efficiency_factor: 1.15
 
       agriculture_machinery_oil:
-        source: agriculture machinery oil
-        target: agriculture machinery electric
-        cap: 0.15
-        type: reverse_shift
-        source_efficiency: 1.0
-        target_efficiency: 1.0
-        max_target_reduction_fraction: 0.95
-        strict_target_available: true
+        source: agriculture machinery electric
+        target: agriculture machinery oil
+        cap: 0.95
+        type: shift
+        efficiency_factor: 0.428571428571
 
   MEOH:
-    # Renewable/synthetic liquid-fuel platform. Aviation and chemicals are the
-    # central use cases; shipping oil is only the small residual oil component.
+    # Renewable/synthetic liquid-fuel demand shifts. Target loads must already
+    # exist and have a positive profile; zero target loads are left unchanged.
     targets:
       conservative: 250
-      high: 350
+      high: 275
     entries:
       aviation_kerosene:
         source: kerosene for aviation
-        # IMPORTANT: this load/carrier must be connected to the methanol-to-kerosene
-        # or synthetic-kerosene route in the network. Keep create_missing_load false
-        # unless the corresponding conversion pathway is already present.
-        target: kerosene for aviation from methanol
-        cap: 0.25
-        type: split
+        target: methanol kerosene for aviation
+        cap: 0.35
+        type: shift
         efficiency_factor: 1.0
-        create_missing_load: false
-        copy_source_bus: true
 
       naphtha_for_industry:
         source: naphtha for industry
         target: industry methanol
-        cap: 0.25
+        cap: 0.35
         type: shift
         efficiency_factor: 1.0
-        max_source_reduction_fraction: 1.0
+
+      solid_biomass_for_industry:
+        source: solid biomass for industry
+        target: industry methanol
+        cap: 0.20
+        type: shift
+        efficiency_factor: 1.0
 
       shipping_oil_to_methanol:
         source: shipping oil
         target:
-          name: EU shipping methanol
+          carrier: shipping methanol
+        cap: 1.00
+        type: shift
+        efficiency_factor: 0.869565217391
+
+      shipping_h2_to_methanol:
+        source: H2 for shipping
+        target:
+          carrier: shipping methanol
         cap: 1.00
         type: shift
         efficiency_factor: 1.0
-        max_source_reduction_fraction: 1.0
-
-      shipping_methanol_extra:
-        target:
-          name: EU shipping methanol
-        cap: 0.10
-        type: add
 
   H2:
-    # Direct final hydrogen-related demand only. Intermediate H2 for synthetic
-    # fuels, storage or other conversion chains remains endogenous.
+    # Direct hydrogen scenarios are also expressed as shifts from existing
+    # fossil/biomass demand into existing H2/NH3/fuel-cell demand loads.
     targets:
       conservative: 50
       high: 80
     entries:
       h2_for_industry:
+        source:
+          - gas for industry
+          - solid biomass for industry
         target: H2 for industry
-        cap: 0.40
-        type: add
+        cap: 0.20
+        type: shift
+        efficiency_factor: 1.0
 
       nh3:
-        target: NH3
-        cap: 0.40
-        type: add
+        source: naphtha for industry
+        target:
+          name: EU NH3
+        cap: 0.20
+        type: shift
+        efficiency_factor: 1.0
 
       h2_shipping:
+        source: shipping oil
         target: H2 for shipping
         cap: 0.40
-        type: add
+        type: shift
+        efficiency_factor: 1.0
 
       land_transport_fuel_cell:
+        source: land transport oil
         target: land transport fuel cell
         cap: 0.20
-        type: add
+        type: shift
+        efficiency_factor: 0.535651226544
 
 scenario_definitions:
   BASE: base
 
-  # Conservative electrification scenarios
   ELEC_HEAT:
     demand_transition:
       family: ELEC
@@ -222,11 +222,10 @@ scenario_definitions:
       family: ELEC
       target: conservative
       priority:
-        - gas_for_industry
         - low_temperature_heat_for_industry
+        - solid_biomass_for_industry
         - building_heat
 
-  # Conservative delayed oil/gas persistence scenarios
   OILGAS_ROAD:
     demand_transition:
       family: OILGAS
@@ -250,7 +249,6 @@ scenario_definitions:
         - shipping_oil
         - land_transport_oil
 
-  # Conservative methanol / renewable-liquid scenarios
   MEOH_AIR:
     demand_transition:
       family: MEOH
@@ -266,8 +264,8 @@ scenario_definitions:
       target: conservative
       priority:
         - naphtha_for_industry
+        - solid_biomass_for_industry
         - aviation_kerosene
-        - shipping_oil_to_methanol
 
   MEOH_SHIP:
     demand_transition:
@@ -275,9 +273,9 @@ scenario_definitions:
       target: conservative
       priority:
         - shipping_oil_to_methanol
+        - shipping_h2_to_methanol
         - aviation_kerosene
 
-  # Conservative direct-H2 scenarios
   H2_IND:
     demand_transition:
       family: H2
@@ -304,7 +302,6 @@ scenario_definitions:
         - h2_for_industry
         - nh3
 
-  # High out-of-sample stress scenarios
   ELEC_HIGH:
     demand_transition:
       family: ELEC
@@ -329,7 +326,6 @@ scenario_definitions:
         - aviation_kerosene
         - naphtha_for_industry
         - shipping_oil_to_methanol
-        - shipping_methanol_extra
 
   H2_HIGH:
     demand_transition:

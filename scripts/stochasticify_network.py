@@ -228,14 +228,19 @@ def _is_reversed_heat_pump_link(n: pypsa.Network, link_name: str) -> bool:
     except (KeyError, TypeError, ValueError):
         return False
 
-    bus0_hint = _link_carrier_hint(n, bus0)
-    bus1_hint = _link_carrier_hint(n, bus1)
-    return (
-        p_min_pu < 0.0
-        and p_max_pu <= 0.0
-        and "heat" in bus0_hint
-        and "electric" in bus1_hint
-    )
+    del p_max_pu, bus0, bus1
+    return p_min_pu < 0.0
+
+
+def _heat_pump_efficiency_series(
+    n: pypsa.Network,
+    link_name: str,
+    scenario: str | None = None,
+) -> pd.Series:
+    efficiency = _read_link_efficiency_series(n, link_name, scenario=scenario).reindex(n.snapshots)
+    if efficiency.isnull().any() or (efficiency <= 0).any():
+        raise ValueError(f"Efficiency/COP for link '{link_name}' must be finite and strictly positive.")
+    return efficiency
 
 
 def _heat_pump_electricity_addition(
@@ -245,13 +250,24 @@ def _heat_pump_electricity_addition(
     scenario: str | None = None,
 ) -> tuple[pd.Series, str]:
     """Convert heat reduction into electricity demand for heat-pump orientation."""
-    efficiency = _read_link_efficiency_series(n, link_name, scenario=scenario).reindex(n.snapshots)
-    if efficiency.isnull().any() or (efficiency <= 0).any():
-        raise ValueError(f"Efficiency/COP for link '{link_name}' must be finite and strictly positive.")
-
+    efficiency = _heat_pump_efficiency_series(n, link_name, scenario=scenario)
     if _is_reversed_heat_pump_link(n, link_name):
-        return heat_reduction * efficiency, "inverse_cop"
+        cop = 1.0 / efficiency
+        return heat_reduction / cop, "inverse_cop"
     return heat_reduction / efficiency, "cop"
+
+
+def _heat_pump_heat_addition(
+    n: pypsa.Network,
+    link_name: str,
+    electricity_reduction: pd.Series,
+    scenario: str | None = None,
+) -> tuple[pd.Series, str]:
+    """Convert electricity reduction into useful heat demand for inverse heat-pump shifts."""
+    efficiency = _heat_pump_efficiency_series(n, link_name, scenario=scenario)
+    if _is_reversed_heat_pump_link(n, link_name):
+        return electricity_reduction / efficiency, "inverse_cop"
+    return electricity_reduction * efficiency, "cop"
 
 
 def _carrier_names_from_table(df: pd.DataFrame, carrier: str) -> list[str]:
@@ -524,6 +540,8 @@ def _target_load_for_source(
         return str(names[0])
     if source_carrier and target_carrier and source_name.endswith(source_carrier):
         return f"{_extract_prefix(source_name, source_carrier)}{target_carrier}"
+    if source_carrier and target_carrier:
+        return f"{source_name} {target_carrier}"
     if target_carrier:
         return target_carrier
     raise ValueError(
@@ -603,6 +621,17 @@ def _resolve_target_load_for_source(
     return proposed
 
 
+def _conversion_factor(transformation: Mapping[str, Any], mode: str) -> float:
+    """Return target-output TWh per source-input TWh for simple conversions."""
+    if "efficiency" in transformation:
+        return float(transformation["efficiency"])
+    if "efficiency_factor" in transformation:
+        return float(transformation["efficiency_factor"])
+    if "source_efficiency" in transformation and "target_efficiency" in transformation:
+        return float(transformation["source_efficiency"]) / float(transformation["target_efficiency"])
+    return 1.0
+
+
 def _load_profile_for_energy(
     n: pypsa.Network,
     load_name: str,
@@ -655,9 +684,10 @@ def _reduce_load_energy(
     actual_delta = min(delta_twh, energy)
     reduction = current.clip(lower=0.0) * (actual_delta / energy)
     updated = current - reduction
-    if updated.min() < -non_negative_tolerance:
+    newly_negative = (updated < -non_negative_tolerance) & (current >= -non_negative_tolerance)
+    if newly_negative.any():
         raise ValueError(f"Reduction would make load '{load_name}' negative.")
-    _write_load_series(n, load_name, updated.clip(lower=0.0), scenario=scenario)
+    _write_load_series(n, load_name, updated, scenario=scenario)
     return reduction
 
 
@@ -1247,6 +1277,7 @@ def _normalize_transition_entry(entry: Mapping[str, Any], entry_name: str) -> di
         "create_missing_load",
         "copy_source_bus",
         "cop",
+        "cop_mode",
     }
     for key in transform_keys:
         if key in raw and key not in transformation:
@@ -1404,16 +1435,8 @@ def _apply_shift_like_entry(
         )
         actual_source_delta = _series_energy_twh(n, reduction, weighting=weighting)
 
-        if mode in {"shift", "split"}:
-            factor = float(transformation.get("efficiency_factor", 1.0))
-            addition = reduction * factor
-        elif mode == "electrify_transport":
-            factor = float(transformation["source_efficiency"]) / float(
-                transformation["target_efficiency"]
-            )
-            addition = reduction * factor
-        else:
-            raise ValueError(f"Unsupported shift-like mode '{mode}'.")
+        factor = _conversion_factor(transformation, mode)
+        addition = reduction * factor
 
         _increase_load_by_profile(n, target_name, addition, scenario=scenario)
         target_delta = _series_energy_twh(n, addition, weighting=weighting)
@@ -1528,9 +1551,10 @@ def _apply_reverse_shift_entry(
             }
         )
 
+    applied_source = sum(x["source_delta_twh"] for x in affected)
     return {
-        "applied_delta_twh": sum(x["source_delta_twh"] for x in affected),
-        "transformed_target_twh": transformed,
+        "applied_delta_twh": applied_source,
+        "transformed_target_twh": applied_source,
         "dynamic_feasibility_cap_twh": dynamic_cap,
         "affected_loads": affected,
     }
@@ -1588,7 +1612,8 @@ def _apply_electrify_heat_entry(
     n: pypsa.Network,
     entry: Mapping[str, Any],
     transformation: Mapping[str, Any],
-    delta_twh: float,
+    requested_target_twh: float,
+    source_cap_twh: float,
     scenario: str | None,
     settings: Mapping[str, Any],
 ) -> dict:
@@ -1597,23 +1622,25 @@ def _apply_electrify_heat_entry(
     source_names = _select_load_names(n, _source_selector(entry))
     if not source_names:
         raise KeyError(f"Demand-transition entry matched no heat source loads: {entry}")
+
     loads = _base_loads_table(n)
-    energies = {name: _load_annual_energy_twh(n, name, scenario, weighting) for name in source_names}
-    total = sum(energies.values())
+    source_energy = {
+        name: _load_annual_energy_twh(n, name, scenario, weighting)
+        for name in source_names
+    }
+    total_source = sum(source_energy.values())
+    if total_source <= 0.0 or requested_target_twh <= 0.0 or source_cap_twh <= 0.0:
+        return {"applied_delta_twh": 0.0, "transformed_target_twh": 0.0, "affected_loads": []}
+
     cop_map = _ensure_dict(transformation.get("cop", {}), "transformation.cop")
-    affected = []
-    transformed = 0.0
-    for source_name, energy in energies.items():
-        if energy <= 0 or total <= 0:
+    cop_mode = str(transformation.get("cop_mode", "direct")).lower()
+    inverse_cop_shift = cop_mode in {"inverse", "electricity_to_heat", "target_heat"}
+    candidates = []
+    total_target_cap = 0.0
+    for source_name, energy in source_energy.items():
+        if energy <= 0.0:
             continue
         source_carrier = str(_component_value(loads, source_name, "carrier"))
-        hp_suffix = cop_map.get(source_carrier)
-        if hp_suffix is None:
-            raise KeyError(f"No COP heat-pump carrier mapping configured for '{source_carrier}'.")
-        prefix = _extract_prefix(source_name, source_carrier)
-        hp_name = f"{prefix}{hp_suffix}"
-        _assert_link_exists(n, hp_name)
-        share = delta_twh * energy / total
         target_name = _resolve_target_load_for_source(
             n,
             source_name,
@@ -1629,26 +1656,86 @@ def _apply_electrify_heat_entry(
                 source_name,
             )
             continue
-        reduction = _reduce_load_energy(n, source_name, share, scenario, weighting, nonneg)
-        addition, hp_efficiency_mode = _heat_pump_electricity_addition(
-            n, hp_name, reduction, scenario=scenario
+
+        if inverse_cop_shift:
+            heat_carrier = str(_component_value(loads, target_name, "carrier"))
+            hp_suffix = cop_map.get(heat_carrier)
+            if hp_suffix is None:
+                raise KeyError(f"No inverse COP heat-pump carrier mapping configured for target '{heat_carrier}'.")
+            prefix = _extract_prefix(target_name, heat_carrier)
+        else:
+            hp_suffix = cop_map.get(source_carrier)
+            if hp_suffix is None:
+                raise KeyError(f"No COP heat-pump carrier mapping configured for source '{source_carrier}'.")
+            prefix = _extract_prefix(source_name, source_carrier)
+
+        hp_name = f"{prefix}{hp_suffix}"
+        _assert_link_exists(n, hp_name)
+        source_cap_for_load = min(energy, source_cap_twh * energy / total_source)
+        cap_reduction_profile = _load_profile_for_energy(
+            n, source_name, source_cap_for_load, scenario, weighting
         )
-        _increase_load_by_profile(n, target_name, addition, scenario=scenario)
-        target_delta = _series_energy_twh(n, addition, weighting=weighting)
-        transformed += target_delta
-        affected.append(
+        if inverse_cop_shift:
+            cap_addition, hp_efficiency_mode = _heat_pump_heat_addition(
+                n, hp_name, cap_reduction_profile, scenario=scenario
+            )
+        else:
+            cap_addition, hp_efficiency_mode = _heat_pump_electricity_addition(
+                n, hp_name, cap_reduction_profile, scenario=scenario
+            )
+        target_cap = _series_energy_twh(n, cap_addition, weighting=weighting)
+        if target_cap <= 0.0:
+            continue
+        candidates.append(
             {
                 "source": source_name,
                 "target": target_name,
                 "heat_pump": hp_name,
+                "mode": hp_efficiency_mode,
+                "source_cap_twh": source_cap_for_load,
+                "target_cap_twh": target_cap,
+            }
+        )
+        total_target_cap += target_cap
+
+    target_to_apply = min(requested_target_twh, total_target_cap)
+    affected = []
+    transformed = 0.0
+    applied_source = 0.0
+    for candidate in candidates:
+        target_share = target_to_apply * candidate["target_cap_twh"] / total_target_cap
+        source_delta = candidate["source_cap_twh"] * target_share / candidate["target_cap_twh"]
+        reduction = _reduce_load_energy(
+            n, candidate["source"], source_delta, scenario, weighting, nonneg
+        )
+        if inverse_cop_shift:
+            addition, hp_efficiency_mode = _heat_pump_heat_addition(
+                n, candidate["heat_pump"], reduction, scenario=scenario
+            )
+        else:
+            addition, hp_efficiency_mode = _heat_pump_electricity_addition(
+                n, candidate["heat_pump"], reduction, scenario=scenario
+            )
+        _increase_load_by_profile(n, candidate["target"], addition, scenario=scenario)
+        source_delta_actual = _series_energy_twh(n, reduction, weighting)
+        target_delta = _series_energy_twh(n, addition, weighting=weighting)
+        applied_source += source_delta_actual
+        transformed += target_delta
+        affected.append(
+            {
+                "source": candidate["source"],
+                "target": candidate["target"],
+                "heat_pump": candidate["heat_pump"],
                 "heat_pump_efficiency_mode": hp_efficiency_mode,
-                "source_delta_twh": _series_energy_twh(n, reduction, weighting),
+                "source_delta_twh": source_delta_actual,
                 "target_delta_twh": target_delta,
             }
         )
+
     return {
-        "applied_delta_twh": sum(x["source_delta_twh"] for x in affected),
+        "applied_delta_twh": applied_source,
         "transformed_target_twh": transformed,
+        "dynamic_feasibility_cap_twh": total_target_cap,
         "affected_loads": affected,
     }
 
@@ -1673,7 +1760,19 @@ def _apply_transition_entry(
         source_energy = requested_twh
     methodological_cap = _entry_cap_twh(entry, source_energy)
     dynamic_cap = methodological_cap
-    if mode == "reverse_shift":
+
+    if mode == "shift" and transformation.get("cop") is not None:
+        result = _apply_electrify_heat_entry(
+            n, entry, transformation, requested_twh, methodological_cap, scenario, settings
+        )
+        dynamic_cap = result.get("dynamic_feasibility_cap_twh", methodological_cap)
+    elif mode in {"convert", "shift", "split", "electrify_transport"}:
+        factor = _conversion_factor(transformation, mode)
+        if factor <= 0.0:
+            raise ValueError(f"Conversion factor for entry '{entry_name}' must be positive.")
+        source_delta = min(methodological_cap, requested_twh / factor)
+        result = _apply_shift_like_entry(n, entry, transformation, source_delta, scenario, settings, "convert")
+    elif mode == "reverse_shift":
         source_eff = float(transformation["source_efficiency"])
         target_eff = float(transformation["target_efficiency"])
         max_frac = float(transformation.get("max_target_reduction_fraction", 1.0))
@@ -1686,24 +1785,21 @@ def _apply_transition_entry(
                 n, source_name, source_carrier, target_selector, target_selector.get("carrier")
             )
             if target_name not in loads.index:
-                if transformation.get("strict_target_available", False):
-                    raise KeyError(f"Target load '{target_name}' for reverse_shift is missing.")
                 continue
             if _load_annual_energy_twh(n, source_name, scenario, weighting) <= 0.0:
                 continue
             target_energy = _load_annual_energy_twh(n, target_name, scenario, weighting)
             caps.append(max_frac * target_energy * target_eff / source_eff)
         dynamic_cap = sum(caps)
-
-    delta = min(requested_twh, methodological_cap, dynamic_cap)
-    if mode in {"shift", "split", "electrify_transport"}:
-        result = _apply_shift_like_entry(n, entry, transformation, delta, scenario, settings, mode)
-    elif mode == "reverse_shift":
-        result = _apply_reverse_shift_entry(n, entry, transformation, delta, scenario, settings)
+        source_delta = min(requested_twh, methodological_cap, dynamic_cap)
+        result = _apply_reverse_shift_entry(n, entry, transformation, source_delta, scenario, settings)
     elif mode == "electrify_heat":
-        result = _apply_electrify_heat_entry(n, entry, transformation, delta, scenario, settings)
+        result = _apply_electrify_heat_entry(
+            n, entry, transformation, requested_twh, methodological_cap, scenario, settings
+        )
+        dynamic_cap = result.get("dynamic_feasibility_cap_twh", methodological_cap)
     elif mode == "add":
-        result = _apply_add_entry(n, entry, transformation, delta, scenario, settings)
+        result = _apply_add_entry(n, entry, transformation, requested_twh, scenario, settings)
     else:
         raise ValueError(f"Unsupported demand_transition transformation type '{mode}'.")
 
@@ -1714,7 +1810,7 @@ def _apply_transition_entry(
         "dynamic_feasibility_cap_twh": result.get("dynamic_feasibility_cap_twh", dynamic_cap),
         "requested_twh": requested_twh,
         **result,
-        "remaining_target_twh": max(0.0, requested_twh - result.get("applied_delta_twh", 0.0)),
+        "remaining_target_twh": max(0.0, requested_twh - result.get("transformed_target_twh", 0.0)),
     }
 
 
@@ -1723,6 +1819,7 @@ def _validate_loads_after_transition(
     scenario: str | None,
     settings: Mapping[str, Any],
     names: list[str] | None = None,
+    check_non_negative: bool = True,
 ) -> None:
     tol = float(settings.get("non_negative_tolerance", 1e-8))
     if names is None:
@@ -1734,7 +1831,7 @@ def _validate_loads_after_transition(
             raise ValueError(f"NaNs introduced in load '{name}'.")
         if np.isinf(values).any():
             raise ValueError(f"Infinite values introduced in load '{name}'.")
-        if values.min() < -tol:
+        if check_non_negative and values.min() < -tol:
             raise ValueError(f"Negative load values below tolerance in '{name}'.")
 
 
@@ -1798,7 +1895,7 @@ def _action_demand_transition(
             scenario=scenario,
             settings=settings,
         )
-        remaining = max(0.0, remaining - report.get("applied_delta_twh", 0.0))
+        remaining = max(0.0, remaining - report.get("transformed_target_twh", 0.0))
         report["remaining_target_twh"] = remaining
         entry_reports.append(report)
 
@@ -1826,13 +1923,29 @@ def _action_demand_transition(
             f" in scenario '{scenario}'" if scenario else "",
         )
     touched_loads = []
+    reduced_loads = []
     for entry_report in entry_reports:
         for affected in entry_report.get("affected_loads", []):
             for key in ("source", "target"):
                 if affected.get(key):
                     touched_loads.append(affected[key])
+            if affected.get("target_reduction_twh", 0.0) > 0 and affected.get("target"):
+                reduced_loads.append(affected["target"])
+            elif affected.get("source_delta_twh", 0.0) > 0 and affected.get("source"):
+                reduced_loads.append(affected["source"])
     _validate_loads_after_transition(
-        n, scenario=scenario, settings=settings, names=touched_loads
+        n,
+        scenario=scenario,
+        settings=settings,
+        names=touched_loads,
+        check_non_negative=False,
+    )
+    _validate_loads_after_transition(
+        n,
+        scenario=scenario,
+        settings=settings,
+        names=reduced_loads,
+        check_non_negative=False,
     )
     n.meta.setdefault("demand_transition_reports", {})[scenario or "deterministic"] = report
     logger.info(

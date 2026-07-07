@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_"
-  name: BASE
+  name: BASE_2020
   scenarios:
     enable: false
     file: config/demand_uncertainty/scenarios_deterministic.yaml
@@ -25,7 +25,7 @@ scenario:
   sector_opts:
   - ""
   planning_horizons:
-  - 2050
+  - 2020
 
 electricity:
   extendable_carriers:
@@ -46,10 +46,10 @@ electricity:
     Link: []
 
 biomass:
-  year: 2050
+  year: 2020
 
 costs:
-  year: 2040
+  year: 2020
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
