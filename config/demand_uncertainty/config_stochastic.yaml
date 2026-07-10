@@ -13,7 +13,7 @@ run:
 
 stochastic_scenarios:
   enable: true
-  file: config/demand_uncertainty/scenario_stochastic.yaml
+  file: config/demand_uncertainty/scenarios/scenarios_stochastic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:

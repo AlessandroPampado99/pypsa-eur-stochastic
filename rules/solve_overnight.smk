@@ -19,6 +19,13 @@ def _stoch_active_scenario():
 def _stoch_preprocess_enabled():
     return _stoch_enabled() or _stoch_active_scenario() is not None
 
+def _stoch_cfg_for_wildcards(w):
+    return config_provider("stochastic_scenarios", default={"enable": False})(w) or {}
+
+def _stoch_preprocess_enabled_for_wildcards(w):
+    stoch = _stoch_cfg_for_wildcards(w)
+    return bool(stoch.get("enable", False)) or stoch.get("active_scenario") is not None
+
 def _stoch_file():
     return _stoch_cfg().get("file", None)
 
@@ -33,7 +40,7 @@ def _stoch_scenario_names():
     return list(sc.keys())
 
 def input_sector_network(w):
-    if _stoch_preprocess_enabled():
+    if _stoch_preprocess_enabled_for_wildcards(w):
         return (
             RESULTS
             + f"networks/base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"

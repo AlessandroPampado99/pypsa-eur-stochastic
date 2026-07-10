@@ -13,7 +13,7 @@ run:
 
 stochastic_scenarios:
   enable: false
-  file: config/demand_uncertainty/scenario_deterministic.yaml
+  file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
   active_scenario:    # change this label to run one scenario at a time
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario

@@ -4,7 +4,7 @@ run:
   name: all
   scenarios:
     enable: true
-    file: config/cutouts_prices_uncertainty/scenarios.yaml
+    file: config/cutouts_prices_uncertainty/scenarios_90.yaml
   disable_progressbar: false
   shared_resources:
     policy: false

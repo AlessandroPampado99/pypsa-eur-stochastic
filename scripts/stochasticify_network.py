@@ -1660,9 +1660,16 @@ def _apply_electrify_heat_entry(
         if inverse_cop_shift:
             heat_carrier = str(_component_value(loads, target_name, "carrier"))
             hp_suffix = cop_map.get(heat_carrier)
-            if hp_suffix is None:
-                raise KeyError(f"No inverse COP heat-pump carrier mapping configured for target '{heat_carrier}'.")
-            prefix = _extract_prefix(target_name, heat_carrier)
+            if hp_suffix is not None:
+                prefix = _extract_prefix(target_name, heat_carrier)
+            else:
+                hp_suffix = cop_map.get(source_carrier)
+                if hp_suffix is None:
+                    raise KeyError(
+                        "No inverse COP heat-pump carrier mapping configured for "
+                        f"target '{heat_carrier}' or source '{source_carrier}'."
+                    )
+                prefix = _extract_prefix(source_name, source_carrier)
         else:
             hp_suffix = cop_map.get(source_carrier)
             if hp_suffix is None:
@@ -2152,10 +2159,10 @@ if __name__ == "__main__":
             "stochasticify_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/demand_uncertainty/config_base.yaml",
+            configfiles="config/demand_uncertainty/config_deterministic.yaml",
             sector_opts="",
             planning_horizons="2050",
-            # run="BASE",
+            run="ELEC_HEAT",
         )
 
     configure_logging(snakemake)

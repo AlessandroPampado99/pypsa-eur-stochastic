@@ -2,7 +2,7 @@
 # Enable with:
 #   stochastic_scenarios:
 #     enable: true
-#     file: config/demand_uncertainty/scenario_stochastic.yaml
+#     file: config/demand_uncertainty/scenarios/scenarios_stochastic.yaml
 #
 # The probabilities below define the in-sample stochastic cases. The same
 # scenario_definitions block can also be reused for deterministic validation.

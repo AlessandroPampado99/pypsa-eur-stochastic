@@ -2,7 +2,7 @@
 # Select one scenario from scenario_definitions with:
 #   stochastic_scenarios:
 #     enable: false
-#     file: config/demand_uncertainty/scenario_deterministic.yaml
+#     file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
 #     active_scenario: ELEC_HEAT
 #
 # The catalogue uses one main transition type: shift. Each entry reduces source
@@ -302,8 +302,8 @@ scenario_definitions:
       family: H2
       target: conservative
       priority:
-        - industry electricity
-        - low-temperature heat for industry
+        - industry_electricity
+        - low-temperature_heat_for_industry
 
   H2_TRANS:
     demand_transition:
@@ -312,8 +312,8 @@ scenario_definitions:
       priority:
         - land_transport_oil
         - shipping_oil
-        - industry electricity
-        - low-temperature heat for industry
+        - industry_electricity
+        - low-temperature_heat_for_industry
 
   ELEC_HIGH:
     demand_transition:
