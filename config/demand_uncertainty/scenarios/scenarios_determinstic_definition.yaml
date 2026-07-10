@@ -49,28 +49,28 @@ families:
       land_transport_oil:
         source: land transport oil
         target: land transport EV
-        cap: 0.20
+        cap: 0.95
         type: shift
         efficiency_factor: 0.302145139124
 
       agriculture_machinery_oil:
         source: agriculture machinery oil
         target: agriculture machinery electric
-        cap: 0.20
+        cap: 0.95
         type: shift
         efficiency_factor: 2.333333333333
 
       solid_biomass_for_industry:
         source: solid biomass for industry
         target: industry electricity
-        cap: 0.20
+        cap: 0.507
         type: shift
         efficiency_factor: 1.0
 
       low_temperature_heat_for_industry:
         source: low-temperature heat for industry
         target: industry electricity
-        cap: 0.20
+        cap: 0.95
         type: shift
         cop:
           low-temperature heat for industry: urban central air heat pump
@@ -87,14 +87,14 @@ families:
       land_transport_EV:
         source: land transport EV
         target: land transport oil
-        cap: 0.2
+        cap: 0.93
         type: shift
         efficiency_factor: 3.309644857175
 
       industry_electricity:
         source: industry electricity
         target: gas for industry
-        cap: 0.2
+        cap: 0.383
         type: shift
         cop_mode: inverse
         cop:
@@ -103,7 +103,7 @@ families:
       low_temperature_heat_for_industry:
         source: low-temperature heat for industry
         target: gas for industry
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
@@ -111,14 +111,14 @@ families:
         source:
           carrier: shipping methanol
         target: shipping oil
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 1.15
 
       agriculture_machinery_electric:
         source: agriculture machinery electric
         target: agriculture machinery oil
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 0.428571428571
 
@@ -133,21 +133,21 @@ families:
       aviation_kerosene:
         source: kerosene for aviation
         target: methanol kerosene for aviation
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
       low_temperature_heat_for_industry:
         source: low-temperature heat for industry
         target: industry methanol
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
       industry_electricity:
         source: industry electricity
         target: industry methanol
-        cap: 0.20
+        cap: 0.383
         type: shift
         cop_mode: inverse
         cop:
@@ -157,7 +157,7 @@ families:
         source: shipping oil
         target:
           carrier: shipping methanol
-        cap: 0.2
+        cap: 0.95
         type: shift
         efficiency_factor: 0.869565217391
 
@@ -165,7 +165,7 @@ families:
         source: H2 for shipping
         target:
           carrier: shipping methanol
-        cap: 1.00
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
@@ -177,19 +177,19 @@ families:
       high: 80
 
     entries:
-      low-temperature heat for industry:
+      low-temperature_heat_for_industry:
         source:
           - low-temperature heat for industry
         target: H2 for industry
-        cap: 0.20
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
-      industry electricity:
+      industry_electricity:
         source:
           - industry electricity
         target: H2 for industry
-        cap: 0.20
+        cap: 0.383
         type: shift
         cop_mode: inverse
         cop:
@@ -198,14 +198,14 @@ families:
       shipping_oil:
         source: shipping oil
         target: H2 for shipping
-        cap: 0.40
+        cap: 0.95
         type: shift
         efficiency_factor: 1.0
 
       land_transport_oil:
         source: land transport oil
         target: land transport fuel cell
-        cap: 0.20
+        cap: 0.95
         type: shift
         efficiency_factor: 0.535651226544
 
@@ -329,7 +329,7 @@ scenario_definitions:
       family: OILGAS
       target: high
       priority:
-        - land_transport_ev
+        - land_transport_EV
         - industry_electricity
         - low_temperature_heat_for_industry
 

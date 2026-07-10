@@ -199,9 +199,9 @@ if __name__ == "__main__":
 
         snakemake = mock_snakemake(
             "build_central_heating_temperature_profiles",
-            clusters=50,
-            planning_horizons="2050",
-            configfiles=["config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"]
+            clusters='adm',
+            planning_horizons="2020",
+            configfiles=["config/demand_uncertainty/config_base_2020.yaml"]
         )
 
     set_scenario_config(snakemake)
