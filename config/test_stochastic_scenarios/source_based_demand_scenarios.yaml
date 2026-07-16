@@ -1,0 +1,113 @@
+# Example source-based demand-transition scenario catalogue.
+# Concise syntax is accepted; selectors such as source/target strings are load carriers.
+
+scenarios:
+  BASE: 0.20
+  ELEC_HEAT: 0.20
+  OILGAS_ROAD: 0.20
+  PRICE_GAS_HIGH: 0.20
+  H2_IND: 0.20
+
+settings:
+  units: TWh
+  weighting: generators
+  allow_unmet_target: false
+  tolerance_twh: 1.0e-4
+  non_negative_tolerance: 1.0e-8
+
+families:
+  ELEC:
+    targets:
+      conservative: 400
+      high: 600
+    entries:
+      building_heat:
+        source:
+          - rural heat
+          - urban central heat
+          - urban decentral heat
+        target: electricity
+        cap: 0.20
+        type: electrify_heat
+        cop:
+          rural heat: rural air heat pump
+          urban central heat: urban central air heat pump
+          urban decentral heat: urban decentral air heat pump
+          agriculture heat: rural air heat pump
+
+      land_transport_oil:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.20
+        type: electrify_transport
+        source_efficiency: 16.0712
+        target_efficiency: 53.19
+
+  OILGAS:
+    targets:
+      conservative: 100
+      high: 150
+    entries:
+      land_transport_oil:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.15
+        type: reverse_shift
+        source_efficiency: 16.0712
+        target_efficiency: 53.19
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+      gas_for_industry:
+        source: gas for industry
+        target: H2 for industry
+        cap: 0.20
+        type: reverse_shift
+        source_efficiency: 1.0
+        target_efficiency: 1.0
+        max_target_reduction_fraction: 0.95
+        strict_target_available: true
+
+  H2:
+    targets:
+      industry: 80
+    entries:
+      h2_for_industry:
+        target: H2 for industry
+        cap: 1.0
+        type: add
+        allow_flat_fallback: true
+
+scenario_definitions:
+  BASE: base
+
+  ELEC_HEAT:
+    demand_transition:
+      family: ELEC
+      target: conservative
+      priority:
+        - building_heat
+        - land_transport_oil
+
+  OILGAS_ROAD:
+    demand_transition:
+      family: OILGAS
+      target: conservative
+      priority:
+        - land_transport_oil
+        - gas_for_industry
+
+  PRICE_GAS_HIGH:
+    modify_components:
+      - component: Link
+        attribute: marginal_cost
+        carrier: gas boiler
+        operation: scale
+        value: 1.20
+
+  H2_IND:
+    demand_transition:
+      family: H2
+      target: industry
+      priority:
+        - h2_for_industry

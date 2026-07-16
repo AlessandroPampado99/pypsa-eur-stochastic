@@ -1,15 +1,20 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_"
-  name: NUC-FREE
+  name: BASE_2020
   scenarios:
     enable: false
-    file: config/demand_uncertainty/scenarios_demand_uncertainty.yaml
+    file: config/demand_uncertainty/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+stochastic_scenarios:
+  enable: false
+  file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
+  active_scenario:    # change this label to run one scenario at a time
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -20,7 +25,7 @@ scenario:
   sector_opts:
   - ""
   planning_horizons:
-  - 2050
+  - 2025
 
 electricity:
   extendable_carriers:
@@ -39,13 +44,12 @@ electricity:
     - battery
     - H2
     Link: []
-  everywhere_powerplants: [nuclear]
 
 biomass:
-  year: 2050
+  year: 2025
 
 costs:
-  year: 2040
+  year: 2025
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
@@ -108,6 +112,15 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
+  aviation_methanol_to_kerosene: true
+  aviation_methanol_kerosene_share:
+    2020: 0.0
+    2025: 0.0
+    2030: 0.0
+    2035: 0.0
+    2040: 0.0
+    2045: 0.0
+    2050: 0.5
   allam_cycle_gas: true
   methanol:
     regional_methanol_demand: true
@@ -143,9 +156,6 @@ sector:
   bioH2: false
   municipal_solid_waste: false
 
-conventional:
-  nuclear:
-    p_max_pu: data/nuclear_p_max_pu_free.csv
 
 clustering:
   mode: administrative

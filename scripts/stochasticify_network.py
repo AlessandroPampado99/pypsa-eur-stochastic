@@ -198,6 +198,48 @@ def _read_link_efficiency_series(
     return _read_ts_series(n.links_t.efficiency, name=link_name, scenario=scenario)
 
 
+def _heat_pump_cop_series(
+    n: pypsa.Network,
+    link_name: str,
+    scenario: str | None = None,
+) -> pd.Series:
+    """Return COP, stored by these reversed links as 1 / efficiency."""
+    efficiency = _read_link_efficiency_series(n, link_name, scenario=scenario).reindex(n.snapshots)
+    if efficiency.isnull().any() or not np.isfinite(efficiency.to_numpy(dtype=float)).all():
+        raise ValueError(f"Efficiency for heat-pump link '{link_name}' must be finite.")
+    if (efficiency <= 0).any():
+        raise ValueError(f"Efficiency for heat-pump link '{link_name}' must be strictly positive.")
+    cop = 1.0 / efficiency
+    if (cop <= 1.0).any():
+        raise ValueError(
+            f"Heat-pump link '{link_name}' must have COP = 1 / efficiency > 1 "
+            "at every snapshot."
+        )
+    return cop
+
+
+def _heat_pump_electricity_addition(
+    n: pypsa.Network,
+    link_name: str,
+    heat_reduction: pd.Series,
+    scenario: str | None = None,
+) -> tuple[pd.Series, str]:
+    """Convert useful heat reduction into electricity demand."""
+    cop = _heat_pump_cop_series(n, link_name, scenario=scenario)
+    return heat_reduction / cop, "cop_is_inverse_link_efficiency"
+
+
+def _heat_pump_heat_addition(
+    n: pypsa.Network,
+    link_name: str,
+    electricity_reduction: pd.Series,
+    scenario: str | None = None,
+) -> tuple[pd.Series, str]:
+    """Convert electricity reduction into displaced useful heat demand."""
+    cop = _heat_pump_cop_series(n, link_name, scenario=scenario)
+    return electricity_reduction * cop, "cop_is_inverse_link_efficiency"
+
+
 def _carrier_names_from_table(df: pd.DataFrame, carrier: str) -> list[str]:
     """Return component names matching a carrier from a base component table."""
     base = _base_component_table(df)
@@ -395,574 +437,264 @@ def _write_load_series(
     _ensure_load_timeseries_column(n, load_name, scenario=scenario)
     _write_ts_series(n.loads_t.p_set, name=load_name, values=values, scenario=scenario)
 
-# ---------------------------
-# Structured scenario builders
-# ---------------------------
-
-TRANSPORT_ELECTRIC_EFFICIENCY = 53.19
-TRANSPORT_ICE_EFFICIENCY = 16.0712
-URBAN_HEAT_CENTRAL_ALPHA = 0.98
 
 
-def _scenario_agriculture_full_electric(
+def _snapshot_weightings(n: pypsa.Network, column: str = "generators") -> pd.Series:
+    """Return snapshot weights aligned to n.snapshots."""
+    weights = n.snapshot_weightings
+    if isinstance(weights, pd.DataFrame):
+        if column not in weights.columns:
+            raise KeyError(f"snapshot_weightings has no column '{column}'.")
+        return weights[column].reindex(n.snapshots).astype(float)
+    return pd.Series(weights, index=n.snapshots, dtype=float).reindex(n.snapshots)
+
+
+def _series_energy_twh(
     n: pypsa.Network,
+    series: pd.Series,
+    weighting: str = "generators",
+) -> float:
+    """Compute annual energy in TWh from an MW series and snapshot weights in hours."""
+    s = series.reindex(n.snapshots).astype(float)
+    if s.isnull().any():
+        raise ValueError("NaNs encountered while computing annual energy.")
+    return float((s * _snapshot_weightings(n, weighting)).sum() / 1e6)
+
+
+def _load_annual_energy_twh(
+    n: pypsa.Network,
+    load_name: str,
     scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """
-    Electrify agriculture:
-    - move all agriculture machinery oil demand to agriculture machinery electric (1:1)
-    - convert agriculture heat demand into agriculture electricity using local rural air heat pump COP
-    """
-    del config  # unused for now
-
-    # Part 1: machinery oil -> machinery electric
-    oil_names = _find_load_names_by_carrier(n, "agriculture machinery oil")
-    if not oil_names:
-        raise KeyError("No loads found for carrier 'agriculture machinery oil'.")
-
-    count_machinery = 0
-    for oil_name in oil_names:
-        prefix = _extract_prefix(oil_name, "agriculture machinery oil")
-        elec_name = f"{prefix}agriculture machinery electric"
-
-        _assert_load_exists(n, elec_name)
-
-        oil_series = _read_load_series(n, oil_name, scenario=scenario)
-        elec_series = _read_load_series(n, elec_name, scenario=scenario)
-
-        _write_load_series(n, elec_name, elec_series + oil_series, scenario=scenario)
-        _write_load_series(
-            n, oil_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
-        )
-        count_machinery += 1
-
-    # Part 2: agriculture heat -> agriculture electricity via rural air heat pump COP
-    heat_names = _find_load_names_by_carrier(n, "agriculture heat")
-    if not heat_names:
-        raise KeyError("No loads found for carrier 'agriculture heat'.")
-
-    count_heat = 0
-    for heat_name in heat_names:
-        prefix = _extract_prefix(heat_name, "agriculture heat")
-        elec_name = f"{prefix}agriculture electricity"
-        hp_name = f"{prefix}rural air heat pump"
-
-        _assert_load_exists(n, elec_name)
-        _assert_link_exists(n, hp_name)
-
-        heat_series = _read_load_series(n, heat_name, scenario=scenario)
-        elec_series = _read_load_series(n, elec_name, scenario=scenario)
-        cop = _read_link_efficiency_series(n, hp_name, scenario=scenario)
-
-        if (cop <= 0).any():
-            raise ValueError(f"Non-positive COP detected for link '{hp_name}'.")
-
-        added_electricity = heat_series / cop
-
-        _write_load_series(n, elec_name, elec_series + added_electricity, scenario=scenario)
-        _write_load_series(
-            n, heat_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
-        )
-        count_heat += 1
-
-    logger.info(
-        "Applied scenario 'agriculture_full_electric' to %s machinery node(s) and %s heat node(s)%s.",
-        count_machinery,
-        count_heat,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    weighting: str = "generators",
+) -> float:
+    """Compute annual energy in TWh for one load."""
+    return _series_energy_twh(
+        n,
+        _read_load_series(n, load_name, scenario=scenario),
+        weighting=weighting,
     )
 
 
-def _scenario_agriculture_machinery_full_oil(
+def _load_has_positive_energy(
     n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """Move all agriculture machinery electric demand to agriculture machinery oil (1:1)."""
-    del config  # unused for now
+    load_name: str,
+    scenario: str | None,
+    weighting: str,
+) -> bool:
+    """Return whether an existing load has positive annual energy."""
+    return _load_annual_energy_twh(
+        n, load_name, scenario=scenario, weighting=weighting
+    ) > 0.0
 
-    elec_names = _find_load_names_by_carrier(n, "agriculture machinery electric")
-    if not elec_names:
-        raise KeyError("No loads found for carrier 'agriculture machinery electric'.")
 
-    count = 0
-    for elec_name in elec_names:
-        prefix = _extract_prefix(elec_name, "agriculture machinery electric")
-        oil_name = f"{prefix}agriculture machinery oil"
+def _select_load_names(n: pypsa.Network, selector: Mapping[str, Any]) -> list[str]:
+    """Select load names using the generic component selector."""
+    return _select_names_from_component(n, "loads", selector)
 
-        _assert_load_exists(n, oil_name)
 
-        elec_series = _read_load_series(n, elec_name, scenario=scenario)
-        oil_series = _read_load_series(n, oil_name, scenario=scenario)
-
-        _write_load_series(n, oil_name, oil_series + elec_series, scenario=scenario)
-        _write_load_series(
-            n, elec_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
-        )
-        count += 1
-
-    logger.info(
-        "Applied scenario 'agriculture_machinery_full_oil' to %s node(s)%s.",
-        count,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+def _target_load_for_source(
+    source_name: str,
+    source_carrier: str | None,
+    target_selector: Mapping[str, Any] | None,
+    target_carrier: str | None,
+) -> str:
+    """Infer a target load name from source/target carrier suffixes or explicit selector."""
+    target_selector = target_selector or {}
+    target_name = target_selector.get("name")
+    if target_name:
+        return str(target_name)
+    names = target_selector.get("names")
+    if isinstance(names, str) and not any(ch in names for ch in "^$.*+?[](){}|\\"):
+        return names
+    if isinstance(names, (list, tuple)) and len(names) == 1:
+        return str(names[0])
+    if source_carrier and target_carrier and source_name.endswith(source_carrier):
+        return f"{_extract_prefix(source_name, source_carrier)}{target_carrier}"
+    if source_carrier and target_carrier:
+        return f"{source_name} {target_carrier}"
+    if target_carrier:
+        return target_carrier
+    raise ValueError(
+        f"Cannot infer target load for source '{source_name}'. Provide target.name, "
+        "a single target.names entry, or target_carrier."
     )
 
 
-def _scenario_shipping_full_methanol(
+
+
+def _target_selector_is_explicit(target_selector: Mapping[str, Any] | None) -> bool:
+    """Return whether the selector names a specific load rather than a carrier class."""
+    target_selector = target_selector or {}
+    return "name" in target_selector or "names" in target_selector
+
+
+def _resolve_target_load_for_source(
     n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
+    source_name: str,
+    source_carrier: str | None,
+    target_selector: Mapping[str, Any] | None,
+    target_carrier: str | None,
+) -> str:
     """
-    Move all shipping oil demand to the global EU shipping methanol load (1:1).
+    Resolve a target load name for source-to-target demand transitions.
 
-    Current PyPSA-Eur structure:
-    - shipping oil is nodal
-    - shipping methanol is represented by a single global load: 'EU shipping methanol'
+    Carrier shorthand normally maps by suffix, e.g. "AL rural heat" ->
+    "AL electricity". Some PyPSA-Eur loads, notably high-voltage electricity,
+    are named by bus/country only ("AL") while carrying carrier="electricity".
+    For carrier-based targets, fall back to such same-prefix existing loads.
     """
-    del config  # unused for now
+    target_selector = target_selector or {}
+    proposed = _target_load_for_source(
+        source_name, source_carrier, target_selector, target_carrier
+    )
+    loads = _base_loads_table(n)
+    if proposed in loads.index:
+        return proposed
 
-    oil_names = _find_load_names_by_carrier(n, "shipping oil")
-    if not oil_names:
-        raise KeyError("No loads found for carrier 'shipping oil'.")
+    if _target_selector_is_explicit(target_selector) or not target_carrier:
+        return proposed
 
-    methanol_name = "EU shipping methanol"
-    _assert_load_exists(n, methanol_name)
-
-    methanol_series = _read_load_series(n, methanol_name, scenario=scenario)
-    total_oil = pd.Series(0.0, index=n.snapshots)
-
-    for oil_name in oil_names:
-        total_oil = total_oil + _read_load_series(n, oil_name, scenario=scenario)
-
-    _write_load_series(n, methanol_name, methanol_series + total_oil, scenario=scenario)
-
-    zero = pd.Series(0.0, index=n.snapshots)
-    for oil_name in oil_names:
-        _write_load_series(n, oil_name, zero, scenario=scenario)
-
-    logger.info(
-        "Applied scenario 'shipping_full_methanol': moved %s nodal shipping oil load(s) into '%s'%s.",
-        len(oil_names),
-        methanol_name,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
+    carrier_matches = (
+        loads["carrier"].astype(str).eq(str(target_carrier))
+        if "carrier" in loads.columns
+        else pd.Series(False, index=loads.index)
     )
 
-
-def _scenario_urban_heat_full_central(
-    n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """Shift 98% of urban decentral heat demand to urban central heat."""
-    del config  # unused for now
-
-    decentral_names = _find_load_names_by_carrier(n, "urban decentral heat")
-    if not decentral_names:
-        raise KeyError("No loads found for carrier 'urban decentral heat'.")
-
-    count = 0
-    for decentral_name in decentral_names:
-        prefix = _extract_prefix(decentral_name, "urban decentral heat")
-        central_name = f"{prefix}urban central heat"
-
-        _assert_load_exists(n, central_name)
-
-        decentral_series = _read_load_series(n, decentral_name, scenario=scenario)
-        central_series = _read_load_series(n, central_name, scenario=scenario)
-
-        moved = URBAN_HEAT_CENTRAL_ALPHA * decentral_series
-        remaining = (1.0 - URBAN_HEAT_CENTRAL_ALPHA) * decentral_series
-
-        _write_load_series(n, central_name, central_series + moved, scenario=scenario)
-        _write_load_series(n, decentral_name, remaining, scenario=scenario)
-        count += 1
-
-    logger.info(
-        "Applied scenario 'urban_heat_full_central' with alpha=%.2f to %s node(s)%s.",
-        URBAN_HEAT_CENTRAL_ALPHA,
-        count,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
-    )
-
-
-def _scenario_land_transport_linear_ev(
-    n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """
-    Reallocate land transport useful service:
-    - 60% EV
-    - 40% oil / ICE
-    preserving useful transport service locally at each node.
-    """
-    del config  # unused for now
-
-    ev_names = _find_load_names_by_carrier(n, "land transport EV")
-    if not ev_names:
-        raise KeyError("No loads found for carrier 'land transport EV'.")
-
-    count = 0
-    for ev_name in ev_names:
-        prefix = _extract_prefix(ev_name, "land transport EV")
-        oil_name = f"{prefix}land transport oil"
-
-        _assert_load_exists(n, oil_name)
-
-        ev_series = _read_load_series(n, ev_name, scenario=scenario)
-        oil_series = _read_load_series(n, oil_name, scenario=scenario)
-
-        useful_service = (
-            ev_series * TRANSPORT_ELECTRIC_EFFICIENCY
-            + oil_series * TRANSPORT_ICE_EFFICIENCY
-        )
-
-        ev_new = 0.60 * useful_service / TRANSPORT_ELECTRIC_EFFICIENCY
-        oil_new = 0.40 * useful_service / TRANSPORT_ICE_EFFICIENCY
-
-        _write_load_series(n, ev_name, ev_new, scenario=scenario)
-        _write_load_series(n, oil_name, oil_new, scenario=scenario)
-        count += 1
-
-    logger.info(
-        "Applied scenario 'land_transport_linear_ev' to %s node(s)%s.",
-        count,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
-    )
-
-
-def _scenario_electricity_optimistic(
-    n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """Increase generic electricity demand by 10%."""
-    del config  # unused for now
-
-    _scale_loads_by_carrier(n, carrier="electricity", factor=1.10, scenario=scenario)
-
-    logger.info(
-        "Applied scenario 'electricity_optimistic'%s.",
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
-    )
-
-
-def _scenario_industry_h2(
-    n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """
-    Move gas for industry and solid biomass for industry demand to H2 for industry (1:1).
-    """
-    del config  # unused for now
-
-    gas_names = _find_load_names_by_carrier(n, "gas for industry")
-    if not gas_names:
-        raise KeyError("No loads found for carrier 'gas for industry'.")
-
-    count = 0
-    for gas_name in gas_names:
-        prefix = _extract_prefix(gas_name, "gas for industry")
-        biomass_name = f"{prefix}solid biomass for industry"
-        h2_name = f"{prefix}H2 for industry"
-
-        _assert_load_exists(n, biomass_name)
-        _assert_load_exists(n, h2_name)
-
-        gas_series = _read_load_series(n, gas_name, scenario=scenario)
-        biomass_series = _read_load_series(n, biomass_name, scenario=scenario)
-        h2_series = _read_load_series(n, h2_name, scenario=scenario)
-
-        _write_load_series(
-            n,
-            h2_name,
-            h2_series + gas_series + biomass_series,
-            scenario=scenario,
-        )
-        _write_load_series(
-            n, gas_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
-        )
-        _write_load_series(
-            n, biomass_name, pd.Series(0.0, index=n.loads_t.p_set.index), scenario=scenario
-        )
-        count += 1
-
-    logger.info(
-        "Applied scenario 'industry_h2' to %s node(s)%s.",
-        count,
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
-    )
-
-def _scenario_base(
-    n: pypsa.Network,
-    scenario: str | None = None,
-    config: dict | None = None,
-) -> None:
-    """Base scenario with no modifications."""
-    del n, config  # unused for now
-
-    logger.info(
-        "Applied scenario 'base' with no modifications%s.",
-        f" for stochastic scenario '{scenario}'" if scenario is not None else " in deterministic mode",
-    )
-
-
-def _apply_named_structured_scenario(
-    n: pypsa.Network,
-    scenario_name: str,
-    config: dict | None,
-    scenario: str | None = None,
-) -> None:
-    """Dispatch a structured scenario by name."""
-    if scenario_name not in STRUCTURED_SCENARIOS:
-        known = ", ".join(sorted(STRUCTURED_SCENARIOS))
-        raise ValueError(
-            f"Unknown structured scenario '{scenario_name}'. Known structured scenarios: {known}"
-        )
-
-    logger.info(
-        "Applying structured scenario builder '%s' (target=%s).",
-        scenario_name,
-        f"stochastic:{scenario}" if scenario is not None else "deterministic",
-    )
-    STRUCTURED_SCENARIOS[scenario_name](n=n, scenario=scenario, config=config or {})
-
-
-def _resolve_deterministic_structured_scenario(
-    config: dict,
-    wildcards: Mapping[str, Any] | None = None,
-) -> tuple[str | None, dict]:
-    """
-    Resolve the active structured scenario in deterministic mode.
-
-    Precedence:
-    1. config['structured_scenario']
-    2. config['scenario']['structured_name']
-    3. wildcards['run']
-    4. config['run']['name']
-
-    Returns
-    -------
-    scenario_name : str | None
-    scenario_params : dict
-    """
-    wildcards = wildcards or {}
-
-    scenario_block = config.get("scenario", {})
-    if not isinstance(scenario_block, dict):
-        scenario_block = {}
-
-    run_block = config.get("run", {})
-    if not isinstance(run_block, dict):
-        run_block = {}
-
-    candidates = [
-        config.get("structured_scenario"),
-        scenario_block.get("structured_name"),
-        wildcards.get("run"),
-        run_block.get("name"),
-    ]
-
-    for candidate in candidates:
-        try:
-            scenario_name, scenario_params = _normalize_structured_scenario_spec(candidate)
-        except (TypeError, ValueError):
-            continue
-
-        if isinstance(scenario_name, str) and scenario_name in STRUCTURED_SCENARIOS:
-            return scenario_name, scenario_params
-
-    return None, {}
-
-
-def _validate_stochastic_structured_scenarios(scenarios: Mapping[str, Any]) -> None:
-    """
-    Ensure all stochastic structured_scenario specifications are valid.
-
-    Supported stochastic scenario formats
-    ------------------------------------
-    Old format:
-        scenarios:
-          base: 0.125
-          scenario_a: 0.125
-
-    New format:
-        scenarios:
-          base:
-            prob: 0.125
-            structured_scenario: null
-          gas_expensive:
-            prob: 0.125
-            structured_scenario:
-              name: modify_components
-              params: {...}
-    """
-    for sc_name, sc_spec in scenarios.items():
-        if np.isscalar(sc_spec):
-            # Legacy format: scenario name itself is used as structured scenario name
-            structured_spec = sc_name
-        elif isinstance(sc_spec, dict):
-            structured_spec = sc_spec.get("structured_scenario", sc_name)
-        else:
-            raise TypeError(
-                f"Invalid stochastic scenario specification for '{sc_name}': "
-                f"expected scalar probability or dict, got {type(sc_spec).__name__}"
-            )
-
-        scenario_name, _ = _normalize_structured_scenario_spec(structured_spec)
-
-        if scenario_name is None:
-            continue
-
-        if scenario_name not in STRUCTURED_SCENARIOS:
-            known = ", ".join(sorted(STRUCTURED_SCENARIOS))
-            raise ValueError(
-                f"Unknown structured scenario '{scenario_name}' declared for stochastic "
-                f"scenario '{sc_name}'. Known structured scenarios: {known}"
-            )
-
-def _normalize_stochastic_scenarios_definition(
-    scenarios: Mapping[str, Any],
-) -> tuple[dict[str, float], dict[str, tuple[str | None, dict]]]:
-    """
-    Normalize stochastic scenario definitions.
-
-    Returns
-    -------
-    probabilities : dict[str, float]
-        Scenario probabilities for n.set_scenarios(...)
-    structured_specs : dict[str, tuple[str | None, dict]]
-        Mapping scenario_name -> (structured_scenario_name, params)
-
-    Notes
-    -----
-    Supported formats:
-
-    1. Legacy
-       scenarios:
-         base: 0.125
-         agriculture_full_electric: 0.125
-
-    2. Extended
-       scenarios:
-         base:
-           prob: 0.125
-           structured_scenario: null
-         custom_case:
-           prob: 0.125
-           structured_scenario:
-             name: modify_components
-             params:
-               rules: [...]
-    """
-    probabilities = {}
-    structured_specs = {}
-
-    for sc_name, sc_spec in scenarios.items():
-        if np.isscalar(sc_spec):
-            probabilities[sc_name] = float(sc_spec)
-            structured_specs[sc_name] = (sc_name, {})
-            continue
-
-        if not isinstance(sc_spec, dict):
-            raise TypeError(
-                f"Invalid stochastic scenario specification for '{sc_name}': "
-                f"expected scalar or dict, got {type(sc_spec).__name__}"
-            )
-
-        if "prob" not in sc_spec:
-            raise ValueError(
-                f"Stochastic scenario '{sc_name}' is missing required key 'prob'."
-            )
-
-        probabilities[sc_name] = float(sc_spec["prob"])
-
-        structured_spec = sc_spec.get("structured_scenario", sc_name)
-        structured_specs[sc_name] = _normalize_structured_scenario_spec(structured_spec)
-
-    return probabilities, structured_specs
-
-def _apply_structured_scenarios(
-    n: pypsa.Network,
-    config: dict,
-    stochastic_param: dict,
-    wildcards: Mapping[str, Any] | None = None,
-) -> tuple[bool, list[str]]:
-    """
-    Apply structured scenarios in stochastic or deterministic mode.
-
-    Returns
-    -------
-    is_stochastic : bool
-        Whether the stochastic mode was enabled.
-    active_names : list[str]
-        List of structured scenario names that were applied.
-    """
-    wildcards = wildcards or {}
-    stoch = _merge_stochastic_param(stochastic_param)
-    enabled = bool(stoch.get("enable", stoch.get("enabled", False)))
-
-    if enabled:
-        scenarios = stoch.get("scenarios", None)
-        if scenarios is None:
-            raise ValueError(
-                "stochastic_scenarios.enable=true but no scenarios were provided "
-                "(inline or through the referenced YAML file)."
-            )
-
-        _validate_stochastic_structured_scenarios(scenarios)
-        probabilities, structured_specs = _normalize_stochastic_scenarios_definition(scenarios)
-
-        logger.info("Enabling stochastic scenarios via n.set_scenarios(...)")
-        n.set_scenarios(probabilities)
-
-        active_names = []
-        logger.info("Structured stochastic scenarios detected: %s", list(probabilities.keys()))
-
-        for sc in probabilities:
-            scenario_name, scenario_params = structured_specs[sc]
-
-            if scenario_name is None:
+    if source_carrier and source_name.endswith(source_carrier):
+        prefix = _extract_prefix(source_name, source_carrier)
+        candidates = []
+        for candidate in (prefix.rstrip(), prefix.strip(), prefix.rstrip(" _-")):
+            if candidate and candidate not in candidates:
+                candidates.append(candidate)
+        for candidate in candidates:
+            if candidate in loads.index and bool(carrier_matches.loc[candidate].any() if isinstance(carrier_matches.loc[candidate], pd.Series) else carrier_matches.loc[candidate]):
                 logger.info(
-                    "No structured scenario declared for stochastic scenario '%s'; skipping builder.",
-                    sc,
+                    "Resolved target load '%s' to existing load '%s' with carrier '%s'.",
+                    proposed,
+                    candidate,
+                    target_carrier,
                 )
-                continue
+                return candidate
 
-            _apply_named_structured_scenario(
-                n=n,
-                scenario_name=scenario_name,
-                config=scenario_params,
-                scenario=sc,
+    if "bus" in loads.columns:
+        source_bus = _component_value(loads, source_name, "bus")
+        same_bus = loads.index[carrier_matches & loads["bus"].eq(source_bus)].unique().tolist()
+        if len(same_bus) == 1:
+            logger.info(
+                "Resolved target load '%s' to same-bus load '%s' with carrier '%s'.",
+                proposed,
+                same_bus[0],
+                target_carrier,
             )
-            active_names.append(f"{sc}->{scenario_name}")
+            return same_bus[0]
 
-        return True, active_names
+    return proposed
 
-    scenario_name, scenario_params = _resolve_deterministic_structured_scenario(
-        config=config,
-        wildcards=wildcards,
+
+def _conversion_factor(transformation: Mapping[str, Any], mode: str) -> float:
+    """Return target-output TWh per source-input TWh for simple conversions."""
+    if "efficiency" in transformation:
+        return float(transformation["efficiency"])
+    if "efficiency_factor" in transformation:
+        return float(transformation["efficiency_factor"])
+    if "source_efficiency" in transformation and "target_efficiency" in transformation:
+        return float(transformation["source_efficiency"]) / float(transformation["target_efficiency"])
+    return 1.0
+
+
+def _load_profile_for_energy(
+    n: pypsa.Network,
+    load_name: str,
+    delta_twh: float,
+    scenario: str | None,
+    weighting: str,
+    fallback: pd.Series | None = None,
+    allow_flat_fallback: bool = False,
+) -> pd.Series:
+    """Build an additive/reduction profile with requested annual energy."""
+    if delta_twh <= 0:
+        return pd.Series(0.0, index=n.snapshots)
+
+    series = _read_load_series(n, load_name, scenario=scenario)
+    energy = _series_energy_twh(n, series.clip(lower=0.0), weighting=weighting)
+    if energy > 0:
+        return series.clip(lower=0.0) * (delta_twh / energy)
+
+    if fallback is not None:
+        fallback = fallback.reindex(n.snapshots).astype(float).clip(lower=0.0)
+        fallback_energy = _series_energy_twh(n, fallback, weighting=weighting)
+        if fallback_energy > 0:
+            return fallback * (delta_twh / fallback_energy)
+
+    if allow_flat_fallback:
+        weights = _snapshot_weightings(n, weighting)
+        hours = float(weights.sum())
+        if hours <= 0:
+            raise ValueError("Cannot build flat fallback profile with non-positive weights.")
+        return pd.Series(delta_twh * 1e6 / hours, index=n.snapshots)
+
+    raise ValueError(
+        f"Load '{load_name}' has zero annual energy; configure an explicit fallback profile."
     )
 
-    if scenario_name is None:
-        logger.info(
-            "Stochastic mode disabled and no deterministic structured scenario detected. "
-            "No structured scenario builder will be applied."
-        )
-        return False, []
 
-    logger.info("Deterministic structured scenario detected: %s", scenario_name)
-    _apply_named_structured_scenario(
-        n=n,
-        scenario_name=scenario_name,
-        config=scenario_params,
-        scenario=None,
-    )
-    return False, [scenario_name]
+def _reduce_load_energy(
+    n: pypsa.Network,
+    load_name: str,
+    delta_twh: float,
+    scenario: str | None,
+    weighting: str,
+    non_negative_tolerance: float,
+) -> pd.Series:
+    """Reduce a load proportionally by delta_twh and return the MW reduction profile."""
+    current = _read_load_series(n, load_name, scenario=scenario)
+    energy = _series_energy_twh(n, current.clip(lower=0.0), weighting=weighting)
+    if energy <= 0:
+        return pd.Series(0.0, index=n.snapshots)
+    actual_delta = min(delta_twh, energy)
+    reduction = current.clip(lower=0.0) * (actual_delta / energy)
+    updated = current - reduction
+    newly_negative = (updated < -non_negative_tolerance) & (current >= -non_negative_tolerance)
+    if newly_negative.any():
+        raise ValueError(f"Reduction would make load '{load_name}' negative.")
+    _write_load_series(n, load_name, updated, scenario=scenario)
+    return reduction
 
+
+def _increase_load_by_profile(
+    n: pypsa.Network,
+    load_name: str,
+    addition: pd.Series,
+    scenario: str | None,
+) -> None:
+    """Increase an existing load by an additive MW profile."""
+    _assert_load_exists(n, load_name)
+    current = _read_load_series(n, load_name, scenario=scenario)
+    _write_load_series(n, load_name, current + addition.reindex(n.snapshots), scenario=scenario)
+
+
+def _component_value(base: pd.DataFrame, name: str, column: str) -> Any:
+    """Return a scalar component value from a base table that may have duplicate names."""
+    value = base.loc[name, column]
+    if isinstance(value, pd.Series):
+        return value.iloc[0]
+    return value
+
+
+def _copy_missing_load_like_source(
+    n: pypsa.Network,
+    source_name: str,
+    target_name: str,
+    target_carrier: str | None,
+) -> None:
+    """Create a target load by copying static metadata from a source load."""
+    loads = _base_loads_table(n)
+    if target_name in loads.index:
+        return
+    source = loads.loc[source_name].copy()
+    source["carrier"] = target_carrier or source.get("carrier", target_name)
+    source["p_set"] = 0.0
+    n.add("Load", target_name, **source.to_dict())
 
 # ---------------------------
 # Patch-based selectors/helpers
@@ -1192,39 +924,6 @@ def _normalize_component_table_name(component: str) -> str:
     if key not in mapping:
         raise ValueError(f"Unsupported component '{component}'.")
     return mapping[key]
-
-
-def _normalize_structured_scenario_spec(spec: Any) -> tuple[str | None, dict]:
-    """
-    Normalize a structured scenario specification.
-
-    Accepted forms:
-    - None
-    - "scenario_name"
-    - {"name": "scenario_name", "params": {...}}
-    """
-    if spec is None:
-        return None, {}
-
-    if isinstance(spec, str):
-        return spec, {}
-
-    if isinstance(spec, dict):
-        name = spec.get("name")
-        params = spec.get("params", {})
-        if name is None:
-            raise ValueError(
-                "Structured scenario dict must contain key 'name'."
-            )
-        if not isinstance(params, dict):
-            raise TypeError(
-                f"structured_scenario.params must be a dict; got {type(params).__name__}"
-            )
-        return name, params
-
-    raise TypeError(
-        f"structured_scenario must be None, str, or dict; got {type(spec).__name__}"
-    )
 
 
 def _get_component_attr_tables(
@@ -1484,6 +1183,837 @@ def _scenario_modify_components(
         )
         _apply_modify_components_rule(n=n, rule=rule, scenario=scenario)
 
+
+
+
+
+def _normalize_load_selector(value: Any, name: str) -> dict:
+    """Normalize concise load selectors into the generic selector format."""
+    if value is None:
+        return {}
+    if isinstance(value, str):
+        return {"carrier": value}
+    if isinstance(value, (list, tuple, set)):
+        return {"carrier": list(value)}
+    selector = dict(_ensure_dict(value, name))
+    selector.pop("component", None)
+    if "name" in selector and "names" not in selector:
+        selector["names"] = selector.pop("name")
+    return selector
+
+
+def _normalize_transition_entry(entry: Mapping[str, Any], entry_name: str) -> dict:
+    """
+    Normalize concise demand-transition entries to the internal explicit shape.
+
+    Accepted concise form example:
+        source: land transport oil
+        target: land transport EV
+        type: electrify_transport
+        cap: 0.2
+        source_efficiency: 16.0712
+        target_efficiency: 53.19
+    """
+    raw = dict(_ensure_dict(entry, f"entries.{entry_name}"))
+    normalized = dict(raw)
+
+    if "source_carrier" in normalized and "source" not in normalized:
+        normalized["source"] = normalized.pop("source_carrier")
+    if "target_carrier" in normalized and "target" not in normalized:
+        normalized["target"] = normalized["target_carrier"]
+    if "cap" in normalized and "cap_fraction" not in normalized:
+        normalized["cap_fraction"] = normalized.pop("cap")
+
+    normalized["source"] = _normalize_load_selector(
+        normalized.get("source", normalized.get("target")),
+        f"entries.{entry_name}.source",
+    )
+    if "target" in normalized:
+        normalized["target"] = _normalize_load_selector(
+            normalized.get("target"),
+            f"entries.{entry_name}.target",
+        )
+
+    transformation = dict(normalized.get("transformation") or {})
+    transform_keys = {
+        "type",
+        "target_carrier",
+        "efficiency_factor",
+        "source_efficiency",
+        "target_efficiency",
+        "max_source_reduction_fraction",
+        "max_target_reduction_fraction",
+        "strict_target_available",
+        "create_missing_load",
+        "copy_source_bus",
+        "cop",
+        "cop_mode",
+    }
+    for key in transform_keys:
+        if key in raw and key not in transformation:
+            transformation[key] = raw[key]
+    if "target_carrier" not in transformation and normalized.get("target"):
+        target_carrier = normalized["target"].get("carrier")
+        if isinstance(target_carrier, str):
+            transformation["target_carrier"] = target_carrier
+
+    if "type" not in transformation:
+        raise ValueError(f"entries.{entry_name} must define transformation.type or concise type.")
+    normalized["transformation"] = transformation
+
+    for key in transform_keys - {"target_carrier"}:
+        if key in normalized and key not in {"cap_fraction", "cap_twh"}:
+            normalized.pop(key, None)
+    return normalized
+
+
+def _scenario_definitions(catalogue: Mapping[str, Any]) -> dict:
+    """Return scenario definitions, accepting 'definitions' as a concise alias."""
+    return _ensure_dict(
+        catalogue.get("scenario_definitions", catalogue.get("definitions", {})),
+        "scenario_definitions",
+    )
+
+
+def _normalize_action(action: Any, scenario_name: str, index: int) -> dict:
+    """Normalize concise scenario actions to {'type': ..., ...}."""
+    if isinstance(action, str):
+        return {"type": action}
+    action = dict(_ensure_dict(action, f"scenario_definitions.{scenario_name}.actions[{index}]"))
+    if "type" in action:
+        return action
+    if len(action) == 1:
+        action_type, payload = next(iter(action.items()))
+        if payload is None:
+            return {"type": action_type}
+        if isinstance(payload, list) and action_type == "modify_components":
+            return {"type": action_type, "rules": payload}
+        if isinstance(payload, dict):
+            return {"type": action_type, **payload}
+    raise ValueError(
+        f"scenario_definitions.{scenario_name}.actions[{index}] must define type "
+        "or use a single-key concise action."
+    )
+
+
+def _normalize_scenario_definition(definition: Any, scenario_name: str) -> dict:
+    """Normalize concise scenario definitions to {'actions': [...]}."""
+    if definition is None:
+        raise ValueError(f"scenario_definitions.{scenario_name} cannot be null.")
+    if isinstance(definition, str):
+        return {"actions": [{"type": definition}]}
+    if isinstance(definition, list):
+        return {"actions": definition}
+    definition = dict(_ensure_dict(definition, f"scenario_definitions.{scenario_name}"))
+    if "actions" in definition:
+        return definition
+    if "demand_transition" in definition or "modify_components" in definition or "base" in definition:
+        return {"actions": [definition]}
+    raise ValueError(f"scenario_definitions.{scenario_name}.actions must be provided.")
+
+def _entry_cap_twh(entry: Mapping[str, Any], source_energy_twh: float) -> float:
+    """Return the methodological cap for one demand-transition entry."""
+    cap_fraction = float(entry.get("cap_fraction", 1.0))
+    cap = cap_fraction * source_energy_twh
+    if entry.get("cap_twh") is not None:
+        cap = min(cap, float(entry["cap_twh"]))
+    return max(0.0, cap)
+
+
+def _source_selector(entry: Mapping[str, Any]) -> dict:
+    return _normalize_load_selector(entry.get("source", entry.get("target", {})), "entry.source")
+
+
+def _target_selector(entry: Mapping[str, Any], transformation: Mapping[str, Any]) -> dict:
+    selector = _normalize_load_selector(entry.get("target", {}), "entry.target")
+    if "carrier" not in selector and transformation.get("target_carrier") is not None:
+        selector["carrier"] = transformation["target_carrier"]
+    return selector
+
+
+def _ensure_target_load(
+    n: pypsa.Network,
+    source_name: str,
+    target_name: str,
+    target_carrier: str | None,
+    transformation: Mapping[str, Any],
+) -> None:
+    if target_name in _base_loads_table(n).index:
+        return
+    if not transformation.get("create_missing_load", False):
+        raise KeyError(
+            f"Target load '{target_name}' is missing. Set create_missing_load: true "
+            "and use source-like bus copying or provide an existing target."
+        )
+    if not transformation.get("copy_source_bus", True):
+        raise ValueError(
+            f"Cannot create missing load '{target_name}' without source-like bus copying."
+        )
+    _copy_missing_load_like_source(n, source_name, target_name, target_carrier)
+
+
+def _apply_shift_like_entry(
+    n: pypsa.Network,
+    entry: Mapping[str, Any],
+    transformation: Mapping[str, Any],
+    delta_twh: float,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+    mode: str,
+) -> dict:
+    weighting = str(settings.get("weighting", "generators"))
+    nonneg = float(settings.get("non_negative_tolerance", 1e-8))
+    source_names = _select_load_names(n, _source_selector(entry))
+    if not source_names:
+        raise KeyError(f"Demand-transition entry matched no source loads: {entry}")
+
+    source_energies = {
+        name: _load_annual_energy_twh(n, name, scenario=scenario, weighting=weighting)
+        for name in source_names
+    }
+    total_source = sum(source_energies.values())
+    if total_source <= 0 or delta_twh <= 0:
+        return {"applied_delta_twh": 0.0, "transformed_target_twh": 0.0, "affected_loads": []}
+
+    loads = _base_loads_table(n)
+    transformed = 0.0
+    affected = []
+    for source_name, energy in source_energies.items():
+        if energy <= 0:
+            continue
+        share_delta = delta_twh * energy / total_source
+        source_carrier = str(_component_value(loads, source_name, "carrier"))
+        target_carrier = transformation.get("target_carrier")
+        target_name = _resolve_target_load_for_source(
+            n,
+            source_name,
+            source_carrier,
+            _target_selector(entry, transformation),
+            target_carrier,
+        )
+        _ensure_target_load(n, source_name, target_name, target_carrier, transformation)
+        if not _load_has_positive_energy(n, target_name, scenario, weighting):
+            logger.warning(
+                "Target load '%s' has zero annual energy; leaving it and source '%s' unchanged.",
+                target_name,
+                source_name,
+            )
+            continue
+
+        reduction = _reduce_load_energy(
+            n, source_name, share_delta, scenario, weighting, nonneg
+        )
+        actual_source_delta = _series_energy_twh(n, reduction, weighting=weighting)
+
+        factor = _conversion_factor(transformation, mode)
+        addition = reduction * factor
+
+        _increase_load_by_profile(n, target_name, addition, scenario=scenario)
+        target_delta = _series_energy_twh(n, addition, weighting=weighting)
+        transformed += target_delta
+        affected.append(
+            {
+                "source": source_name,
+                "target": target_name,
+                "source_delta_twh": actual_source_delta,
+                "target_delta_twh": target_delta,
+            }
+        )
+
+    return {
+        "applied_delta_twh": sum(x["source_delta_twh"] for x in affected),
+        "transformed_target_twh": transformed,
+        "affected_loads": affected,
+    }
+
+
+def _apply_reverse_shift_entry(
+    n: pypsa.Network,
+    entry: Mapping[str, Any],
+    transformation: Mapping[str, Any],
+    delta_twh: float,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+) -> dict:
+    weighting = str(settings.get("weighting", "generators"))
+    nonneg = float(settings.get("non_negative_tolerance", 1e-8))
+    source_eff = float(transformation["source_efficiency"])
+    target_eff = float(transformation["target_efficiency"])
+    max_target_fraction = float(transformation.get("max_target_reduction_fraction", 1.0))
+    source_names = _select_load_names(n, _source_selector(entry))
+    if not source_names:
+        raise KeyError(f"Demand-transition entry matched no source loads: {entry}")
+
+    loads = _base_loads_table(n)
+    target_by_source = {}
+    source_energies = {}
+    dynamic_caps = {}
+    for source_name in source_names:
+        source_carrier = str(_component_value(loads, source_name, "carrier"))
+        target_carrier = (_target_selector(entry, transformation) or {}).get("carrier")
+        target_name = _resolve_target_load_for_source(
+            n,
+            source_name,
+            source_carrier,
+            _target_selector(entry, transformation),
+            target_carrier,
+        )
+        if target_name not in loads.index:
+            if transformation.get("strict_target_available", False):
+                raise KeyError(f"Target load '{target_name}' for reverse_shift is missing.")
+            continue
+        source_energy = max(_load_annual_energy_twh(n, source_name, scenario, weighting), 0.0)
+        if source_energy <= 0.0:
+            logger.warning(
+                "Source load '%s' has zero annual energy; leaving it unchanged for reverse_shift.",
+                source_name,
+            )
+            continue
+        target_energy = _load_annual_energy_twh(n, target_name, scenario, weighting)
+        dynamic_caps[source_name] = max_target_fraction * target_energy * target_eff / source_eff
+        target_by_source[source_name] = target_name
+        source_energies[source_name] = source_energy
+
+    dynamic_cap = sum(dynamic_caps.values())
+    applied = min(delta_twh, dynamic_cap)
+    if applied <= 0:
+        return {
+            "applied_delta_twh": 0.0,
+            "transformed_target_twh": 0.0,
+            "dynamic_feasibility_cap_twh": dynamic_cap,
+            "affected_loads": [],
+        }
+
+    weights = source_energies if sum(source_energies.values()) > 0 else dynamic_caps
+    total_weight = sum(weights.values())
+    affected = []
+    transformed = 0.0
+    for source_name, target_name in target_by_source.items():
+        if total_weight <= 0:
+            continue
+        share = applied * weights[source_name] / total_weight
+        share = min(share, dynamic_caps[source_name])
+        target_reduction_twh = share * source_eff / target_eff
+        target_reduction = _reduce_load_energy(
+            n, target_name, target_reduction_twh, scenario, weighting, nonneg
+        )
+        actual_target_reduction = _series_energy_twh(
+            n, target_reduction, weighting=weighting
+        )
+        actual_source_increase = actual_target_reduction * target_eff / source_eff
+        source_add = _load_profile_for_energy(
+            n,
+            source_name,
+            actual_source_increase,
+            scenario,
+            weighting,
+            fallback=target_reduction * target_eff / source_eff,
+            allow_flat_fallback=bool(transformation.get("allow_flat_fallback", False)),
+        )
+        _increase_load_by_profile(n, source_name, source_add, scenario=scenario)
+        transformed += actual_target_reduction
+        affected.append(
+            {
+                "source": source_name,
+                "target": target_name,
+                "source_delta_twh": actual_source_increase,
+                "target_reduction_twh": actual_target_reduction,
+            }
+        )
+
+    applied_source = sum(x["source_delta_twh"] for x in affected)
+    return {
+        "applied_delta_twh": applied_source,
+        "transformed_target_twh": applied_source,
+        "dynamic_feasibility_cap_twh": dynamic_cap,
+        "affected_loads": affected,
+    }
+
+
+def _apply_add_entry(
+    n: pypsa.Network,
+    entry: Mapping[str, Any],
+    transformation: Mapping[str, Any],
+    delta_twh: float,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+) -> dict:
+    weighting = str(settings.get("weighting", "generators"))
+    selector = _target_selector(entry, transformation) or _source_selector(entry)
+    target_names = _select_load_names(n, selector)
+    if not target_names:
+        raise KeyError(f"add transformation matched no target loads: {entry}")
+    energies = {
+        name: max(_load_annual_energy_twh(n, name, scenario, weighting), 0.0)
+        for name in target_names
+    }
+    positive_names = [name for name in target_names if energies[name] > 0.0]
+    total = sum(energies[name] for name in positive_names)
+    if total <= 0:
+        logger.warning(
+            "add transformation matched target loads but all have zero annual energy; "
+            "leaving them unchanged. entry=%s",
+            entry,
+        )
+        return {
+            "applied_delta_twh": 0.0,
+            "transformed_target_twh": 0.0,
+            "affected_loads": [],
+            "warnings": ["all matched add targets have zero annual energy"],
+        }
+
+    affected = []
+    for name in positive_names:
+        share = delta_twh * energies[name] / total
+        addition = _load_profile_for_energy(
+            n,
+            name,
+            share,
+            scenario,
+            weighting,
+            allow_flat_fallback=False,
+        )
+        _increase_load_by_profile(n, name, addition, scenario=scenario)
+        affected.append({"target": name, "target_delta_twh": share})
+    return {"applied_delta_twh": delta_twh, "transformed_target_twh": delta_twh, "affected_loads": affected}
+
+
+def _apply_electrify_heat_entry(
+    n: pypsa.Network,
+    entry: Mapping[str, Any],
+    transformation: Mapping[str, Any],
+    requested_target_twh: float,
+    source_cap_twh: float,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+) -> dict:
+    weighting = str(settings.get("weighting", "generators"))
+    nonneg = float(settings.get("non_negative_tolerance", 1e-8))
+    source_names = _select_load_names(n, _source_selector(entry))
+    if not source_names:
+        raise KeyError(f"Demand-transition entry matched no heat source loads: {entry}")
+
+    loads = _base_loads_table(n)
+    source_energy = {
+        name: _load_annual_energy_twh(n, name, scenario, weighting)
+        for name in source_names
+    }
+    total_source = sum(source_energy.values())
+    if total_source <= 0.0 or requested_target_twh <= 0.0 or source_cap_twh <= 0.0:
+        return {"applied_delta_twh": 0.0, "transformed_target_twh": 0.0, "affected_loads": []}
+
+    cop_map = _ensure_dict(transformation.get("cop", {}), "transformation.cop")
+    cop_mode = str(transformation.get("cop_mode", "direct")).lower()
+    inverse_cop_shift = cop_mode in {"inverse", "electricity_to_heat", "target_heat"}
+    candidates = []
+    total_target_cap = 0.0
+    for source_name, energy in source_energy.items():
+        if energy <= 0.0:
+            continue
+        source_carrier = str(_component_value(loads, source_name, "carrier"))
+        target_name = _resolve_target_load_for_source(
+            n,
+            source_name,
+            source_carrier,
+            _target_selector(entry, transformation),
+            transformation.get("target_carrier"),
+        )
+        _ensure_target_load(n, source_name, target_name, transformation.get("target_carrier"), transformation)
+        if not _load_has_positive_energy(n, target_name, scenario, weighting):
+            logger.warning(
+                "Target load '%s' has zero annual energy; leaving it and source '%s' unchanged.",
+                target_name,
+                source_name,
+            )
+            continue
+
+        if inverse_cop_shift:
+            heat_carrier = str(_component_value(loads, target_name, "carrier"))
+            hp_suffix = cop_map.get(heat_carrier)
+            if hp_suffix is not None:
+                prefix = _extract_prefix(target_name, heat_carrier)
+            else:
+                hp_suffix = cop_map.get(source_carrier)
+                if hp_suffix is None:
+                    raise KeyError(
+                        "No inverse COP heat-pump carrier mapping configured for "
+                        f"target '{heat_carrier}' or source '{source_carrier}'."
+                    )
+                prefix = _extract_prefix(source_name, source_carrier)
+        else:
+            hp_suffix = cop_map.get(source_carrier)
+            if hp_suffix is None:
+                raise KeyError(f"No COP heat-pump carrier mapping configured for source '{source_carrier}'.")
+            prefix = _extract_prefix(source_name, source_carrier)
+
+        hp_name = f"{prefix}{hp_suffix}"
+        _assert_link_exists(n, hp_name)
+        source_cap_for_load = min(energy, source_cap_twh * energy / total_source)
+        cap_reduction_profile = _load_profile_for_energy(
+            n, source_name, source_cap_for_load, scenario, weighting
+        )
+        if inverse_cop_shift:
+            cap_addition, hp_efficiency_mode = _heat_pump_heat_addition(
+                n, hp_name, cap_reduction_profile, scenario=scenario
+            )
+        else:
+            cap_addition, hp_efficiency_mode = _heat_pump_electricity_addition(
+                n, hp_name, cap_reduction_profile, scenario=scenario
+            )
+        target_cap = _series_energy_twh(n, cap_addition, weighting=weighting)
+        if target_cap <= 0.0:
+            continue
+        candidates.append(
+            {
+                "source": source_name,
+                "target": target_name,
+                "heat_pump": hp_name,
+                "mode": hp_efficiency_mode,
+                "source_cap_twh": source_cap_for_load,
+                "target_cap_twh": target_cap,
+            }
+        )
+        total_target_cap += target_cap
+
+    target_to_apply = min(requested_target_twh, total_target_cap)
+    affected = []
+    transformed = 0.0
+    applied_source = 0.0
+    for candidate in candidates:
+        target_share = target_to_apply * candidate["target_cap_twh"] / total_target_cap
+        source_delta = candidate["source_cap_twh"] * target_share / candidate["target_cap_twh"]
+        reduction = _reduce_load_energy(
+            n, candidate["source"], source_delta, scenario, weighting, nonneg
+        )
+        if inverse_cop_shift:
+            addition, hp_efficiency_mode = _heat_pump_heat_addition(
+                n, candidate["heat_pump"], reduction, scenario=scenario
+            )
+        else:
+            addition, hp_efficiency_mode = _heat_pump_electricity_addition(
+                n, candidate["heat_pump"], reduction, scenario=scenario
+            )
+        _increase_load_by_profile(n, candidate["target"], addition, scenario=scenario)
+        source_delta_actual = _series_energy_twh(n, reduction, weighting)
+        target_delta = _series_energy_twh(n, addition, weighting=weighting)
+        applied_source += source_delta_actual
+        transformed += target_delta
+        affected.append(
+            {
+                "source": candidate["source"],
+                "target": candidate["target"],
+                "heat_pump": candidate["heat_pump"],
+                "heat_pump_efficiency_mode": hp_efficiency_mode,
+                "source_delta_twh": source_delta_actual,
+                "target_delta_twh": target_delta,
+            }
+        )
+
+    return {
+        "applied_delta_twh": applied_source,
+        "transformed_target_twh": transformed,
+        "dynamic_feasibility_cap_twh": total_target_cap,
+        "affected_loads": affected,
+    }
+
+
+def _apply_transition_entry(
+    n: pypsa.Network,
+    entry_name: str,
+    entry: Mapping[str, Any],
+    requested_twh: float,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+) -> dict:
+    weighting = str(settings.get("weighting", "generators"))
+    transformation = _ensure_dict(entry.get("transformation"), f"entries.{entry_name}.transformation")
+    mode = str(transformation.get("type", "")).strip()
+    source_names = _select_load_names(n, _source_selector(entry))
+    source_energy = sum(
+        _load_annual_energy_twh(n, name, scenario=scenario, weighting=weighting)
+        for name in source_names
+    )
+    if mode == "add" and "source" not in entry:
+        source_energy = requested_twh
+    methodological_cap = _entry_cap_twh(entry, source_energy)
+    dynamic_cap = methodological_cap
+
+    if mode == "shift" and transformation.get("cop") is not None:
+        result = _apply_electrify_heat_entry(
+            n, entry, transformation, requested_twh, methodological_cap, scenario, settings
+        )
+        dynamic_cap = result.get("dynamic_feasibility_cap_twh", methodological_cap)
+    elif mode in {"convert", "shift", "split", "electrify_transport"}:
+        factor = _conversion_factor(transformation, mode)
+        if factor <= 0.0:
+            raise ValueError(f"Conversion factor for entry '{entry_name}' must be positive.")
+        source_delta = min(methodological_cap, requested_twh / factor)
+        result = _apply_shift_like_entry(n, entry, transformation, source_delta, scenario, settings, "convert")
+    elif mode == "reverse_shift":
+        source_eff = float(transformation["source_efficiency"])
+        target_eff = float(transformation["target_efficiency"])
+        max_frac = float(transformation.get("max_target_reduction_fraction", 1.0))
+        loads = _base_loads_table(n)
+        target_selector = _target_selector(entry, transformation)
+        caps = []
+        for source_name in source_names:
+            source_carrier = str(_component_value(loads, source_name, "carrier"))
+            target_name = _resolve_target_load_for_source(
+                n, source_name, source_carrier, target_selector, target_selector.get("carrier")
+            )
+            if target_name not in loads.index:
+                continue
+            if _load_annual_energy_twh(n, source_name, scenario, weighting) <= 0.0:
+                continue
+            target_energy = _load_annual_energy_twh(n, target_name, scenario, weighting)
+            caps.append(max_frac * target_energy * target_eff / source_eff)
+        dynamic_cap = sum(caps)
+        source_delta = min(requested_twh, methodological_cap, dynamic_cap)
+        result = _apply_reverse_shift_entry(n, entry, transformation, source_delta, scenario, settings)
+    elif mode == "electrify_heat":
+        result = _apply_electrify_heat_entry(
+            n, entry, transformation, requested_twh, methodological_cap, scenario, settings
+        )
+        dynamic_cap = result.get("dynamic_feasibility_cap_twh", methodological_cap)
+    elif mode == "add":
+        result = _apply_add_entry(n, entry, transformation, requested_twh, scenario, settings)
+    else:
+        raise ValueError(f"Unsupported demand_transition transformation type '{mode}'.")
+
+    return {
+        "entry": entry_name,
+        "source_energy_before_twh": source_energy,
+        "methodological_cap_twh": methodological_cap,
+        "dynamic_feasibility_cap_twh": result.get("dynamic_feasibility_cap_twh", dynamic_cap),
+        "requested_twh": requested_twh,
+        **result,
+        "remaining_target_twh": max(0.0, requested_twh - result.get("transformed_target_twh", 0.0)),
+    }
+
+
+def _validate_loads_after_transition(
+    n: pypsa.Network,
+    scenario: str | None,
+    settings: Mapping[str, Any],
+    names: list[str] | None = None,
+    check_non_negative: bool = True,
+) -> None:
+    tol = float(settings.get("non_negative_tolerance", 1e-8))
+    if names is None:
+        names = _base_loads_table(n).index.unique().tolist()
+    for name in pd.Index(names).drop_duplicates().tolist():
+        series = _read_load_series(n, name, scenario=scenario)
+        values = series.to_numpy(dtype=float)
+        if np.isnan(values).any():
+            raise ValueError(f"NaNs introduced in load '{name}'.")
+        if np.isinf(values).any():
+            raise ValueError(f"Infinite values introduced in load '{name}'.")
+        if check_non_negative and values.min() < -tol:
+            raise ValueError(f"Negative load values below tolerance in '{name}'.")
+
+
+def _action_base(
+    n: pypsa.Network,
+    action: Mapping[str, Any],
+    catalogue: Mapping[str, Any],
+    scenario: str | None = None,
+) -> dict:
+    del n, action, catalogue
+    logger.info("Applied base action%s.", f" for stochastic scenario '{scenario}'" if scenario else "")
+    return {"type": "base"}
+
+
+def _action_modify_components(
+    n: pypsa.Network,
+    action: Mapping[str, Any],
+    catalogue: Mapping[str, Any],
+    scenario: str | None = None,
+) -> dict:
+    del catalogue
+    _scenario_modify_components(n=n, scenario=scenario, config=dict(action))
+    return {"type": "modify_components", "rules": len(action.get("rules", []))}
+
+
+def _action_demand_transition(
+    n: pypsa.Network,
+    action: Mapping[str, Any],
+    catalogue: Mapping[str, Any],
+    scenario: str | None = None,
+) -> dict:
+    settings = _ensure_dict(catalogue.get("settings", {}), "settings")
+    families = _ensure_dict(catalogue.get("families", {}), "families")
+    family_name = action.get("family")
+    if family_name not in families:
+        raise KeyError(f"Unknown demand-transition family '{family_name}'.")
+    family = _ensure_dict(families[family_name], f"families.{family_name}")
+    target_spec = action.get("target")
+    if isinstance(target_spec, str):
+        targets = _ensure_dict(family.get("targets", {}), f"families.{family_name}.targets")
+        if target_spec not in targets:
+            raise KeyError(f"Unknown target '{target_spec}' for family '{family_name}'.")
+        requested = float(targets[target_spec])
+    else:
+        requested = float(target_spec)
+
+    entries = _ensure_dict(family.get("entries", {}), f"families.{family_name}.entries")
+    priority = action.get("priority") or list(entries)
+    remaining = requested
+    entry_reports = []
+    for entry_name in priority:
+        if entry_name not in entries:
+            raise KeyError(f"Unknown demand-transition entry '{entry_name}' in family '{family_name}'.")
+        if remaining <= float(settings.get("tolerance_twh", 1e-4)):
+            break
+        report = _apply_transition_entry(
+            n=n,
+            entry_name=entry_name,
+            entry=_normalize_transition_entry(entries[entry_name], entry_name),
+            requested_twh=remaining,
+            scenario=scenario,
+            settings=settings,
+        )
+        remaining = max(0.0, remaining - report.get("transformed_target_twh", 0.0))
+        report["remaining_target_twh"] = remaining
+        entry_reports.append(report)
+
+    tolerance = float(settings.get("tolerance_twh", 1e-4))
+    allow_unmet = bool(settings.get("allow_unmet_target", False))
+    applied = requested - remaining
+    report = {
+        "scenario": scenario or "deterministic",
+        "family": family_name,
+        "requested_target_twh": requested,
+        "applied_total_twh": applied,
+        "unmet_target_twh": remaining,
+        "entries": entry_reports,
+    }
+    if remaining > tolerance and not allow_unmet:
+        raise ValueError(
+            f"Demand-transition target for family '{family_name}' is unmet by {remaining:.6g} TWh. "
+            f"Allocation report: {report}"
+        )
+    if remaining > tolerance:
+        logger.warning(
+            "Demand-transition family '%s' left %.6g TWh unmet%s.",
+            family_name,
+            remaining,
+            f" in scenario '{scenario}'" if scenario else "",
+        )
+    touched_loads = []
+    reduced_loads = []
+    for entry_report in entry_reports:
+        for affected in entry_report.get("affected_loads", []):
+            for key in ("source", "target"):
+                if affected.get(key):
+                    touched_loads.append(affected[key])
+            if affected.get("target_reduction_twh", 0.0) > 0 and affected.get("target"):
+                reduced_loads.append(affected["target"])
+            elif affected.get("source_delta_twh", 0.0) > 0 and affected.get("source"):
+                reduced_loads.append(affected["source"])
+    _validate_loads_after_transition(
+        n,
+        scenario=scenario,
+        settings=settings,
+        names=touched_loads,
+        check_non_negative=False,
+    )
+    _validate_loads_after_transition(
+        n,
+        scenario=scenario,
+        settings=settings,
+        names=reduced_loads,
+        check_non_negative=False,
+    )
+    n.meta.setdefault("demand_transition_reports", {})[scenario or "deterministic"] = report
+    logger.info(
+        "Demand-transition %s/%s applied %.6g of %.6g TWh%s.",
+        family_name,
+        target_spec,
+        applied,
+        requested,
+        f" for stochastic scenario '{scenario}'" if scenario else "",
+    )
+    return {"type": "demand_transition", **report}
+
+
+ACTION_HANDLERS = {
+    "base": _action_base,
+    "modify_components": _action_modify_components,
+    "demand_transition": _action_demand_transition,
+}
+
+
+def _apply_action_catalogue_scenario(
+    n: pypsa.Network,
+    catalogue: Mapping[str, Any],
+    scenario_name: str,
+    scenario: str | None = None,
+) -> list[dict]:
+    definitions = _scenario_definitions(catalogue)
+    if scenario_name not in definitions:
+        raise KeyError(
+            f"Scenario '{scenario_name}' has a probability/active_scenario but no scenario_definitions entry."
+        )
+    definition = _normalize_scenario_definition(definitions[scenario_name], scenario_name)
+    actions = definition.get("actions", [])
+    if not isinstance(actions, list) or not actions:
+        raise ValueError(f"scenario_definitions.{scenario_name}.actions must be a non-empty list.")
+    reports = []
+    for i, action in enumerate(actions, start=1):
+        action = _normalize_action(action, scenario_name, i)
+        action_type = action.get("type")
+        if action_type not in ACTION_HANDLERS:
+            known = ", ".join(sorted(ACTION_HANDLERS))
+            raise ValueError(f"Unknown action type '{action_type}'. Known action types: {known}")
+        reports.append(ACTION_HANDLERS[action_type](n, action, catalogue, scenario=scenario))
+    return reports
+
+
+def _apply_scenario_catalogue(
+    n: pypsa.Network,
+    stochastic_param: dict,
+) -> tuple[bool, list[str]]:
+    """Apply the declarative scenario catalogue in stochastic or deterministic mode."""
+    catalogue = _merge_stochastic_param(stochastic_param)
+    enabled = bool(catalogue.get("enable", catalogue.get("enabled", False)))
+    if enabled:
+        scenarios = _ensure_dict(catalogue.get("scenarios"), "scenarios")
+        if not scenarios:
+            raise ValueError("stochastic_scenarios.enable=true but no scenarios were provided.")
+        probabilities = {name: float(prob) for name, prob in scenarios.items()}
+        missing = sorted(set(probabilities) - set(_scenario_definitions(catalogue)))
+        if missing:
+            raise KeyError(
+                "Missing scenario_definitions for scenario(s): " + ", ".join(missing)
+            )
+        logger.info("Enabling stochastic scenarios via n.set_scenarios(...): %s", probabilities)
+        n.set_scenarios(probabilities)
+        active = []
+        for scenario_name in probabilities:
+            _apply_action_catalogue_scenario(
+                n=n,
+                catalogue=catalogue,
+                scenario_name=scenario_name,
+                scenario=scenario_name,
+            )
+            active.append(scenario_name)
+        return True, active
+
+    active_scenario = catalogue.get("active_scenario")
+    if active_scenario is None:
+        logger.info("Stochastic mode disabled and no active_scenario configured; no-op.")
+        return False, []
+    active_scenario = str(active_scenario)
+    logger.info("Applying deterministic active_scenario '%s' from scenario catalogue.", active_scenario)
+    _apply_action_catalogue_scenario(
+        n=n,
+        catalogue=catalogue,
+        scenario_name=active_scenario,
+        scenario=None,
+    )
+    return False, [active_scenario]
+
+
 def _apply_patch_config_if_present(
     n: pypsa.Network,
     stochastic_param: dict,
@@ -1565,47 +2095,31 @@ def apply_stochastic_config(
     wildcards: Mapping[str, Any] | None = None,
 ) -> None:
     """
-    Apply structured stochastic/deterministic scenarios and optional legacy patches.
+    Apply a declarative source-based scenario catalogue.
 
-    Behavior
-    --------
-    - If stochastic mode is enabled:
-      * read scenario names from stochastic config
-      * call n.set_scenarios(...)
-      * dispatch one structured builder per scenario name
-      * optionally apply legacy patch-based modifications
-
-    - If stochastic mode is disabled:
-      * detect a single structured scenario name from config or run context
-      * apply the corresponding builder in deterministic mode
+    - stochastic_scenarios.enable=true reads probabilities from scenarios,
+      calls n.set_scenarios(...), and applies scenario_definitions actions.
+    - stochastic_scenarios.enable=false with active_scenario applies that single
+      scenario definition to the deterministic network without set_scenarios.
+    - stochastic_scenarios.enable=false without active_scenario is a no-op.
     """
-    is_stochastic, active_names = _apply_structured_scenarios(
+    del config, wildcards
+    is_stochastic, active_names = _apply_scenario_catalogue(
         n=n,
-        config=config,
         stochastic_param=stochastic_param,
-        wildcards=wildcards,
     )
 
     if is_stochastic:
         _apply_patch_config_if_present(n=n, stochastic_param=stochastic_param)
 
     if active_names:
-        logger.info("Applied structured scenario(s): %s", active_names)
+        logger.info("Applied scenario catalogue entry/entries: %s", active_names)
     else:
-        logger.info("No structured scenario was applied.")
+        logger.info("No scenario catalogue entry was applied.")
 
 
-STRUCTURED_SCENARIOS = {
-    "modify_components": _scenario_modify_components,
-    "agriculture_full_electric": _scenario_agriculture_full_electric,
-    "agriculture_machinery_full_oil": _scenario_agriculture_machinery_full_oil,
-    "shipping_full_methanol": _scenario_shipping_full_methanol,
-    "urban_heat_full_central": _scenario_urban_heat_full_central,
-    "land_transport_linear_ev": _scenario_land_transport_linear_ev,
-    "electricity_optimistic": _scenario_electricity_optimistic,
-    "industry_h2": _scenario_industry_h2,
-    "base": _scenario_base,
-}
+# Old named structured scenario builders are intentionally no longer registered.
+
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
@@ -1615,10 +2129,10 @@ if __name__ == "__main__":
             "stochasticify_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/test_stochastic_scenarios/config.yaml",
+            configfiles="config/demand_uncertainty/config_deterministic.yaml",
             sector_opts="",
             planning_horizons="2050",
-            run="land_transport_linear_ev",
+            run="ELEC_HEAT",
         )
 
     configure_logging(snakemake)
@@ -1647,7 +2161,9 @@ if __name__ == "__main__":
         wildcards=dict(snakemake.wildcards),
     )
 
+    action_meta = dict(n.meta)
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
+    n.meta.update(action_meta)
     n.export_to_netcdf(snakemake.output.network)
 
     with open(snakemake.output.config, "w", encoding="utf-8") as f:

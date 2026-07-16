@@ -5153,14 +5153,21 @@ def add_aviation(
         )
 
     all_aviation = ["total international aviation", "total domestic aviation"]
-    methanol_kerosene_share = get(
+    configured_methanol_kerosene_share = get(
         options["aviation_methanol_kerosene_share"], investment_year
     )
+    aviation_methanol_to_kerosene = options["aviation_methanol_to_kerosene"]
+    methanol_kerosene_share = (
+        configured_methanol_kerosene_share
+        if aviation_methanol_to_kerosene
+        else 0.0
+    )
     kerosene_share = 1 - methanol_kerosene_share
-    if methanol_kerosene_share and not options["methanol"]["methanol_to_kerosene"]:
-        raise ValueError(
-            "sector.methanol.methanol_to_kerosene must be true when "
-            "sector.aviation_methanol_kerosene_share contains non-zero values."
+    if not aviation_methanol_to_kerosene and configured_methanol_kerosene_share:
+        logger.warning(
+            "Ignoring sector.aviation_methanol_kerosene_share=%s because "
+            "sector.aviation_methanol_to_kerosene is false.",
+            configured_methanol_kerosene_share,
         )
 
     aviation_demand = (
@@ -5225,7 +5232,7 @@ def add_aviation(
         efficiency2=costs.at["oil", "CO2 intensity"],
     )
 
-    if options["methanol"]["methanol_to_kerosene"]:
+    if aviation_methanol_to_kerosene:
         tech = "methanol-to-kerosene"
 
         logger.info(f"Adding {tech}.")

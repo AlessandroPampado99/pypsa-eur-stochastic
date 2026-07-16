@@ -13,7 +13,7 @@ run:
 
 validation:
   enable: true
-  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml 
+  config: config/cutouts_prices_uncertainty/validation_deterministic_90.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -211,4 +211,5 @@ solving:
       - gas
       
 
-    validation_missing_capacity_policy: keep_extendable
+    validation_missing_capacity_policy: fix_current
+    io_api: direct

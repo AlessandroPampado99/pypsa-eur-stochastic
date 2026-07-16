@@ -1,0 +1,167 @@
+# Demand uncertainty scenario catalogue guide.
+#
+# This file is documentation and a template. It is not used by Snakemake unless
+# you point stochastic_scenarios.file to it. Copy the patterns into
+# scenario_deterministic.yaml or scenario_stochastic.yaml when defining cases.
+#
+# Main idea
+# ---------
+# A scenario is built from one demand_transition action. The action selects a
+# family, a target amount in TWh/a, and a priority list of entries. Entries are
+# tried in priority order until the requested target/output demand has been
+# allocated or the configured caps are exhausted.
+#
+# Targets are output-side additions. For example, ELEC_HEAT target: 400 means
+# +400 TWh/a electricity demand after COP conversion. It does not mean 400 TWh/a
+# heat demand removed.
+#
+# Entry model
+# -----------
+# Prefer the compact form below:
+#
+#   entry_name:
+#     source: land transport oil        # carrier, list of carriers, or selector
+#     target: land transport EV         # carrier or explicit target selector
+#     cap: 0.20                         # max fraction of current source energy
+#     cap_twh: 50                       # optional absolute source-side cap
+#     type: shift
+#     efficiency_factor: 0.302145139124 # target TWh per source TWh
+#
+# Source and target selectors
+# ---------------------------
+# Shorthand strings select loads by carrier:
+#
+#   source: land transport oil
+#   target: land transport EV
+#
+# A list selects several carriers:
+#
+#   source:
+#     - rural heat
+#     - urban central heat
+#
+# Use an explicit existing name for global loads:
+#
+#   target:
+#     carrier: shipping methanol
+#
+# Regex/list name selectors are also accepted:
+#
+#   source:
+#     names: "^DE .*heat$"
+#
+# Target loads must already exist. This catalogue intentionally does not use
+# create_missing_load. If a matched target load has zero annual energy, it is
+# left unchanged; no flat fallback profile is injected.
+#
+# Conversion alternatives
+# -----------------------
+# 1. Fixed conversion, generic shift:
+#
+#   land_transport_oil:
+#     source: land transport oil
+#     target: land transport EV
+#     cap: 0.20
+#     type: shift
+#     efficiency_factor: 0.302145139124
+#
+# The factor is target-output TWh per source-input TWh. For oil to EV transport,
+# this is oil_efficiency / EV_efficiency = 16.0712 / 53.19.
+#
+# 2. Heat-pump conversion with time-varying COP:
+#
+#   building_heat:
+#     source:
+#       - rural heat
+#       - urban central heat
+#     target: electricity
+#     cap: 0.20
+#     type: shift
+#     cop:
+#       rural heat: rural air heat pump
+#       urban central heat: urban central air heat pump
+#
+# The map links each heat load carrier to the heat-pump link suffix. These links
+# store efficiency as 1/COP, so preprocessing always uses COP = 1/efficiency.
+# It requires COP > 1 at every snapshot. Therefore reducing 1 TWh of useful heat
+# adds less than 1 TWh of electricity demand.
+#
+# 3. Delayed transition / fossil persistence:
+#
+# Write it as an ordinary shift from the low-carbon demand to fossil demand. For
+# fixed-efficiency technologies, reverse source and target and use the normal
+# target-output/source-input factor:
+#
+#   land_transport_oil:
+#     source: land transport EV
+#     target: land transport oil
+#     cap: 0.95
+#     type: shift
+#     efficiency_factor: 3.309644857175  # EV_efficiency / oil_efficiency
+#
+# For inverse heat-pump cases, keep type: shift and add cop_mode: inverse. The
+# target output is then source electricity reduction multiplied by COP. COP is
+# always read as 1/link efficiency:
+#
+#   low_temperature_heat_for_industry:
+#     source: electricity
+#     target: low-temperature heat for industry
+#     cap: 0.20
+#     type: shift
+#     cop_mode: inverse
+#     cop:
+#       low-temperature heat for industry: urban central air heat pump
+#
+# This replaces reverse_shift. The source load is reduced with a cap and the
+# transition code checks that the reduction does not introduce new negatives.
+#
+# 4. Direct target-demand stress:
+#
+# The preferred source-based form is to choose an existing demand that is being
+# substituted, for example gas/biomass to H2. Avoid target-only add cases unless
+# you explicitly want to increase an already positive target profile without a
+# corresponding source reduction.
+#
+# Scenario definitions
+# --------------------
+# A deterministic catalogue does not need a scenarios probability block. Select
+# one active scenario in config_base.yaml. A stochastic catalogue needs:
+#
+# scenarios:
+#   BASE: 0.20
+#   ELEC_HEAT: 0.20
+#   OILGAS_ROAD: 0.20
+#   MEOH_AIR: 0.20
+#   H2_IND: 0.20
+#
+# Every scenario listed there must also exist under scenario_definitions.
+#
+# Minimal complete example
+# ------------------------
+settings:
+  units: TWh
+  weighting: generators
+  allow_unmet_target: false
+  tolerance_twh: 1.0e-4
+  non_negative_tolerance: 1.0e-8
+
+families:
+  EXAMPLE:
+    targets:
+      conservative: 100
+      high: 150
+    entries:
+      road_ev:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.20
+        type: shift
+        efficiency_factor: 0.302145139124
+
+scenario_definitions:
+  EXAMPLE_ROAD:
+    demand_transition:
+      family: EXAMPLE
+      target: conservative
+      priority:
+        - road_ev

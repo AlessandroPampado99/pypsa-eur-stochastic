@@ -1,15 +1,20 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_"
-  name: BASE_methanol_aviation
+  name: BASE
   scenarios:
     enable: false
-    file: config/demand_uncertainty/scenarios_demand_uncertainty.yaml
+    file: config/demand_uncertainty/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+stochastic_scenarios:
+  enable: false
+  file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
+  active_scenario:    # change this label to run one scenario at a time
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -107,6 +112,7 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
+  aviation_methanol_to_kerosene: true
   aviation_methanol_kerosene_share:
     2020: 0.0
     2025: 0.0

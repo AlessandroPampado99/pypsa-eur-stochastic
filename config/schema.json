@@ -4394,6 +4394,11 @@
           "description": "The proportion of demand for aviation compared to today's consumption.",
           "type": "number"
         },
+        "aviation_methanol_to_kerosene": {
+          "default": false,
+          "description": "Enable serving a share of aviation demand with methanol-derived kerosene.",
+          "type": "boolean"
+        },
         "aviation_methanol_kerosene_share": {
           "additionalProperties": {
             "type": "number"
@@ -10666,6 +10671,11 @@
           "default": 1.0,
           "description": "The proportion of demand for aviation compared to today's consumption.",
           "type": "number"
+        },
+        "aviation_methanol_to_kerosene": {
+          "default": false,
+          "description": "Enable serving a share of aviation demand with methanol-derived kerosene.",
+          "type": "boolean"
         },
         "aviation_methanol_kerosene_share": {
           "additionalProperties": {

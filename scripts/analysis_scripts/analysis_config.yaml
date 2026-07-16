@@ -1,115 +1,45 @@
-# Central configuration for analysis scripts
+# Compact configuration for scripts/analysis_scripts/run_analysis.py
+#
+# All script-specific output paths are derived from output_dir. The runner still
+# accepts optional per-script overrides under scripts:<name>:overrides when needed.
 
-common:
-  # General run paths
-  ROOT_DIR: "results/prices_and_renewables"
-  PREFIX_DIR: "results/prices_and_renewables"
+input_dir: "results/demand_uncertainty_"
+output_dir: "results/demand_uncertainty_/analysis_output/"
 
-  NETWORK_GLOB: "networks/base_s_adm___2040.nc"
-  NETWORK_PICKER: "base_s_adm___2040.nc"
+network_file: "base_s_adm___2050.nc"
+base_network_path: "results/demand_uncertainty_/BASE/networks/base_s_adm___2050.nc"
 
-  BASE_NETWORK_PATH: "results/prices_and_renewables/base_mod/networks/base_s_adm___2040.nc"
-  BASE_NAME: "__BASE__"
-  BASE_LABEL: "__BASE__"
+model_config: "config/demand_uncertainty/config_deterministic.yaml"
+plotting_config: "config/plotting.default.yaml"
 
-  CONFIG_YAML: "config/prices_renewables/config.yaml"
-  PLOTTING_YAML: "config/plotting.default.yaml"
+excluded_scenarios:
+  - BASE
+  - BASE_2020
 
-  EXCLUDED_SCENARIOS:
-    - base
-    - base_mod
+parameters:
+  scenario_name_mode: "folder"
+  save_png: true
+  save_pdf: false
+  dpi: 300
+  zero_tol: 1.0e-9
 
-  EXCLUDE_SCENARIOS:
-    - base
-    - base_mod
-
-  SCENARIO_NAME_MODE: "folder"
-
-  SAVE_PNG: true
-  SAVE_PDF: false
-  DPI: 300
-
-  ZERO_TOL: 1.0e-9
-
+# Optional. Omit this block to run all scripts. Use false to disable a script,
+# or add overrides only for the exceptional cases that need customization.
 scripts:
-  analysis_network_batch:
-    enabled: true
-    file: "analysis_network_batch.py"
-    overrides:
-      OUTPUT_EXCEL: "results/prices_and_renewables/2040/csvs/analysis_networks_energy.xlsx"
-      EXCLUDED_SCENARIOS:
-        - base
-        - base_mod
-
-  analysis_network_powers:
-    enabled: true
-    file: "analysis_network_powers.py"
-    overrides:
-      OUTPUT_EXCEL: "results/prices_and_renewables/2040/csvs/analysis_networks_power.xlsx"
-      EXCLUDED_SCENARIOS:
-        - base
-        - base_mod
-
+  analysis_network_batch: true
+  analysis_network_powers: true
   analysis_stores_batch:
-    enabled: true
-    file: "analysis_stores_batch.py"
     overrides:
-      OUTPUT_EXCEL: "results/prices_and_renewables/2040/csvs/analysis_stores.xlsx"
       EXCLUDED_SCENARIOS:
-        - base
-        - base_mod
-        - stochastic_network
-
+        - BASE
+        - BASE_2020
   demand_comparison:
-    enabled: true
-    file: "demand_comparison.py"
     overrides:
-      OUT_DIR: "results/prices_and_renewables/2040/postprocess_demand_compare"
-      OUT_STEM: "demand_compare"
-      GROUPBY: "carrier"
       EXCLUDED_SCENARIOS:
-        - base
-        - stochastic_network
-
-  objective_comparison:
-    enabled: true
-    file: "objective_comparison.py"
-    overrides:
-      OUT_DIR: "results/prices_and_renewables/2040/_postprocess_objectives"
-      OUT_STEM: "objectives"
-      TRY_LOG: true
-      SORT_BY_TOTAL: false
-
-  plot_capacity_energybalance:
-    enabled: true
-    file: "plot_capacity_energybalance.py"
-    overrides:
-      OUTPUT_DIR: "results/prices_and_renewables/2040/csvs/capacity_energy_by_technology"
-      OUTPUT_PLOTS_DIR: "results/prices_and_renewables/2040/csvs/capacity_energy_by_technology/plots"
-      HEATMAPS_DIR: "results/prices_and_renewables/2040/csvs/capacity_energy_by_technology/heatmaps"
-      SAVE_HEATMAPS: true
-
-  plot_demand_bars:
-    enabled: true
-    file: "plot_demand_bars.py"
-    overrides:
-      EXCEL_PATH: "results/prices_and_renewables/2040/postprocess_demand_compare/demand_compare_levels.xlsx"
-      OUT_DIR: "results/prices_and_renewables/2040/postprocess_demand_compare/demand_level_plots"
-      SHEET_NAME: "levels"
-      EXCLUDE_BASE: true
-
-  plot_heatmap_vs_base:
-    enabled: true
-    file: "plot_heatmap_vs_base.py"
-    overrides:
-      EXCEL_PATH: "results/prices_and_renewables/2040/csvs/analysis_networks_energy.xlsx"
-      OUT_DIR: "results/prices_and_renewables/2040/heatmaps_vs_base_energy"
-      ZIP_NAME: "results/prices_and_renewables/2040/heatmaps_vs_base_energy.zip"
-
-  plot_heatmap_vs_base_size:
-    enabled: true
-    file: "plot_heatmap_vs_base_size.py"
-    overrides:
-      EXCEL_PATH: "results/prices_and_renewables/2040/csvs/analysis_networks_power.xlsx"
-      OUT_DIR: "results/prices_and_renewables/2040/heatmaps_vs_base_power"
-      ZIP_NAME: "results/prices_and_renewables/2040/heatmaps_vs_base_power.zip"
+        - BASE
+        - BASE_2020
+  objective_comparison: true
+  plot_capacity_energybalance: true
+  plot_demand_bars: true
+  plot_heatmap_vs_base: true
+  plot_heatmap_vs_base_size: true

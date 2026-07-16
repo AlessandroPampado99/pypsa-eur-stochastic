@@ -64,7 +64,7 @@ GroupByField = Literal["carrier", "bus", "load_name"]
 GROUPBY: GroupByField = "carrier"
 
 # Output folder (will contain three Excel files)
-OUT_DIR = Path("results/demand_uncertainty_/postprocess_demand_compare")
+OUT_DIR = Path("results/demand_uncertainty_/analysis_output/postprocess_demand_compare")
 
 # File name prefix for exported Excel files
 OUT_STEM = "demand_compare"
