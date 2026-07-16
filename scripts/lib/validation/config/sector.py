@@ -10,7 +10,7 @@ See docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from scripts.lib.validation.config._base import ConfigModel
 
@@ -583,6 +583,10 @@ class SectorConfig(BaseModel):
         1.0,
         description="The proportion of demand for aviation compared to today's consumption.",
     )
+    aviation_methanol_to_kerosene: bool = Field(
+        False,
+        description="Enable serving a share of aviation demand with methanol-derived kerosene.",
+    )
     aviation_methanol_kerosene_share: dict[int, float] = Field(
         default_factory=lambda: {
             2020: 0,
@@ -936,15 +940,3 @@ class SectorConfig(BaseModel):
     imports: _ImportsConfig = Field(
         default_factory=_ImportsConfig, description="Imports configuration."
     )
-
-    @model_validator(mode="after")
-    def validate_aviation_methanol_kerosene_enabled(self) -> "SectorConfig":
-        if (
-            any(self.aviation_methanol_kerosene_share.values())
-            and not self.methanol.methanol_to_kerosene
-        ):
-            raise ValueError(
-                "sector.methanol.methanol_to_kerosene must be true when "
-                "sector.aviation_methanol_kerosene_share contains non-zero values."
-            )
-        return self

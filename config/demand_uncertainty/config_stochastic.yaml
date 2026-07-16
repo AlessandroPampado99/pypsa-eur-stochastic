@@ -111,6 +111,7 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
+  aviation_methanol_to_kerosene: true
   aviation_methanol_kerosene_share:
     2020: 0.0
     2025: 0.0
