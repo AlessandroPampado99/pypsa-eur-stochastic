@@ -41,11 +41,11 @@ MEOH_AIR:
     enable: false
     file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
     active_scenario: MEOH_AIR
-MEOH_HVC:
+MEOH_IND:
   stochastic_scenarios:
     enable: false
     file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
-    active_scenario: MEOH_HVC
+    active_scenario: MEOH_IND
 MEOH_SHIP:
   stochastic_scenarios:
     enable: false
@@ -56,11 +56,11 @@ H2_IND:
     enable: false
     file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
     active_scenario: H2_IND
-H2_NH3:
+H2_IND:
   stochastic_scenarios:
     enable: false
     file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
-    active_scenario: H2_NH3
+    active_scenario: H2_IND
 H2_TRANS:
   stochastic_scenarios:
     enable: false

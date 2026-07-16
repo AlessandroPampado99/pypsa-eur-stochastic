@@ -28,8 +28,8 @@ def _network():
     for name, (carrier, values) in loads.items():
         n.add("Load", name, bus="DE", carrier=carrier)
         n.loads_t.p_set.loc[:, name] = values
-    n.add("Link", "DE rural air heat pump", bus0="DE", bus1="DE heat", carrier="rural air heat pump", p_min_pu=0.0, p_max_pu=1.0)
-    n.links_t.efficiency.loc[:, "DE rural air heat pump"] = [2.0, 2.0]
+    n.add("Link", "DE rural air heat pump", bus0="DE heat", bus1="DE", carrier="rural air heat pump", p_min_pu=-1.0, p_max_pu=0.0)
+    n.links_t.efficiency.loc[:, "DE rural air heat pump"] = [0.5, 0.5]
     n.add("Link", "DE gas boiler", bus0="DE", bus1="DE heat", carrier="gas boiler", marginal_cost=10.0)
     return n
 
@@ -178,8 +178,8 @@ def test_electrify_heat_resolves_country_named_electricity_load():
     n.loads_t.p_set.loc[:, "AL"] = [100.0, 100.0]
     n.add("Load", "AL rural heat", bus="AL heat", carrier="rural heat")
     n.loads_t.p_set.loc[:, "AL rural heat"] = [1000.0, 1000.0]
-    n.add("Link", "AL rural air heat pump", bus0="AL", bus1="AL heat", carrier="rural air heat pump", p_min_pu=0.0, p_max_pu=1.0)
-    n.links_t.efficiency.loc[:, "AL rural air heat pump"] = [2.0, 2.0]
+    n.add("Link", "AL rural air heat pump", bus0="AL heat", bus1="AL", carrier="rural air heat pump", p_min_pu=-1.0, p_max_pu=0.0)
+    n.links_t.efficiency.loc[:, "AL rural air heat pump"] = [0.5, 0.5]
     cfg = {
         "enable": False,
         "active_scenario": "ELEC_HEAT",
@@ -221,7 +221,7 @@ def test_electrify_heat_resolves_country_named_electricity_load():
     assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(800.0)
 
 
-def test_electrify_heat_uses_inverse_cop_for_reversed_heat_pump_link():
+def test_electrify_heat_uses_cop_as_inverse_link_efficiency():
     n = pypsa.Network()
     snapshots = pd.date_range("2020-01-01", periods=2, freq="h")
     n.set_snapshots(snapshots)
@@ -282,7 +282,7 @@ def test_electrify_heat_uses_inverse_cop_for_reversed_heat_pump_link():
     assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(800.0)
     report = n.meta["demand_transition_reports"]["deterministic"]
     affected = report["entries"][0]["affected_loads"][0]
-    assert affected["heat_pump_efficiency_mode"] == "inverse_cop"
+    assert affected["heat_pump_efficiency_mode"] == "cop_is_inverse_link_efficiency"
 
 
 def test_shift_with_inverse_cop_converts_electricity_back_to_heat():
@@ -348,7 +348,7 @@ def test_shift_with_inverse_cop_converts_electricity_back_to_heat():
     assert _load_annual_energy_twh(n, "AL rural heat") == pytest.approx(1100.0)
     report = n.meta["demand_transition_reports"]["deterministic"]
     affected = report["entries"][0]["affected_loads"][0]
-    assert affected["heat_pump_efficiency_mode"] == "inverse_cop"
+    assert affected["heat_pump_efficiency_mode"] == "cop_is_inverse_link_efficiency"
 
 
 def test_add_transformation_leaves_zero_targets_unchanged_when_unmet_allowed():

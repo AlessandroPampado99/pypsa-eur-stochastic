@@ -81,9 +81,10 @@
 #       rural heat: rural air heat pump
 #       urban central heat: urban central air heat pump
 #
-# The map links each heat load carrier to the heat-pump link suffix. If the link
-# has p_min_pu < 0, PyPSA-Eur stores efficiency as 1/COP and the preprocessing
-# reverses it automatically.
+# The map links each heat load carrier to the heat-pump link suffix. These links
+# store efficiency as 1/COP, so preprocessing always uses COP = 1/efficiency.
+# It requires COP > 1 at every snapshot. Therefore reducing 1 TWh of useful heat
+# adds less than 1 TWh of electricity demand.
 #
 # 3. Delayed transition / fossil persistence:
 #
@@ -99,9 +100,8 @@
 #     efficiency_factor: 3.309644857175  # EV_efficiency / oil_efficiency
 #
 # For inverse heat-pump cases, keep type: shift and add cop_mode: inverse. The
-# target output is then source electricity reduction multiplied by COP. If the
-# PyPSA-Eur heat-pump link has p_min_pu < 0, its stored efficiency is 1/COP and
-# the preprocessing inverts it automatically:
+# target output is then source electricity reduction multiplied by COP. COP is
+# always read as 1/link efficiency:
 #
 #   low_temperature_heat_for_industry:
 #     source: electricity

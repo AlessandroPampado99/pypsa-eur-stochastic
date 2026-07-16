@@ -433,11 +433,15 @@ def copy_capacities_from_source_network(
             )
 
         if len(unresolved) > 0 and missing_capacity_policy == "fix_current":
+            if opt_col in df_target.columns:
+                df_target.loc[unresolved, opt_col] = df_target.loc[unresolved, attr]
             df_target.loc[unresolved, extendable_col] = False
             logger.warning(
-                "Component %s: %s unresolved target assets were fixed at their current nominal value.",
+                "Component %s: %s unresolved target assets were fixed at their current nominal value. "
+                "Examples: %s",
                 comp_name,
                 len(unresolved),
+                list(unresolved[:10]),
             )
 
         source_only = pd.Index(df_source.index).difference(df_target.index)
@@ -508,8 +512,8 @@ if __name__ == "__main__":
             opts="",
             sector_opts="",
             planning_horizons="2050",
-            cap_source="d_2000",
-            op_source="d_2001",
+            cap_source="d_2008",
+            op_source="d_1999",
             run_prefix="cutouts_det_capexp_",
         )
 
@@ -624,7 +628,12 @@ if __name__ == "__main__":
             )
 
             logger.info("Solving validation operations network...")
-            n_operation.optimize.solve_model(**solve_kwargs)
+            status, condition = n_operation.optimize.solve_model(**solve_kwargs)
+            if status != "ok":
+                raise RuntimeError(
+                    f"Validation optimization failed with status={status}, "
+                    f"condition={condition}."
+                )
 
     logger.info("Maximum memory usage: %s", mem.mem_usage)
 

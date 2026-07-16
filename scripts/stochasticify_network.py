@@ -198,49 +198,24 @@ def _read_link_efficiency_series(
     return _read_ts_series(n.links_t.efficiency, name=link_name, scenario=scenario)
 
 
-def _link_static_value(n: pypsa.Network, link_name: str, column: str) -> Any:
-    """Return one static link value from deterministic or stochastic tables."""
-    links = _base_links_table(n)
-    if link_name not in links.index:
-        raise KeyError(f"Required link '{link_name}' not found in n.links.")
-    return _component_value(links, link_name, column)
-
-
-def _link_carrier_hint(n: pypsa.Network, bus_name: Any) -> str:
-    """Return a lowercase carrier-like hint for a bus, if available."""
-    bus_name = str(bus_name)
-    buses = _base_component_table(n.buses)
-    hints = [bus_name.lower()]
-    if bus_name in buses.index and "carrier" in buses.columns:
-        carrier = _component_value(buses, bus_name, "carrier")
-        if pd.notna(carrier):
-            hints.append(str(carrier).lower())
-    return " ".join(hints)
-
-
-def _is_reversed_heat_pump_link(n: pypsa.Network, link_name: str) -> bool:
-    """Detect PyPSA-Eur reversed heat-pump links where efficiency is 1/COP."""
-    try:
-        p_min_pu = float(_link_static_value(n, link_name, "p_min_pu"))
-        p_max_pu = float(_link_static_value(n, link_name, "p_max_pu"))
-        bus0 = _link_static_value(n, link_name, "bus0")
-        bus1 = _link_static_value(n, link_name, "bus1")
-    except (KeyError, TypeError, ValueError):
-        return False
-
-    del p_max_pu, bus0, bus1
-    return p_min_pu < 0.0
-
-
-def _heat_pump_efficiency_series(
+def _heat_pump_cop_series(
     n: pypsa.Network,
     link_name: str,
     scenario: str | None = None,
 ) -> pd.Series:
+    """Return COP, stored by these reversed links as 1 / efficiency."""
     efficiency = _read_link_efficiency_series(n, link_name, scenario=scenario).reindex(n.snapshots)
-    if efficiency.isnull().any() or (efficiency <= 0).any():
-        raise ValueError(f"Efficiency/COP for link '{link_name}' must be finite and strictly positive.")
-    return efficiency
+    if efficiency.isnull().any() or not np.isfinite(efficiency.to_numpy(dtype=float)).all():
+        raise ValueError(f"Efficiency for heat-pump link '{link_name}' must be finite.")
+    if (efficiency <= 0).any():
+        raise ValueError(f"Efficiency for heat-pump link '{link_name}' must be strictly positive.")
+    cop = 1.0 / efficiency
+    if (cop <= 1.0).any():
+        raise ValueError(
+            f"Heat-pump link '{link_name}' must have COP = 1 / efficiency > 1 "
+            "at every snapshot."
+        )
+    return cop
 
 
 def _heat_pump_electricity_addition(
@@ -249,12 +224,9 @@ def _heat_pump_electricity_addition(
     heat_reduction: pd.Series,
     scenario: str | None = None,
 ) -> tuple[pd.Series, str]:
-    """Convert heat reduction into electricity demand for heat-pump orientation."""
-    efficiency = _heat_pump_efficiency_series(n, link_name, scenario=scenario)
-    if _is_reversed_heat_pump_link(n, link_name):
-        cop = 1.0 / efficiency
-        return heat_reduction / cop, "inverse_cop"
-    return heat_reduction / efficiency, "cop"
+    """Convert useful heat reduction into electricity demand."""
+    cop = _heat_pump_cop_series(n, link_name, scenario=scenario)
+    return heat_reduction / cop, "cop_is_inverse_link_efficiency"
 
 
 def _heat_pump_heat_addition(
@@ -263,11 +235,9 @@ def _heat_pump_heat_addition(
     electricity_reduction: pd.Series,
     scenario: str | None = None,
 ) -> tuple[pd.Series, str]:
-    """Convert electricity reduction into useful heat demand for inverse heat-pump shifts."""
-    efficiency = _heat_pump_efficiency_series(n, link_name, scenario=scenario)
-    if _is_reversed_heat_pump_link(n, link_name):
-        return electricity_reduction / efficiency, "inverse_cop"
-    return electricity_reduction * efficiency, "cop"
+    """Convert electricity reduction into displaced useful heat demand."""
+    cop = _heat_pump_cop_series(n, link_name, scenario=scenario)
+    return electricity_reduction * cop, "cop_is_inverse_link_efficiency"
 
 
 def _carrier_names_from_table(df: pd.DataFrame, carrier: str) -> list[str]:

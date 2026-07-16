@@ -177,7 +177,7 @@ families:
       high: 80
 
     entries:
-      low-temperature_heat_for_industry:
+      low_temperature_heat_for_industry:
         source:
           - low-temperature heat for industry
         target: H2 for industry
@@ -220,6 +220,7 @@ scenario_definitions:
         - building_heat
         - agriculture_heat
         - low_temperature_heat_for_industry
+        - land_transport_oil
 
   ELEC_ROAD:
     demand_transition:
@@ -303,7 +304,7 @@ scenario_definitions:
       target: conservative
       priority:
         - industry_electricity
-        - low-temperature_heat_for_industry
+        - low_temperature_heat_for_industry
 
   H2_TRANS:
     demand_transition:
@@ -313,7 +314,7 @@ scenario_definitions:
         - land_transport_oil
         - shipping_oil
         - industry_electricity
-        - low-temperature_heat_for_industry
+        - low_temperature_heat_for_industry
 
   ELEC_HIGH:
     demand_transition:

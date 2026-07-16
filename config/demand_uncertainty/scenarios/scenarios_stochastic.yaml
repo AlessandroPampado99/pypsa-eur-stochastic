@@ -207,6 +207,9 @@ scenario_definitions:
       target: conservative
       priority:
         - building_heat
+        - agriculture_heat
+        - low_temperature_heat_for_industry
+        - land_transport_oil
 
   ELEC_ROAD:
     demand_transition:
