@@ -57,6 +57,104 @@ NOMINAL_ATTRS = {
     "Transformer": "s_nom",
 }
 
+IMPORT_SOURCE_ONLY_COMPONENTS = {"Link"}
+
+
+def _source_capacity(row: pd.Series, attr: str) -> float | None:
+    opt_col = f"{attr}_opt"
+
+    if opt_col in row.index and pd.notna(row[opt_col]):
+        return row[opt_col]
+    if attr in row.index and pd.notna(row[attr]):
+        return row[attr]
+
+    return None
+
+
+def _referenced_buses(row: pd.Series) -> pd.Index:
+    bus_cols = [
+        col
+        for col in row.index
+        if col == "bus" or (col.startswith("bus") and col[3:].isdigit())
+    ]
+    buses = [
+        row[col]
+        for col in bus_cols
+        if col in row.index and pd.notna(row[col]) and str(row[col])
+    ]
+    return pd.Index(buses)
+
+
+def import_source_only_fixed_links(
+    n_target: pypsa.Network,
+    n_source: pypsa.Network,
+    source_only: pd.Index,
+    attr: str,
+) -> list[str]:
+    """
+    Import source-only links whose topology already exists in the target network.
+
+    This handles validation across networks built with slightly different sector
+    switches, e.g. a capacity-source network with methanol-to-kerosene links and
+    an operation network whose buses exist but whose links were not created.
+    """
+    comp_target = n_target.components["Link"]
+    comp_source = n_source.components["Link"]
+    df_target = comp_target.static
+    df_source = comp_source.static
+    opt_col = f"{attr}_opt"
+    extendable_col = f"{attr}_extendable"
+
+    imported = []
+    skipped = []
+
+    for asset in source_only:
+        row = df_source.loc[asset].copy()
+        source_value = _source_capacity(row, attr)
+        if source_value is None or pd.isna(source_value):
+            skipped.append(asset)
+            continue
+
+        missing_buses = _referenced_buses(row).difference(n_target.buses.index)
+        if len(missing_buses) > 0:
+            skipped.append(asset)
+            continue
+
+        carrier = row.get("carrier")
+        if pd.notna(carrier) and carrier not in n_target.carriers.index:
+            if carrier in n_source.carriers.index:
+                carrier_row = n_source.carriers.loc[carrier]
+                n_target.add("Carrier", carrier, **carrier_row.dropna().to_dict())
+            else:
+                n_target.add("Carrier", carrier)
+
+        attrs = row.drop(labels=[opt_col], errors="ignore").dropna().to_dict()
+        attrs[attr] = source_value
+        attrs[extendable_col] = False
+        n_target.add("Link", asset, **attrs)
+        if opt_col in df_target.columns:
+            df_target.at[asset, opt_col] = source_value
+        imported.append(asset)
+
+    if imported:
+        logger.warning(
+            "Component Link: imported %s source-only fixed-capacity links because "
+            "their referenced buses already exist in the operation network. Examples: %s",
+            len(imported),
+            imported[:10],
+        )
+
+    if skipped:
+        logger.warning(
+            "Component Link: skipped %s source-only links because their capacity or "
+            "referenced buses were missing. Examples: %s",
+            len(skipped),
+            skipped[:10],
+        )
+
+    return imported
+
+
 
 def log_remaining_extendable_assets(n: pypsa.Network) -> None:
     """
@@ -445,6 +543,16 @@ def copy_capacities_from_source_network(
             )
 
         source_only = pd.Index(df_source.index).difference(df_target.index)
+        imported_source_only = []
+        if len(source_only) > 0 and comp_name in IMPORT_SOURCE_ONLY_COMPONENTS:
+            imported_source_only = import_source_only_fixed_links(
+                n_target=n_target,
+                n_source=n_source,
+                source_only=source_only,
+                attr=attr,
+            )
+            source_only = source_only.difference(pd.Index(imported_source_only))
+
         if len(source_only) > 0:
             logger.warning(
                 "Component %s: %s assets exist in the capacity source network but not in the "
@@ -460,6 +568,7 @@ def copy_capacities_from_source_network(
                 "attr": attr,
                 "extendable_active": len(ext_i),
                 "fixed_from_source": len(fixed_assets),
+                "imported_source_only": len(imported_source_only),
                 "excluded_by_carrier": len(excluded_by_carrier),
                 "excluded_explicitly": len(explicitly_excluded),
                 "missing_in_source": len(missing_in_source),
@@ -512,8 +621,8 @@ if __name__ == "__main__":
             opts="",
             sector_opts="",
             planning_horizons="2050",
-            cap_source="d_2008",
-            op_source="d_1999",
+            cap_source="d_2016",
+            op_source="d_1998",
             run_prefix="cutouts_det_capexp_",
         )
 

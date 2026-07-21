@@ -239,6 +239,8 @@ scenario_definitions:
         - low_temperature_heat_for_industry
         - solid_biomass_for_industry
         - building_heat
+        - land_transport_oil
+        - agriculture_heat
 
   OILGAS_ROAD:
     demand_transition:
@@ -324,6 +326,8 @@ scenario_definitions:
         - building_heat
         - land_transport_oil
         - low_temperature_heat_for_industry
+        - agriculture_heat
+        - solid_biomass_for_industry
 
   OILGAS_HIGH:
     demand_transition:

@@ -152,3 +152,34 @@ d_1999:
           features: []
           monthly_requests: true
           tmpdir: ./cutouts_tmp/
+
+d_2005:
+  snapshots:
+    start: "2005-01-01"
+    end: "2006-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-2005-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-2005-era5":
+        module: era5
+        x:
+        - -12.0
+        - 42.0
+        'y':
+        - 33.0
+        - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+        - '2005'
+        - '2005'
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/

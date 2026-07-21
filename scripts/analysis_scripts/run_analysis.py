@@ -71,6 +71,8 @@ SET_KEYS = {
     "EXCLUDED_METRICS",
     "INCLUDED_CARRIERS",
     "EXCLUDED_CARRIERS",
+    "INCLUDED_GROUPS",
+    "EXCLUDED_GROUPS",
     "EXCLUDED_TECHNOLOGY_SUBSTRINGS",
     "EXCLUDED_ITEM_LABEL_SUBSTRINGS",
 }
@@ -116,6 +118,17 @@ DEFAULT_SCRIPTS: dict[str, dict[str, Any]] = {
             "HEATMAPS_DIR": "csvs/capacity_energy_by_technology/heatmaps",
         },
         "defaults": {"SAVE_HEATMAPS": True},
+    },
+    "plot_scenario_energy_balance": {
+        "file": "plot_scenario_energy_balance.py",
+        "outputs": {
+            "EXCEL_PATH": "csvs/analysis_networks_energy.xlsx",
+            "OUTPUT_DIR": "graphs/scenario_energy_balance",
+        },
+        "defaults": {
+            "OUT_STEM": "scenario_energy_balance",
+            "TOTAL_MODE": "positive",
+        },
     },
     "plot_demand_bars": {
         "file": "plot_demand_bars.py",

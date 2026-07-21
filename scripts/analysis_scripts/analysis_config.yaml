@@ -15,6 +15,10 @@ plotting_config: "config/plotting.default.yaml"
 excluded_scenarios:
   - BASE
   - BASE_2020
+  # - ELEC_HIGH
+  # - OILGAS_HIGH
+  # - MEOH_HIGH
+  # - H2_HIGH
 
 parameters:
   scenario_name_mode: "folder"
@@ -40,6 +44,40 @@ scripts:
         - BASE_2020
   objective_comparison: true
   plot_capacity_energybalance: true
+  plot_scenario_energy_balance:
+    overrides:
+      # Optional explicit groups. Unlisted scenarios are grouped from the text
+      # before their first underscore, e.g. ELEC_HEAT -> ELEC.
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        ELEC:
+          - ELEC_HEAT
+          - ELEC_ROAD
+          - ELEC_IND
+        OILGAS:
+          - OILGAS_ROAD
+          - OILGAS_IND
+          - OILGAS_SHIP
+        MEOH:
+          - MEOH_AIR
+          - MEOH_IND
+          - MEOH_SHIP
+        H2:
+          - H2_IND
+          - H2_TRANS
+      FAMILY_ORDER:
+        - BASE
+        - ELEC
+        - OILGAS
+        - MEOH
+        - H2
+      # Alternatives: positive, consumption, net, throughput.
+      TOTAL_MODE: positive
+      ENERGY_THRESHOLD_TWH: 0.0
+      # Optional exact bus-carrier selection, e.g. [AC, co2, H2].
+      INCLUDED_GROUPS:
+      EXCLUDED_GROUPS: []
   plot_demand_bars: true
   plot_heatmap_vs_base: true
   plot_heatmap_vs_base_size: true
