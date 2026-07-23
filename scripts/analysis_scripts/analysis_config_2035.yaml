@@ -3,17 +3,17 @@
 # All script-specific output paths are derived from output_dir. The runner still
 # accepts optional per-script overrides under scripts:<name>:overrides when needed.
 
-input_dir: "results/demand_uncertainty_"
-output_dir: "results/demand_uncertainty_/analysis_output/"
+input_dir: "results/demand_uncertainty_2035"
+output_dir: "results/demand_uncertainty_2035/analysis_output/"
 
-network_file: "base_s_adm___2050.nc"
-base_network_path: "results/demand_uncertainty_/BASE/networks/base_s_adm___2050.nc"
+network_file: "base_s_adm___2035.nc"
+base_network_path: "results/demand_uncertainty_2035/BASE/networks/base_s_adm___2035.nc"
 
 model_config: "config/demand_uncertainty/config_deterministic.yaml"
 plotting_config: "config/plotting.default.yaml"
 
 excluded_scenarios:
-  - BASE
+  #- BASE
   - BASE_2020
   # - ELEC_HIGH
   # - OILGAS_HIGH
@@ -35,12 +35,12 @@ scripts:
   analysis_stores_batch:
     overrides:
       EXCLUDED_SCENARIOS:
-        - BASE
+        #- BASE
         - BASE_2020
   demand_comparison:
     overrides:
       EXCLUDED_SCENARIOS:
-        - BASE
+        #- BASE
         - BASE_2020
   objective_comparison: true
   plot_capacity_energybalance: true

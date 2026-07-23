@@ -48,8 +48,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/eth_results")
-OUTPUT_DIR = Path("results/eth_results/validation_heatmaps")
+ROOT_DIR = Path("results/cutouts_det_capexp_")
+OUTPUT_DIR = Path("results/cutouts_det_capexp_/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
 DIAGONAL_FILENAME = "base_s_adm___2050.nc"
@@ -64,40 +64,45 @@ CROSS_FILENAME_TEMPLATE = "base_s_adm___2050__cap-{cap_source}__op-{op_source}.n
 OUTPUT_FIGURE = OUTPUT_DIR / "validation_heatmaps.png"
 OUTPUT_EXCEL = OUTPUT_DIR / "validation_heatmaps.xlsx"
 
+# Reuse the existing Excel tables instead of loading all solved networks again.
+# Set to False to recompute the metrics and overwrite the workbook.
+REUSE_EXISTING_EXCEL = True
+
 # Scenario selection
 EXCLUDED_SCENARIOS = set()
 INCLUDE_STOCHASTIC_SCENARIOS = True
 
 # These scenarios, if included, use __exp on the diagonal
-STOCHASTIC_SCENARIOS = {"stochastic_network"}
+STOCHASTIC_SCENARIOS = {} # {"stochastic_network"}
 
 # Optional manual order. If None, folder order is used alphabetically.
 SCENARIO_ORDER = None
 # Example:
-SCENARIO_ORDER = [
-    "base",
-    "agriculture_full_electric",
-    "agriculture_machinery_full_oil",
-    "electricity_optimistic",
-    "industry_h2",
-    "land_transport_linear_ev",
-    "shipping_full_methanol",
-    "urban_heat_full_central",
-    "stochastic_network",
-]
+# SCENARIO_ORDER = [
+#    "base",
+#    "agriculture_full_electric",
+#    "agriculture_machinery_full_oil",
+#    "electricity_optimistic",
+#    "industry_h2",
+#    "land_transport_linear_ev",
+#    "shipping_full_methanol",
+#    "urban_heat_full_central",
+#    "stochastic_network",
+#]
 
 # Optional pretty labels for plots
-SCENARIO_LABELS = {
-    "base": "BASE",
-    "agriculture_full_electric": "AFE",
-    "agriculture_machinery_full_oil": "AMFO",
-    "electricity_optimistic": "EO",
-    "industry_h2": "IH2",
-    "land_transport_linear_ev": "LTLEV",
-    "shipping_full_methanol": "SFM",
-    "urban_heat_full_central": "UHFC",
-    "stochastic_network": "SP",
-}
+#SCENARIO_LABELS = {
+#    "base": "BASE",
+#    "agriculture_full_electric": "AFE",
+#    "agriculture_machinery_full_oil": "AMFO",
+#    "electricity_optimistic": "EO",
+#    "industry_h2": "IH2",
+#    "land_transport_linear_ev": "LTLEV",
+#    "shipping_full_methanol": "SFM",
+#    "urban_heat_full_central": "UHFC",
+#    "stochastic_network": "SP",
+#}
+SCENARIO_LABELS = None
 
 # Metrics
 TOTAL_COST_SCALE = 1e9
@@ -191,7 +196,7 @@ def _network_has_invalid_solution(n: pypsa.Network) -> bool:
 
 def _scenario_display_name(name: str) -> str:
     """Return the scenario label used in the plot."""
-    return SCENARIO_LABELS.get(name, name)
+    return SCENARIO_LABELS.get(name, name) if SCENARIO_LABELS else name
 
 
 def _list_scenarios(root_dir: Path) -> list[str]:
@@ -531,6 +536,40 @@ def _write_excel(matrices: dict[str, pd.DataFrame], output_excel: Path) -> None:
             df.to_excel(writer, sheet_name=name[:31])
 
 
+def _read_excel(
+    output_excel: Path,
+) -> tuple[dict[str, pd.DataFrame], dict[str, pd.DataFrame]]:
+    """Read previously computed metric matrices from Excel."""
+    metric_names = ["total_cost", "load_curtailment", "renewable_curtailment"]
+    sheets = pd.read_excel(output_excel, sheet_name=None, index_col=0)
+
+    missing_sheets = [name for name in metric_names if name not in sheets]
+    if missing_sheets:
+        raise ValueError(
+            f"{output_excel} is missing required sheets: "
+            + ", ".join(missing_sheets)
+        )
+
+    matrices = {}
+    invalid_masks = {}
+    for name in metric_names:
+        df = sheets[name]
+        df.index = df.index.map(str)
+        df.columns = df.columns.map(str)
+        matrices[name] = df.apply(pd.to_numeric, errors="coerce")
+
+        # Older workbooks do not store whether an empty cell came from a
+        # missing file or an invalid solution, so leave empty cells unlabelled.
+        invalid_masks[name] = pd.DataFrame(
+            False,
+            index=matrices[name].index,
+            columns=matrices[name].columns,
+            dtype=bool,
+        )
+
+    return matrices, invalid_masks
+
+
 def _metric_plot_settings(metric_name: str) -> dict:
     """Return plot settings for each metric."""
     settings = {
@@ -589,15 +628,20 @@ def _plot_metric_heatmap(
 
 
 def main():
-    scenarios = _list_scenarios(ROOT_DIR)
+    if REUSE_EXISTING_EXCEL and OUTPUT_EXCEL.exists():
+        print(f"[INFO] Reusing existing Excel file: {OUTPUT_EXCEL}")
+        matrices, invalid_masks = _read_excel(OUTPUT_EXCEL)
+        excel_status = f"Excel reused from: {OUTPUT_EXCEL}"
+    else:
+        scenarios = _list_scenarios(ROOT_DIR)
 
-    print("[INFO] Scenarios used:")
-    for s in scenarios:
-        print(f"  - {s}")
+        print("[INFO] Scenarios used:")
+        for s in scenarios:
+            print(f"  - {s}")
 
-    matrices, invalid_masks = _build_metric_matrices(ROOT_DIR, scenarios)
-
-    _write_excel(matrices, OUTPUT_EXCEL)
+        matrices, invalid_masks = _build_metric_matrices(ROOT_DIR, scenarios)
+        _write_excel(matrices, OUTPUT_EXCEL)
+        excel_status = f"Excel written to: {OUTPUT_EXCEL}"
 
     for metric_name, df in matrices.items():
         _plot_metric_heatmap(
@@ -607,7 +651,7 @@ def main():
             OUTPUT_DIR,
         )
 
-    print(f"✔ Excel written to: {OUTPUT_EXCEL}")
+    print(f"✔ {excel_status}")
     print(f"✔ Figures written to: {OUTPUT_DIR}")
 
 

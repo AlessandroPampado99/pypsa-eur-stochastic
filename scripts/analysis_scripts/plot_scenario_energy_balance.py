@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
+from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -52,9 +53,19 @@ ANNOTATE_TOTALS = True
 TOTAL_MODE = "positive"
 TOTAL_DECIMALS = 0
 
+# Labels inside technology segments. Threshold values use the plotted unit
+# (TWh for energy groups and MtCO2 for CO2 groups).
+ANNOTATE_SEGMENTS = True
+LABELED_TECHNOLOGIES: set[str] | None = None
+SEGMENT_LABEL_MODE = "percent"
+SEGMENT_LABEL_MIN_VALUE = 1.0
+SEGMENT_LABEL_MIN_PERCENT = 5.0
+SEGMENT_LABEL_DECIMALS = 0
+
 TITLE_PREFIX = "Energy balance"
 FIGSIZE: tuple[float, float] | None = None
 BAR_WIDTH = 0.78
+CONSUMPTION_HATCH = "//"
 SAVE_PNG = True
 SAVE_SVG = True
 SAVE_PDF = False
@@ -299,18 +310,37 @@ def calculate_totals(table: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def _annotation_values(totals: pd.DataFrame) -> tuple[pd.Series, str]:
-    labels = {
-        "positive": "supply",
-        "consumption": "consumption",
-        "net": "net",
-        "throughput": "throughput",
-    }
-    if TOTAL_MODE not in labels:
+def _annotation_values(totals: pd.DataFrame) -> pd.Series:
+    modes = {"positive", "consumption", "net", "throughput"}
+    if TOTAL_MODE not in modes:
         raise ValueError(
-            f"TOTAL_MODE must be one of {sorted(labels)}, got {TOTAL_MODE!r}."
+            f"TOTAL_MODE must be one of {sorted(modes)}, got {TOTAL_MODE!r}."
         )
-    return totals[TOTAL_MODE], labels[TOTAL_MODE]
+    return totals[TOTAL_MODE]
+
+
+def _label_segment(technology: str, value: float, side_total: float) -> bool:
+    """Return whether a technology segment should show its signed value."""
+    if not ANNOTATE_SEGMENTS or value == 0.0:
+        return False
+    if LABELED_TECHNOLOGIES is not None and technology not in LABELED_TECHNOLOGIES:
+        return False
+
+    absolute_match = abs(value) >= SEGMENT_LABEL_MIN_VALUE
+    share = 100.0 * abs(value) / side_total if side_total > 0.0 else 0.0
+    percent_match = share >= SEGMENT_LABEL_MIN_PERCENT
+    modes = {
+        "absolute": absolute_match,
+        "percent": percent_match,
+        "either": absolute_match or percent_match,
+        "both": absolute_match and percent_match,
+    }
+    if SEGMENT_LABEL_MODE not in modes:
+        raise ValueError(
+            "SEGMENT_LABEL_MODE must be one of "
+            f"{sorted(modes)}, got {SEGMENT_LABEL_MODE!r}."
+        )
+    return modes[SEGMENT_LABEL_MODE]
 
 
 def _safe_filename(value: str) -> str:
@@ -366,7 +396,6 @@ def plot_group(
             BAR_WIDTH,
             bottom=positive_bottom,
             color=colors[technology],
-            label=technology,
             linewidth=0,
         )
         ax.bar(
@@ -375,23 +404,43 @@ def plot_group(
             BAR_WIDTH,
             bottom=negative_bottom,
             color=colors[technology],
-            linewidth=0,
+            edgecolor="black",
+            linewidth=0.3,
+            hatch=CONSUMPTION_HATCH,
         )
+        for i, value in enumerate(values):
+            side_total = (
+                totals.iloc[i]["positive"]
+                if value > 0.0
+                else totals.iloc[i]["consumption"]
+            )
+            if _label_segment(technology, value, side_total):
+                bottom = positive_bottom[i] if value > 0.0 else negative_bottom[i]
+                ax.text(
+                    x[i],
+                    bottom + value / 2.0,
+                    f"{value:.{SEGMENT_LABEL_DECIMALS}f}",
+                    ha="center",
+                    va="center",
+                    color="black",
+                    fontsize=7,
+                )
         positive_bottom += positive
         negative_bottom += negative
 
-    annotation_values, annotation_label = _annotation_values(totals)
+    annotation_values = _annotation_values(totals)
     span = max(positive_bottom.max() - negative_bottom.min(), 1.0)
     if ANNOTATE_TOTALS:
         for xpos, top, value in zip(x, positive_bottom, annotation_values):
             ax.text(
                 xpos,
                 top + 0.015 * span,
-                f"{annotation_label} {value:.{TOTAL_DECIMALS}f}",
+                f"{value:.{TOTAL_DECIMALS}f}",
                 ha="center",
                 va="bottom",
                 fontsize=8,
-                rotation=90 if len(scenarios) > 12 else 0,
+                rotation=0,
+                fontweight="bold",
             )
 
     for family_index, (family, first, last) in enumerate(family_ranges):
@@ -417,20 +466,51 @@ def plot_group(
 
     unit = _unit_for_group(group)
     ax.axhline(0.0, color="black", linewidth=0.8)
-    ax.set_xticks(x, scenarios, rotation=45, ha="right")
-    ax.set_ylabel(f"Energy balance [{unit}]")
-    ax.set_xlabel("Scenario")
+    ax.set_xticks(x)
+    ax.set_xticklabels(scenarios, rotation=45, ha="right", fontweight="bold")
+    ax.set_ylabel(f"Energy balance [{unit}]", fontweight="bold")
+    ax.set_xlabel("Scenario", fontweight="bold")
+    for label in ax.get_yticklabels():
+        label.set_fontweight("bold")
     ax.set_title(f"{TITLE_PREFIX}: {group}")
     ax.grid(axis="y", alpha=0.25)
     ax.grid(axis="x", visible=False)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(
-        handles[::-1],
-        labels[::-1],
+    supply_technologies = [
+        technology for technology in technologies if (table[technology] > 0.0).any()
+    ]
+    consumption_technologies = [
+        technology for technology in technologies if (table[technology] < 0.0).any()
+    ]
+    heading = Patch(facecolor="none", edgecolor="none")
+    legend_handles = [heading]
+    legend_labels = ["SUPPLY"]
+    legend_handles.extend(
+        Patch(facecolor=colors[technology], edgecolor="none")
+        for technology in supply_technologies
+    )
+    legend_labels.extend(supply_technologies)
+    legend_handles.append(heading)
+    legend_labels.append("CONSUMPTION")
+    legend_handles.extend(
+        Patch(
+            facecolor=colors[technology],
+            edgecolor="black",
+            linewidth=0.3,
+            hatch=CONSUMPTION_HATCH,
+        )
+        for technology in consumption_technologies
+    )
+    legend_labels.extend(consumption_technologies)
+    legend = ax.legend(
+        legend_handles,
+        legend_labels,
         loc="upper left",
         bbox_to_anchor=(1.01, 1.0),
         frameon=False,
     )
+    for text in legend.get_texts():
+        if text.get_text() in {"SUPPLY", "CONSUMPTION"}:
+            text.set_fontweight("bold")
     ax.set_ylim(
         negative_bottom.min() - 0.04 * span,
         positive_bottom.max() + 0.12 * span,
