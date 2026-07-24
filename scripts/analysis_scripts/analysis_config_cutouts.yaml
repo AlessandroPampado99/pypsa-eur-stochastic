@@ -1,0 +1,57 @@
+# Compact configuration for scripts/analysis_scripts/run_analysis.py
+#
+# All script-specific output paths are derived from output_dir. The runner still
+# accepts optional per-script overrides under scripts:<name>:overrides when needed.
+
+input_dir: "results/cutouts_det_capexp_"
+output_dir: "results/cutouts_det_capexp_/analysis_output/"
+
+network_file: "base_s_adm___2050.nc"
+base_network_path: "/home/pampado/stochastic/pypsa-eur/results/cutouts_det_capexp_/d_2013/networks/base_s_adm___2050.nc"
+
+model_config: "config/cutouts_prices_uncertainty/cutouts_det_capexp.yaml"
+plotting_config: "config/plotting.default.yaml"
+
+excluded_scenarios:
+
+parameters:
+  scenario_name_mode: "folder"
+  save_png: true
+  save_pdf: false
+  dpi: 300
+  zero_tol: 1.0e-9
+
+# Optional. Omit this block to run all scripts. Use false to disable a script,
+# or add overrides only for the exceptional cases that need customization.
+scripts:
+  analysis_network_batch: true
+  analysis_network_powers: true
+  analysis_stores_batch:
+    overrides:
+      EXCLUDED_SCENARIOS:
+  demand_comparison:
+    overrides:
+      EXCLUDED_SCENARIOS:
+  objective_comparison: true
+  plot_capacity_energybalance: true
+  plot_scenario_energy_balance:
+    overrides:
+      # Optional explicit groups. Unlisted scenarios are grouped from the text
+      # before their first underscore, e.g. ELEC_HEAT -> ELEC.
+      FAMILY_GROUPS:
+      # Alternatives: positive, consumption, net, throughput.
+      TOTAL_MODE: positive
+      # Technology values inside bars. Alternatives: absolute, percent,
+      # either, or both. Use a list to restrict labels to selected technologies.
+      SEGMENT_LABEL_MODE: percent
+      SEGMENT_LABEL_MIN_VALUE: 1.0
+      SEGMENT_LABEL_MIN_PERCENT: 5.0
+      LABELED_TECHNOLOGIES:
+      CONSUMPTION_HATCH: "//"
+      ENERGY_THRESHOLD_TWH: 0.0
+      # Optional exact bus-carrier selection, e.g. [AC, co2, H2].
+      INCLUDED_GROUPS:
+      EXCLUDED_GROUPS: []
+  plot_demand_bars: true
+  plot_heatmap_vs_base: true
+  plot_heatmap_vs_base_size: true

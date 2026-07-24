@@ -698,6 +698,24 @@ sector:
     dh_areas:
       buffer: 1000
       handle_missing_countries: fill
+  urban_central_heat_split:
+    enable: false
+    gas_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0
+      2040: 0
+      2045: 0
+      2050: 0
+    electricity_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0
+      2040: 0
+      2045: 0
+      2050: 0
   heat_pump_sources:
     urban central:
     - air

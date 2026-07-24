@@ -4158,6 +4158,30 @@
             }
           }
         },
+        "urban_central_heat_split": {
+          "description": "Configuration for splitting urban central heat demand by technology.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+              "type": "boolean"
+            },
+            "gas_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+              "type": "object"
+            },
+            "electricity_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+              "type": "object"
+            }
+          }
+        },
         "heat_pump_sources": {
           "additionalProperties": {
             "items": {
@@ -7877,6 +7901,30 @@
         }
       }
     },
+    "_UrbanCentralHeatSplitConfig": {
+      "description": "Configuration for splitting urban central heat demand by technology.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+          "type": "boolean"
+        },
+        "gas_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+          "type": "object"
+        },
+        "electricity_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+          "type": "object"
+        }
+      }
+    },
     "_UserAgentConfig": {
       "description": "Configuration for `overpass_api.user_agent` settings.",
       "properties": {
@@ -10432,6 +10480,30 @@
             "dh_areas": {
               "additionalProperties": true,
               "description": "District heating areas settings.",
+              "type": "object"
+            }
+          }
+        },
+        "urban_central_heat_split": {
+          "description": "Configuration for splitting urban central heat demand by technology.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+              "type": "boolean"
+            },
+            "gas_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+              "type": "object"
+            },
+            "electricity_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
               "type": "object"
             }
           }

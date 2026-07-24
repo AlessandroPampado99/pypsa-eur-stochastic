@@ -2896,6 +2896,31 @@ def add_heat(
             unit="MWh_th",
         )
 
+        urban_central_heat_split = options.get(
+            "urban_central_heat_split", {"enable": False}
+        )
+        split_urban_central_heat = (
+            heat_system == HeatSystem.URBAN_CENTRAL
+            and urban_central_heat_split["enable"]
+        )
+        if split_urban_central_heat:
+            gas_heat_share = get(urban_central_heat_split["gas_share"], investment_year)
+            electricity_heat_share = get(
+                urban_central_heat_split["electricity_share"], investment_year
+            )
+            shared_heat_share = 1 - gas_heat_share - electricity_heat_share
+
+            for prefix in ["gas", "electricity"]:
+                carrier = f"{prefix} urban central heat"
+                n.add("Carrier", carrier)
+                n.add(
+                    "Bus",
+                    nodes + f" {carrier}",
+                    location=nodes,
+                    carrier=carrier,
+                    unit="MWh_th",
+                )
+
         # if heat_system == HeatSystem.URBAN_CENTRAL and options["central_heat_vent"]:
         if options["heat_vent"][heat_system.system_type.value]:
             n.add(
@@ -2939,14 +2964,30 @@ def add_heat(
                 )
             )
 
-        n.add(
-            "Load",
-            nodes,
-            suffix=f" {heat_system} heat",
-            bus=nodes + f" {heat_system} heat",
-            carrier=f"{heat_system} heat",
-            p_set=heat_load.loc[n.snapshots],
-        )
+        if split_urban_central_heat:
+            heat_load_splits = {
+                "urban central heat": shared_heat_share,
+                "gas urban central heat": gas_heat_share,
+                "electricity urban central heat": electricity_heat_share,
+            }
+            for carrier, share in heat_load_splits.items():
+                n.add(
+                    "Load",
+                    nodes,
+                    suffix=f" {carrier}",
+                    bus=nodes + f" {carrier}",
+                    carrier=carrier,
+                    p_set=share * heat_load.loc[n.snapshots],
+                )
+        else:
+            n.add(
+                "Load",
+                nodes,
+                suffix=f" {heat_system} heat",
+                bus=nodes + f" {heat_system} heat",
+                carrier=f"{heat_system} heat",
+                p_set=heat_load.loc[n.snapshots],
+            )
 
         if options["residential_heat"]["dsm"]["enable"] and heat_system in [
             HeatSystem.RESIDENTIAL_RURAL,
@@ -3307,7 +3348,11 @@ def add_heat(
                     "Link",
                     nodes,
                     suffix=f" {heat_system} {heat_source} heat pump",
-                    bus0=nodes + f" {heat_system} heat",
+                    bus0=(
+                        nodes + " electricity urban central heat"
+                        if split_urban_central_heat and heat_source == "air"
+                        else nodes + f" {heat_system} heat"
+                    ),
                     bus1=nodes,
                     bus2=nodes + f" {heat_carrier}",
                     carrier=f"{heat_system} {heat_source} heat pump",
@@ -3370,7 +3415,11 @@ def add_heat(
                     "Link",
                     nodes,
                     suffix=f" {heat_system} {heat_source} heat pump",
-                    bus0=nodes + f" {heat_system} heat",
+                    bus0=(
+                        nodes + " electricity urban central heat"
+                        if split_urban_central_heat and heat_source == "air"
+                        else nodes + f" {heat_system} heat"
+                    ),
                     bus1=nodes,
                     bus2=nodes + f" {heat_system} water pits",
                     carrier=f"{heat_system} {heat_source} heat pump",
@@ -3391,7 +3440,11 @@ def add_heat(
                     "Link",
                     nodes,
                     suffix=f" {heat_system} {heat_source} heat pump",
-                    bus0=nodes + f" {heat_system} heat",
+                    bus0=(
+                        nodes + " electricity urban central heat"
+                        if split_urban_central_heat and heat_source == "air"
+                        else nodes + f" {heat_system} heat"
+                    ),
                     bus1=nodes,
                     carrier=f"{heat_system} {heat_source} heat pump",
                     efficiency=(1 / cop_heat_pump.clip(lower=0.001)).squeeze(),
@@ -3407,12 +3460,17 @@ def add_heat(
 
         if options["resistive_heaters"]:
             key = f"{heat_system.central_or_decentral} resistive heater"
+            resistive_heater_bus = (
+                nodes + " electricity urban central heat"
+                if split_urban_central_heat
+                else nodes + f" {heat_system} heat"
+            )
 
             n.add(
                 "Link",
                 nodes + f" {heat_system} resistive heater",
                 bus0=nodes,
-                bus1=nodes + f" {heat_system} heat",
+                bus1=resistive_heater_bus,
                 carrier=f"{heat_system} resistive heater",
                 efficiency=costs.at[key, "efficiency"],
                 capital_cost=costs.at[key, "efficiency"]
@@ -3424,13 +3482,18 @@ def add_heat(
 
         if options["boilers"]:
             key = f"{heat_system.central_or_decentral} gas boiler"
+            gas_boiler_bus = (
+                nodes + " gas urban central heat"
+                if split_urban_central_heat
+                else nodes + f" {heat_system} heat"
+            )
 
             n.add(
                 "Link",
                 nodes + f" {heat_system} gas boiler",
                 p_nom_extendable=True,
                 bus0=spatial.gas.df.loc[nodes, "nodes"].values,
-                bus1=nodes + f" {heat_system} heat",
+                bus1=gas_boiler_bus,
                 bus2="co2 atmosphere",
                 carrier=f"{heat_system} gas boiler",
                 efficiency=costs.at[key, "efficiency"],
@@ -3443,12 +3506,17 @@ def add_heat(
 
         if options["solar_thermal"]:
             n.add("Carrier", f"{heat_system} solar thermal")
+            solar_thermal_bus = (
+                nodes + " electricity urban central heat"
+                if split_urban_central_heat
+                else nodes + f" {heat_system} heat"
+            )
 
             n.add(
                 "Generator",
                 nodes,
                 suffix=f" {heat_system} solar thermal collector",
-                bus=nodes + f" {heat_system} heat",
+                bus=solar_thermal_bus,
                 carrier=f"{heat_system} solar thermal",
                 p_nom_extendable=True,
                 capital_cost=costs.at[
@@ -3468,12 +3536,17 @@ def add_heat(
                     # Solid biomass CHP is added in add_biomass
                     continue
                 fuel_nodes = getattr(spatial, fuel).df
+                chp_heat_bus = (
+                    nodes + " gas urban central heat"
+                    if split_urban_central_heat and fuel == "gas"
+                    else nodes + " urban central heat"
+                )
                 n.add(
                     "Link",
                     nodes + f" urban central {fuel} CHP",
                     bus0=fuel_nodes.loc[nodes, "nodes"].values,
                     bus1=nodes,
-                    bus2=nodes + " urban central heat",
+                    bus2=chp_heat_bus,
                     bus3="co2 atmosphere",
                     carrier=f"urban central {fuel} CHP",
                     p_nom_extendable=True,
@@ -3492,7 +3565,7 @@ def add_heat(
                     nodes + f" urban central {fuel} CHP CC",
                     bus0=fuel_nodes.loc[nodes, "nodes"].values,
                     bus1=nodes,
-                    bus2=nodes + " urban central heat",
+                    bus2=chp_heat_bus,
                     bus3="co2 atmosphere",
                     bus4=spatial.co2.df.loc[nodes, "nodes"].values,
                     carrier=f"urban central {fuel} CHP CC",
@@ -5158,9 +5231,7 @@ def add_aviation(
     )
     aviation_methanol_to_kerosene = options["aviation_methanol_to_kerosene"]
     methanol_kerosene_share = (
-        configured_methanol_kerosene_share
-        if aviation_methanol_to_kerosene
-        else 0.0
+        configured_methanol_kerosene_share if aviation_methanol_to_kerosene else 0.0
     )
     kerosene_share = 1 - methanol_kerosene_share
     if not aviation_methanol_to_kerosene and configured_methanol_kerosene_share:

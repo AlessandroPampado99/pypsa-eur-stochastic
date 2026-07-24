@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_2035"
-  name: BASE_2032
+  name: BASE_2032_lesstechs
   scenarios:
     enable: false
     file: config/demand_uncertainty/scenarios_deterministic.yaml
@@ -131,19 +131,13 @@ sector:
     2040: 0.0
     2045: 0.0
     2050: 0.5
-  allam_cycle_gas: true
   methanol:
     regional_methanol_demand: true
     methanol_reforming: true
     methanol_reforming_cc: true
     methanol_to_kerosene: true
     methanol_to_power:
-      ccgt: true
-      ccgt_cc: false
       ocgt: true
-      allam: true
-    biomass_to_methanol: false
-    biomass_to_methanol_cc: false
   H2_network: true
   gas_network: true
   H2_retrofit: false
@@ -161,10 +155,6 @@ sector:
   biomass_to_liquid: true
   biomass_to_liquid_cc: false
   electrobiofuels: true
-  biosng: true
-  biosng_cc: false
-  bioH2: false
-  municipal_solid_waste: false
 
 
 clustering:
