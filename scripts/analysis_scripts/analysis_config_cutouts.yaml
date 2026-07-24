@@ -52,6 +52,31 @@ scripts:
       # Optional exact bus-carrier selection, e.g. [AC, co2, H2].
       INCLUDED_GROUPS:
       EXCLUDED_GROUPS: []
+  plot_scenario_optimal_capacity:
+    overrides:
+      # Capacities are separated by component and metric; carriers are stacked.
+      FAMILY_GROUPS:
+      CAPACITY_THRESHOLD: 0.0
+      SEGMENT_LABEL_MIN_PERCENT: 5.0
+      EXCLUDED_COMPONENTS: [Load]
+      INCLUDED_COMPONENTS:
+      EXCLUDED_CARRIERS: ["<none>"]
+      # Optional exact sector selection, e.g. [AC, H2, gas].
+      INCLUDED_GROUPS:
+      EXCLUDED_GROUPS: []
+  plot_scenario_capacity_factors:
+    overrides:
+      # Raw carrier names. Extend this list to add technologies.
+      TECHNOLOGIES:
+        - onwind
+        - offwind-ac
+        - offwind-dc
+        - offwind-float
+        - solar
+        - solar rooftop
+        - solar-hsat
+        - ror
+      COMPONENTS: [Generator, Link]
   plot_demand_bars: true
   plot_heatmap_vs_base: true
   plot_heatmap_vs_base_size: true

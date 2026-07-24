@@ -271,7 +271,43 @@ def _component_metric_records(n: pypsa.Network) -> pd.DataFrame:
     return out
 
 
-def analyze_one_network(n: pypsa.Network, config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def _component_metric_sector_records(n: pypsa.Network) -> pd.DataFrame:
+    """Assign capacities to each distinct bus-carrier sector connected to an asset."""
+    specs = [
+        ("Generator", n.generators, "power_final", "p_nom_opt", "p_nom"),
+        ("Link", n.links, "power_final", "p_nom_opt", "p_nom"),
+        ("Store", n.stores, "energy_final", "e_nom_opt", "e_nom"),
+        ("StorageUnit", n.storage_units, "power_final", "p_nom_opt", "p_nom"),
+        ("Line", n.lines, "apparent_power_final", "s_nom_opt", "s_nom"),
+        ("Transformer", n.transformers, "apparent_power_final", "s_nom_opt", "s_nom"),
+    ]
+    records = []
+    bus_carrier = n.buses.carrier.fillna("").astype(str)
+    for component, frame, metric, opt_col, base_col in specs:
+        if frame.empty:
+            continue
+        capacity = _get_final_capacity(frame, opt_col, base_col)
+        carriers = _clean_carrier(frame.get("carrier", pd.Series("", index=frame.index)))
+        bus_columns = [c for c in frame.columns if c == "bus" or c.startswith("bus")]
+        for asset in frame.index:
+            groups = {bus_carrier.get(str(frame.at[asset, c]), "") for c in bus_columns if pd.notna(frame.at[asset, c]) and str(frame.at[asset, c])}
+            groups.discard("")
+            for group in groups:
+                records.append({"group": group, "component": component, "carrier": carriers.at[asset], "metric": metric, "value": capacity.at[asset]})
+                if component == "StorageUnit":
+                    hours = _safe_series(frame, "max_hours", default=0.0).at[asset]
+                    energy = capacity.at[asset] * hours
+                    if np.isfinite(energy):
+                        records.append({"group": group, "component": component, "carrier": carriers.at[asset], "metric": "energy_final_from_max_hours", "value": energy})
+    out = pd.DataFrame(records, columns=["group", "component", "carrier", "metric", "value"])
+    if not out.empty:
+        out["value"] = pd.to_numeric(out["value"], errors="coerce").replace([np.inf, -np.inf], np.nan).fillna(0.0)
+        if DROP_ZERO_VALUES:
+            out = out[out["value"].abs() > ZERO_TOL]
+    return out
+
+
+def analyze_one_network(n: pypsa.Network, config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Compute optimized/final capacity tables for one network.
 
@@ -289,7 +325,8 @@ def analyze_one_network(n: pypsa.Network, config: dict) -> tuple[pd.DataFrame, p
     if raw.empty:
         empty_comp = pd.DataFrame(columns=["component", "metric", "value"])
         empty_comp_car = pd.DataFrame(columns=["component", "carrier", "metric", "value"])
-        return empty_comp, empty_comp_car
+        empty_sector = pd.DataFrame(columns=["group", "component", "carrier", "metric", "value"])
+        return empty_comp, empty_comp_car, empty_sector
 
     by_component = (
         raw.groupby(["component", "metric"], as_index=False)["value"]
@@ -301,7 +338,9 @@ def analyze_one_network(n: pypsa.Network, config: dict) -> tuple[pd.DataFrame, p
         .sum()
     )
 
-    return by_component, by_component_carrier
+    by_sector_carrier = (_component_metric_sector_records(n).groupby(["group", "component", "carrier", "metric"], as_index=False)["value"].sum())
+
+    return by_component, by_component_carrier, by_sector_carrier
 
 
 def to_wide(df_long: pd.DataFrame, index_cols: list[str]) -> pd.DataFrame:
@@ -401,13 +440,15 @@ def main():
     # Base
     print(f"[BASE] Loading: {BASE_NETWORK_PATH}")
     n_base = pypsa.Network(str(BASE_NETWORK_PATH))
-    base_comp, base_comp_car = analyze_one_network(n_base, cfg)
+    base_comp, base_comp_car, base_sector_car = analyze_one_network(n_base, cfg)
 
     base_comp["scenario"] = "__BASE__"
     base_comp_car["scenario"] = "__BASE__"
+    base_sector_car["scenario"] = "__BASE__"
 
     all_comp = [base_comp]
     all_comp_car = [base_comp_car]
+    all_sector_car = [base_sector_car]
 
     write_debug_raw(n_base, OUTPUT_EXCEL, "__BASE__")
 
@@ -417,16 +458,19 @@ def main():
         print(f"[SCENARIO={label}] Loading: {p}")
 
         n = pypsa.Network(str(p))
-        comp, comp_car = analyze_one_network(n, cfg)
+        comp, comp_car, sector_car = analyze_one_network(n, cfg)
 
         comp["scenario"] = label
         comp_car["scenario"] = label
+        sector_car["scenario"] = label
 
         all_comp.append(comp)
         all_comp_car.append(comp_car)
+        all_sector_car.append(sector_car)
 
     levels_component_long = pd.concat(all_comp, ignore_index=True)
     levels_component_carrier_long = pd.concat(all_comp_car, ignore_index=True)
+    levels_sector_carrier_long = pd.concat(all_sector_car, ignore_index=True)
 
     if levels_component_long.empty and levels_component_carrier_long.empty:
         raise ValueError("No component size records were produced.")
@@ -439,6 +483,10 @@ def main():
         levels_component_carrier_long,
         index_cols=["component", "carrier", "metric"],
     )
+    levels_by_sector_carrier = to_wide(
+        levels_sector_carrier_long,
+        index_cols=["group", "component", "carrier", "metric"],
+    )
 
     vs_base_by_component = delta_vs_base(
         levels_by_component,
@@ -450,13 +498,20 @@ def main():
         "__BASE__",
         index_cols=["component", "carrier", "metric"],
     )
+    vs_base_by_sector_carrier = delta_vs_base(
+        levels_by_sector_carrier,
+        "__BASE__",
+        index_cols=["group", "component", "carrier", "metric"],
+    )
 
     OUTPUT_EXCEL.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(OUTPUT_EXCEL, engine="openpyxl") as writer:
         levels_by_component.to_excel(writer, sheet_name="levels_by_component", index=False)
         levels_by_component_carrier.to_excel(writer, sheet_name="levels_by_component_carrier", index=False)
+        levels_by_sector_carrier.to_excel(writer, sheet_name="levels_by_sector_carrier", index=False)
         vs_base_by_component.to_excel(writer, sheet_name="vs_base_by_component", index=False)
         vs_base_by_component_carrier.to_excel(writer, sheet_name="vs_base_by_component_carrier", index=False)
+        vs_base_by_sector_carrier.to_excel(writer, sheet_name="vs_base_by_sector_carrier", index=False)
 
     print(f"✔ Wrote Excel: {OUTPUT_EXCEL}")
 
