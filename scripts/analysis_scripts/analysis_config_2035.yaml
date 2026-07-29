@@ -13,7 +13,7 @@ model_config: "config/demand_uncertainty/config_deterministic.yaml"
 plotting_config: "config/plotting.default.yaml"
 
 excluded_scenarios:
-  #- BASE
+  - BASE
   - BASE_2020
   # - ELEC_HIGH
   # - OILGAS_HIGH
@@ -35,12 +35,12 @@ scripts:
   analysis_stores_batch:
     overrides:
       EXCLUDED_SCENARIOS:
-        #- BASE
+        - BASE
         - BASE_2020
   demand_comparison:
     overrides:
       EXCLUDED_SCENARIOS:
-        #- BASE
+        - BASE
         - BASE_2020
   objective_comparison: true
   plot_capacity_energybalance: true
@@ -50,15 +50,15 @@ scripts:
       # before their first underscore, e.g. ELEC_HEAT -> ELEC.
       FAMILY_GROUPS:
         BASE:
-          - __BASE__
+          - BASE
         ELEC:
           - ELEC_HEAT
           - ELEC_ROAD
           - ELEC_IND
         OILGAS:
-          - OILGAS_ROAD
+          - OILGAS_TRANS
           - OILGAS_IND
-          - OILGAS_SHIP
+          - OILGAS_HEAT
         MEOH:
           - MEOH_AIR
           - MEOH_IND
@@ -66,6 +66,7 @@ scripts:
         H2:
           - H2_IND
           - H2_TRANS
+          - H2_HIGH
       FAMILY_ORDER:
         - BASE
         - ELEC
