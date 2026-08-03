@@ -13,6 +13,161 @@
 
 # Scenarios for capacity expansion cutouts and prices uncertainty.
 
+d_1995:
+  snapshots:
+    start: "1995-01-01"
+    end: "1996-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-1995-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-1995-era5":
+        module: era5
+        x:
+          - -12.0
+          - 42.0
+        y:
+          - 33.0
+          - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+          - "1995"
+          - "1995"
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_1996:
+  snapshots:
+    start: "1996-01-01"
+    end: "1997-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-1996-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-1996-era5":
+        module: era5
+        x:
+          - -12.0
+          - 42.0
+        y:
+          - 33.0
+          - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+          - "1996"
+          - "1996"
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_1997:
+  snapshots:
+    start: "1997-01-01"
+    end: "1998-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-1997-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-1997-era5":
+        module: era5
+        x:
+          - -12.0
+          - 42.0
+        y:
+          - 33.0
+          - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+          - "1997"
+          - "1997"
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_1998:
+  snapshots:
+    start: "1998-01-01"
+    end: "1999-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-1998-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-1998-era5":
+        module: era5
+        x:
+          - -12.0
+          - 42.0
+        y:
+          - 33.0
+          - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+          - "1998"
+          - "1998"
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
+d_1999:
+  snapshots:
+    start: "1999-01-01"
+    end: "2000-01-01"
+    inclusive: left
+
+  atlite:
+    default_cutout: "europe-1999-era5"
+    nprocesses: 16
+    show_progress: true
+    cutouts:
+      "europe-1999-era5":
+        module: era5
+        x:
+          - -12.0
+          - 42.0
+        y:
+          - 33.0
+          - 72.0
+        dx: 0.3
+        dy: 0.3
+        time:
+          - "1999"
+          - "1999"
+        chunks:
+          time: 500
+        prepare_kwargs:
+          features: []
+          monthly_requests: true
+          tmpdir: ./cutouts_tmp/
+
 d_2000:
   snapshots:
     start: "2000-01-01"

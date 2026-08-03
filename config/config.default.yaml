@@ -877,6 +877,16 @@ sector:
   SMR: true
   SMR_cc: true
   regional_oil_demand: true
+  oil_from_h2:
+    enable: false
+    share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0
+      2040: 0
+      2045: 0
+      2050: 0
   regional_coal_demand: false
   regional_co2_sequestration_potential:
     enable: true

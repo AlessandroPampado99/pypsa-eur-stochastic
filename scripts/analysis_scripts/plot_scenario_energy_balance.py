@@ -39,6 +39,12 @@ EXCLUDED_SCENARIOS: set[str] = set()
 INCLUDED_SCENARIOS: set[str] | None = None
 INCLUDED_GROUPS: set[str] | None = None
 EXCLUDED_GROUPS: set[str] = set()
+GROUP_ALIASES = {
+    "gas urban central heat": "urban central heat",
+    "electricity urban central heat": "urban central heat",
+    "oil from H2": "oil",
+}
+ZERO_BALANCE_TOLERANCE = 1e-12
 
 SCENARIO_ORDER: list[str] | None = None
 FAMILY_GROUPS: dict[str, list[str]] | None = None
@@ -231,6 +237,7 @@ def read_balance_workbook(path: Path) -> pd.DataFrame:
     if INCLUDED_GROUPS is not None:
         balance = balance[balance["group"].isin(set(INCLUDED_GROUPS))]
 
+    balance["group"] = balance["group"].replace(GROUP_ALIASES)
     balance = balance.groupby(
         ["group", "scenario", "technology"], as_index=False, sort=False
     )["value"].sum()
@@ -364,18 +371,28 @@ def plot_group(
     table: pd.DataFrame,
     plotting: Mapping[str, Any],
     output_dir: Path,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, bool]:
     """Write one scenario comparison plot and its source CSVs."""
     scenarios, family_by_scenario = order_and_group_scenarios(table.index)
     full_table = table.reindex(scenarios)
     totals = calculate_totals(full_table)
+    unit = _unit_for_group(group)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stem = f"{OUT_STEM}_{_safe_filename(group)}"
+    full_table.to_csv(output_dir / f"{stem}_by_technology.csv")
+    totals = totals.assign(group=group, unit=unit)
+    totals.to_csv(output_dir / f"{stem}_totals.csv")
+    totals_for_summary = totals.reset_index(names="scenario")
+
+    if full_table.abs().to_numpy().max(initial=0.0) <= ZERO_BALANCE_TOLERANCE:
+        print(f"[SKIP] {group}: balance contains no non-zero activity")
+        return totals_for_summary, False
+
     table = _visible_table(full_table)
     if table.shape[1] == 0:
-        print(
-            f"[SKIP] {group}: no technologies exceed "
-            f"{ENERGY_THRESHOLD_TWH:g} {_unit_for_group(group)}"
-        )
-        return pd.DataFrame()
+        print(f"[SKIP] {group}: no technologies exceed {ENERGY_THRESHOLD_TWH:g} {unit}")
+        return totals_for_summary, False
 
     technologies = _technology_order(table.columns)
     table = table.loc[:, technologies]
@@ -464,7 +481,6 @@ def plot_group(
                 alpha=0.8,
             )
 
-    unit = _unit_for_group(group)
     ax.axhline(0.0, color="black", linewidth=0.8)
     ax.set_xticks(x)
     ax.set_xticklabels(scenarios, rotation=45, ha="right", fontweight="bold")
@@ -517,8 +533,6 @@ def plot_group(
     )
     fig.subplots_adjust(bottom=0.28)
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    stem = f"{OUT_STEM}_{_safe_filename(group)}"
     for enabled, suffix in (
         (SAVE_PNG, "png"),
         (SAVE_SVG, "svg"),
@@ -534,10 +548,7 @@ def plot_group(
             print(f"[WRITE] {path}")
     plt.close(fig)
 
-    full_table.to_csv(output_dir / f"{stem}_by_technology.csv")
-    totals = totals.assign(group=group, unit=unit)
-    totals.to_csv(output_dir / f"{stem}_totals.csv")
-    return totals.reset_index(names="scenario")
+    return totals_for_summary, True
 
 
 def main() -> None:
@@ -548,17 +559,16 @@ def main() -> None:
     output_dir = Path(OUTPUT_DIR)
     output_dir.mkdir(parents=True, exist_ok=True)
     summary = []
+    plotted_groups = 0
     for group, table in tables.items():
-        totals = plot_group(group, table, plotting, output_dir)
-        if not totals.empty:
-            summary.append(totals)
+        totals, plotted = plot_group(group, table, plotting, output_dir)
+        summary.append(totals)
+        plotted_groups += int(plotted)
 
-    if not summary:
-        raise ValueError("No carrier plots were produced.")
     pd.concat(summary, ignore_index=True).to_csv(
         output_dir / f"{OUT_STEM}_all_group_totals.csv", index=False
     )
-    print(f"[DONE] Wrote {len(summary)} carrier plot set(s) to {output_dir}")
+    print(f"[DONE] Wrote {plotted_groups} carrier plot set(s) to {output_dir}")
 
 
 if __name__ == "__main__":

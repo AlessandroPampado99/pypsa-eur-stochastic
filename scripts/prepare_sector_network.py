@@ -176,6 +176,9 @@ def define_spatial(nodes, options):
 
     spatial.oil.nodes = ["EU oil"]
     spatial.oil.locations = ["EU"]
+    spatial.oil.from_h2 = pd.Index(spatial.oil.nodes).str.replace(
+        " oil", " oil from H2", regex=False
+    )
 
     if options["regional_oil_demand"]:
         spatial.oil.demand_locations = nodes
@@ -5869,6 +5872,93 @@ def add_agriculture(
         )
 
 
+def add_oil_from_h2_demand(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    spatial: SimpleNamespace,
+    options: dict,
+    investment_year: int,
+) -> None:
+    """Reserve a share of fixed oil demand for H2-based oil production routes."""
+    config = options.get("oil_from_h2", {"enable": False})
+    if not config["enable"]:
+        return
+
+    share = get(config["share"], investment_year)
+    residual_share = 1 - share
+    fixed_oil_carriers = {
+        "land transport oil",
+        "naphtha for industry",
+        "kerosene for aviation",
+        "shipping oil",
+        "agriculture machinery oil",
+    }
+    oil_loads = n.loads.index[n.loads.carrier.isin(fixed_oil_carriers)]
+    if oil_loads.empty:
+        raise ValueError(
+            "sector.oil_from_h2 is enabled, but the network has no fixed oil demand."
+        )
+
+    original_demand = n.get_switchable_as_dense("Load", "p_set", n.snapshots, oil_loads)
+    oil_from_h2_demand = share * original_demand.sum(axis=1)
+
+    n.loads.loc[oil_loads, "p_set"] *= residual_share
+    dynamic_loads = oil_loads.intersection(n.loads_t.p_set.columns)
+    n.loads_t.p_set.loc[:, dynamic_loads] *= residual_share
+
+    n.add("Carrier", "oil from H2")
+    n.add(
+        "Bus",
+        spatial.oil.from_h2,
+        location=spatial.oil.locations,
+        carrier="oil from H2",
+        unit="MWh_LHV",
+    )
+    n.add(
+        "Load",
+        spatial.oil.from_h2,
+        bus=spatial.oil.from_h2,
+        carrier="oil from H2",
+        p_set=oil_from_h2_demand.to_frame(name=spatial.oil.from_h2[0]),
+    )
+    n.add(
+        "Load",
+        "oil from H2 emissions",
+        bus="co2 atmosphere",
+        carrier="oil from H2 emissions",
+        p_set=-costs.at["oil", "CO2 intensity"] * oil_from_h2_demand,
+    )
+
+    oil_stores = n.stores.index[n.stores.bus.isin(spatial.oil.nodes)]
+    oil_bus_map = dict(zip(spatial.oil.nodes, spatial.oil.from_h2))
+    duplicate_components(
+        n,
+        "Store",
+        oil_stores,
+        " from H2",
+        bus=n.stores.loc[oil_stores, "bus"].map(oil_bus_map),
+        carrier=np.repeat("oil from H2", len(oil_stores)),
+    )
+
+    h2_oil_links = n.links.index[
+        n.links.carrier.isin(["Fischer-Tropsch", "electrobiofuels"])
+        & n.links.bus1.isin(spatial.oil.nodes)
+    ]
+    duplicate_components(
+        n,
+        "Link",
+        h2_oil_links,
+        " oil-from-H2-only",
+        bus1=n.links.loc[h2_oil_links, "bus1"].map(oil_bus_map),
+    )
+
+    logger.info(
+        "Serving %.2f%% of fixed oil demand from Fischer-Tropsch and "
+        "electrobiofuels only.",
+        100 * share,
+    )
+
+
 def decentral(n):
     """
     Removes the electricity transmission system.
@@ -6704,6 +6794,14 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
+
+    add_oil_from_h2_demand(
+        n=n,
+        costs=costs,
+        spatial=spatial,
+        options=options,
+        investment_year=investment_year,
+    )
 
     if not options["electricity_transmission_grid"]:
         decentral(n)

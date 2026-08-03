@@ -18,6 +18,7 @@ gurobi.log
 screenlog*
 demand_screen*
 Makefile
+*.log
 
 /bak
 /resources

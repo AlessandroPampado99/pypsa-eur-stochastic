@@ -1,6 +1,6 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "cutouts_det_capexp_"
+  prefix: "cutouts_det_capexp_nols"
   name: all
   scenarios:
     enable: false
@@ -13,7 +13,7 @@ run:
 
 validation:
   enable: true
-  config: config/cutouts_prices_uncertainty/validation_deterministic_90.yaml
+  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:

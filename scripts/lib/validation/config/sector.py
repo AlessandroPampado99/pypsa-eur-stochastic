@@ -206,6 +206,38 @@ class _UrbanCentralHeatSplitConfig(ConfigModel):
         return self
 
 
+class _OilFromH2Config(ConfigModel):
+    """Configuration for reserving a share of oil demand for H2-based fuels."""
+
+    enable: bool = Field(
+        False,
+        description="Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+    )
+    share: dict[int, float] = Field(
+        default_factory=lambda: {
+            2020: 0,
+            2025: 0,
+            2030: 0,
+            2035: 0,
+            2040: 0,
+            2045: 0,
+            2050: 0,
+        },
+        description="Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+    )
+
+    @field_validator("share")
+    @classmethod
+    def validate_share(cls, shares: dict[int, float]) -> dict[int, float]:
+        if invalid := {
+            year: share for year, share in shares.items() if not 0 <= share <= 1
+        }:
+            raise ValueError(
+                f"All oil-from-H2 shares must be between 0 and 1; got {invalid}."
+            )
+        return shares
+
+
 class _ResidentialHeatConfig(BaseModel):
     """Configuration for `sector.residential_heat` settings."""
 
@@ -791,6 +823,10 @@ class SectorConfig(BaseModel):
     regional_oil_demand: bool = Field(
         True,
         description="Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
+    )
+    oil_from_h2: _OilFromH2Config = Field(
+        default_factory=_OilFromH2Config,
+        description="Restricted H2-based oil demand configuration.",
     )
     regional_coal_demand: bool = Field(False, description="Regional coal demand.")
 

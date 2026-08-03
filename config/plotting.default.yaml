@@ -662,6 +662,8 @@ plotting:
     H2 turbine: '#991f83'
     H2 Electrolysis: '#ff29d9'
     H2 electrolysis: '#ff29d9'
+    oil from H2: '#46caf0'
+    oil from H2 emissions: '#468c8b'
     # ammonia
     NH3: '#46caf0'
     ammonia: '#46caf0'

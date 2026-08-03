@@ -1,10 +1,10 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "cutouts_det_capexp_"
+  prefix: "cutouts_det_capexp_nols"
   name: all
   scenarios:
     enable: true
-    file: config/cutouts_prices_uncertainty/scenarios_90.yaml
+    file: config/cutouts_prices_uncertainty/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
@@ -197,4 +197,4 @@ clustering:
     resolution_sector: 3H
 
 solving:
-  load_shedding: true
+  load_shedding: false

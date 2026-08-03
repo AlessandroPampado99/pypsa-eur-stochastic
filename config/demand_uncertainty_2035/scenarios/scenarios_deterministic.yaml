@@ -61,8 +61,8 @@ H2_TRANS:
     enable: false
     file: config/demand_uncertainty_2035/scenarios/scenarios_determinstic_definition.yaml
     active_scenario: H2_TRANS
-H2_HIGH:
+H2_OIL:
   stochastic_scenarios:
     enable: false
     file: config/demand_uncertainty_2035/scenarios/scenarios_determinstic_definition.yaml
-    active_scenario: H2_HIGH
+    active_scenario: H2_OIL

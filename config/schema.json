@@ -4620,6 +4620,23 @@
           "description": "Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
           "type": "boolean"
         },
+        "oil_from_h2": {
+          "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+              "type": "boolean"
+            },
+            "share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+              "type": "object"
+            }
+          }
+        },
         "regional_coal_demand": {
           "default": false,
           "description": "Regional coal demand.",
@@ -6991,6 +7008,23 @@
           ],
           "default": 20,
           "description": "Fixed length of the cable connection that is onshorelandfall in km. If 'centroid', the length is calculated as the distance to centroid of the onshore bus."
+        }
+      }
+    },
+    "_OilFromH2Config": {
+      "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+          "type": "boolean"
+        },
+        "share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+          "type": "object"
         }
       }
     },
@@ -10945,6 +10979,23 @@
           "default": true,
           "description": "Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
           "type": "boolean"
+        },
+        "oil_from_h2": {
+          "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+              "type": "boolean"
+            },
+            "share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+              "type": "object"
+            }
+          }
         },
         "regional_coal_demand": {
           "default": false,

@@ -357,17 +357,17 @@ def _get_validation_pair(w):
     return VALIDATION_PAIR_BY_CAP_OP[key]
 
 
-def _run_base_dir(prefix: str, name: str) -> Path:
+def _run_base_dir(root: str, prefix: str, name: str) -> Path:
     """
     Build the base directory of a run.
 
     The canonical structure is assumed to be:
-        results/<prefix>/<name>/
+        <root>/<prefix>/<name>/
 
     If prefix is empty, it falls back to:
-        results/<name>/
+        <root>/<name>/
     """
-    base = Path("results")
+    base = Path(root)
     if prefix:
         return base / prefix / name
     return base / name
@@ -387,7 +387,7 @@ def validation_capacity_network(w):
         return pair["cap_path"]
 
     return str(
-        _run_base_dir(pair["cap_prefix"], pair["cap_source"])
+        _run_base_dir("results", pair["cap_prefix"], pair["cap_source"])
         / "networks"
         / f"base_s_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
     )
@@ -399,19 +399,21 @@ def validation_operation_network(w):
 
     Resolution priority:
     1. explicit path from validation.yaml
-    2. canonical path under results/<prefix>/<name>/networks/
+    2. canonical path under resources/<prefix>/<name>/networks/
 
-    The default assumption is that the operation network is the stochasticified one.
+    The stochasticified resource is used only when stochastic scenarios are enabled.
     """
     pair = _get_validation_pair(w)
 
     if pair["op_path"]:
         return pair["op_path"]
 
+    network_prefix = "base_s_stoch" if _stoch_enabled() else "base_s"
+
     return str(
-        _run_base_dir(pair["op_prefix"], pair["op_source"])
+        _run_base_dir("resources", pair["op_prefix"], pair["op_source"])
         / "networks"
-        / f"base_s_stoch_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+        / f"{network_prefix}_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
     )
 
 
