@@ -1,0 +1,183 @@
+# PyPSA-Eur deterministic run scenarios for demand uncertainty.
+# Each run applies one source-based demand-transition scenario before solve_sector_network.
+
+ELEC_HEAT_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_HEAT_100
+ELEC_HEAT_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_HEAT_200
+ELEC_HEAT_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_HEAT_300
+ELEC_ROAD_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_ROAD_100
+ELEC_ROAD_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_ROAD_200
+ELEC_ROAD_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_ROAD_300
+ELEC_IND_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_IND_100
+ELEC_IND_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_IND_200
+ELEC_IND_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: ELEC_IND_300
+OILGAS_TRANS_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_TRANS_100
+OILGAS_TRANS_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_TRANS_200
+OILGAS_TRANS_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_TRANS_300
+OILGAS_IND_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_IND_100
+OILGAS_IND_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_IND_200
+OILGAS_IND_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_IND_300
+OILGAS_HEAT_100:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_HEAT_200
+OILGAS_HEAT_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_HEAT_200
+OILGAS_HEAT_300:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: OILGAS_HEAT_300
+MEOH_AIR_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_AIR_50
+MEOH_AIR_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_AIR_150
+MEOH_AIR_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_AIR_200
+MEOH_IND_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_IND_50
+MEOH_IND_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_IND_150
+MEOH_IND_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_IND_200
+MEOH_SHIP_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_SHIP_50
+MEOH_SHIP_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_SHIP_150
+MEOH_SHIP_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: MEOH_SHIP_200
+H2_IND_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_IND_50
+H2_IND_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_IND_150
+H2_IND_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_IND_200
+H2_TRANS_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_TRANS_50
+H2_TRANS_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_TRANS_150
+H2_TRANS_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_TRANS_200
+H2_OIL_50:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_OIL_50
+H2_OIL_150:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_OIL_150
+H2_OIL_200:
+  stochastic_scenarios:
+    enable: false
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+    active_scenario: H2_OIL_200

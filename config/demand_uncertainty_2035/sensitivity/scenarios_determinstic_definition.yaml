@@ -1,0 +1,585 @@
+# Simplified demand-transition scenario catalogue for deterministic runs.
+# 2035-network cap update.
+#
+# Target grids:
+# - ELEC and OILGAS: 200, 300, and 500 TWh;
+# - MEOH and H2: 50, 150, and 200 TWh.
+#
+# Cap update criteria:
+# - use the uploaded `__BASE__` column as the 2035 network;
+# - use `BASE_2020` as the historical/current reference column present in the workbook;
+# - where mappable, prevent delayed-transition scenarios from reducing low-carbon
+#   source demands below the reference or increasing fossil target demands above it;
+# - where the reference constraint is not informative, retain the 2050 practical cap
+#   or the 20% structural/fallback cap already used for heat categories.
+
+settings:
+  units: TWh
+  weighting: generators
+  allow_unmet_target: false
+  tolerance_twh: 1.0e-4
+  non_negative_tolerance: 1.0e-8
+
+families:
+  ELEC:
+    targets:
+      "100": 100
+      "200": 200
+      "300": 300
+      "500": 500
+
+    entries:
+      building_heat:
+        source: gas urban central heat
+        target: electricity urban central heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      land_transport_oil:
+        source: land transport oil
+        target: land transport EV
+        cap: 0.950
+        type: shift
+        efficiency_factor: 0.302145139124
+
+      agriculture_machinery_oil:
+        source: agriculture machinery oil
+        target: agriculture machinery electric
+        cap: 0.950
+        type: shift
+        efficiency_factor: 2.333333333333
+
+      solid_biomass_for_industry:
+        source: solid biomass for industry
+        target: industry electricity
+        cap: 0.301
+        type: shift
+        efficiency_factor: 1.0
+
+  OILGAS:
+    targets:
+      "100": 100
+      "200": 200
+      "300": 300
+      "500": 500
+
+    entries:
+      building_heat:
+        source: electricity urban central heat
+        target: gas urban central heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      land_transport_EV:
+        source: land transport EV
+        target: land transport oil
+        cap: 0.885
+        type: shift
+        efficiency_factor: 3.309644857175
+
+      industry_electricity:
+        source: industry electricity
+        target: gas for industry
+        cap: 0.212
+        type: shift
+        efficiency_factor: 1.0
+
+      low_temperature_heat_for_industry:
+        source: low-temperature heat for industry
+        target: gas for industry
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+      shipping_methanol:
+        source:
+          carrier: shipping methanol
+        target: shipping oil
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.15
+
+      agriculture_machinery_electric:
+        source: agriculture machinery electric
+        target: agriculture machinery oil
+        cap: 0.950
+        type: shift
+        efficiency_factor: 0.428571428571
+
+  MEOH:
+    targets:
+      "50": 50
+      "150": 150
+      "200": 200
+
+    entries:
+      aviation_kerosene:
+        source: kerosene for aviation
+        target: methanol kerosene for aviation
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+      low_temperature_heat_for_industry:
+        source: low-temperature heat for industry
+        target: industry methanol
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+      industry_electricity:
+        source: industry electricity
+        target: industry methanol
+        cap: 0.212
+        type: shift
+        efficiency_factor: 1.0
+
+      shipping_oil:
+        source: shipping oil
+        target:
+          carrier: shipping methanol
+        cap: 0.950
+        type: shift
+        efficiency_factor: 0.869565217391
+
+      shipping_h2:
+        source: H2 for shipping
+        target:
+          carrier: shipping methanol
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+  H2:
+    targets:
+      "50": 50
+      "150": 150
+      "200": 200
+
+    entries:
+      low_temperature_heat_for_industry:
+        source:
+          - low-temperature heat for industry
+        target: H2 for industry
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+      industry_electricity:
+        source:
+          - industry electricity
+        target: H2 for industry
+        cap: 0.212
+        type: shift
+        efficiency_factor: 1.0
+
+      shipping_oil:
+        source: shipping oil
+        target: H2 for shipping
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+      land_transport_oil:
+        source: land transport oil
+        target: land transport fuel cell
+        cap: 0.950
+        type: shift
+        efficiency_factor: 0.535651226544
+
+      oil_from_H2:
+        source:
+          - land transport oil
+          - shipping oil
+          - agriculture machinery oil
+        target:
+          name: EU oil from H2
+        cap: 0.950
+        type: shift
+        efficiency_factor: 1.0
+
+scenario_definitions:
+  BASE: base
+
+  ELEC_HEAT_200:
+    demand_transition:
+      family: ELEC
+      target: "200"
+      priority:
+        - building_heat
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - solid_biomass_for_industry
+
+  ELEC_HEAT_300:
+    demand_transition:
+      family: ELEC
+      target: "300"
+      priority:
+        - building_heat
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - solid_biomass_for_industry
+
+  ELEC_HEAT_100:
+    demand_transition:
+      family: ELEC
+      target: "100"
+      priority:
+        - building_heat
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - solid_biomass_for_industry
+
+  ELEC_ROAD_200:
+    demand_transition:
+      family: ELEC
+      target: "200"
+      priority:
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+        - solid_biomass_for_industry
+
+  ELEC_ROAD_300:
+    demand_transition:
+      family: ELEC
+      target: "300"
+      priority:
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+        - solid_biomass_for_industry
+
+  ELEC_ROAD_100:
+    demand_transition:
+      family: ELEC
+      target: "100"
+      priority:
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+        - solid_biomass_for_industry
+
+  ELEC_IND_200:
+    demand_transition:
+      family: ELEC
+      target: "200"
+      priority:
+        - solid_biomass_for_industry
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+
+  ELEC_IND_300:
+    demand_transition:
+      family: ELEC
+      target: "300"
+      priority:
+        - solid_biomass_for_industry
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+
+  ELEC_IND_100:
+    demand_transition:
+      family: ELEC
+      target: "100"
+      priority:
+        - solid_biomass_for_industry
+        - land_transport_oil
+        - agriculture_machinery_oil
+        - building_heat
+
+  OILGAS_TRANS_200:
+    demand_transition:
+      family: OILGAS
+      target: "200"
+      priority:
+        - shipping_methanol
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - low_temperature_heat_for_industry
+        - building_heat
+
+  OILGAS_TRANS_300:
+    demand_transition:
+      family: OILGAS
+      target: "300"
+      priority:
+        - shipping_methanol
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - low_temperature_heat_for_industry
+        - building_heat
+
+  OILGAS_TRANS_100:
+    demand_transition:
+      family: OILGAS
+      target: "100"
+      priority:
+        - shipping_methanol
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - low_temperature_heat_for_industry
+        - building_heat
+
+  OILGAS_IND_200:
+    demand_transition:
+      family: OILGAS
+      target: "200"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - building_heat
+        - shipping_methanol
+
+  OILGAS_IND_300:
+    demand_transition:
+      family: OILGAS
+      target: "300"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - building_heat
+        - shipping_methanol
+
+  OILGAS_IND_100:
+    demand_transition:
+      family: OILGAS
+      target: "100"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - building_heat
+        - shipping_methanol
+
+  OILGAS_HEAT_200:
+    demand_transition:
+      family: OILGAS
+      target: "200"
+      priority:
+        - building_heat
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - shipping_methanol
+
+  OILGAS_HEAT_300:
+    demand_transition:
+      family: OILGAS
+      target: "300"
+      priority:
+        - building_heat
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - shipping_methanol
+
+  OILGAS_HEAT_100:
+    demand_transition:
+      family: OILGAS
+      target: "100"
+      priority:
+        - building_heat
+        - low_temperature_heat_for_industry
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - shipping_methanol
+
+  MEOH_AIR_50:
+    demand_transition:
+      family: MEOH
+      target: "50"
+      priority:
+        - aviation_kerosene
+        - shipping_oil
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_h2
+
+  MEOH_AIR_150:
+    demand_transition:
+      family: MEOH
+      target: "150"
+      priority:
+        - aviation_kerosene
+        - shipping_oil
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_h2
+
+  MEOH_AIR_200:
+    demand_transition:
+      family: MEOH
+      target: "200"
+      priority:
+        - aviation_kerosene
+        - shipping_oil
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_h2
+
+  MEOH_IND_50:
+    demand_transition:
+      family: MEOH
+      target: "50"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+        - shipping_oil
+        - shipping_h2
+
+  MEOH_IND_150:
+    demand_transition:
+      family: MEOH
+      target: "150"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+        - shipping_oil
+        - shipping_h2
+
+  MEOH_IND_200:
+    demand_transition:
+      family: MEOH
+      target: "200"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+        - shipping_oil
+        - shipping_h2
+
+  MEOH_SHIP_50:
+    demand_transition:
+      family: MEOH
+      target: "50"
+      priority:
+        - shipping_oil
+        - shipping_h2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+
+  MEOH_SHIP_150:
+    demand_transition:
+      family: MEOH
+      target: "150"
+      priority:
+        - shipping_oil
+        - shipping_h2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+
+  MEOH_SHIP_200:
+    demand_transition:
+      family: MEOH
+      target: "200"
+      priority:
+        - shipping_oil
+        - shipping_h2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - aviation_kerosene
+
+  H2_IND_50:
+    demand_transition:
+      family: H2
+      target: "50"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_oil
+        - oil_from_H2
+        - land_transport_oil
+
+  H2_IND_150:
+    demand_transition:
+      family: H2
+      target: "150"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_oil
+        - oil_from_H2
+        - land_transport_oil
+
+  H2_IND_200:
+    demand_transition:
+      family: H2
+      target: "200"
+      priority:
+        - industry_electricity
+        - low_temperature_heat_for_industry
+        - shipping_oil
+        - oil_from_H2
+        - land_transport_oil
+
+  H2_TRANS_50:
+    demand_transition:
+      family: H2
+      target: "50"
+      priority:
+        - land_transport_oil
+        - shipping_oil
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+
+  H2_TRANS_150:
+    demand_transition:
+      family: H2
+      target: "150"
+      priority:
+        - land_transport_oil
+        - shipping_oil
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+
+  H2_TRANS_200:
+    demand_transition:
+      family: H2
+      target: "200"
+      priority:
+        - land_transport_oil
+        - shipping_oil
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+
+  H2_OIL_50:
+    demand_transition:
+      family: H2
+      target: "50"
+      priority:
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+
+  H2_OIL_150:
+    demand_transition:
+      family: H2
+      target: "150"
+      priority:
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
+
+  H2_OIL_200:
+    demand_transition:
+      family: H2
+      target: "200"
+      priority:
+        - oil_from_H2
+        - industry_electricity
+        - low_temperature_heat_for_industry
