@@ -10,7 +10,7 @@ See docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from scripts.lib.validation.config._base import ConfigModel
 
@@ -146,6 +146,96 @@ class _ResidentialHeatDsmConfig(BaseModel):
         default_factory=lambda: [10, 22],
         description="Checkpoint hours (0-23) at which heat flexibility storage must return to baseline state of charge, i.e. the residence surplus or missing heat be balanced. Time is the local time for each country and bus. Default: [10, 22] creates 12-hour periods with checkpoints at 10am and 10pm.",
     )
+
+
+class _UrbanCentralHeatSplitConfig(ConfigModel):
+    """Configuration for splitting urban central heat demand by technology."""
+
+    enable: bool = Field(
+        False,
+        description="Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+    )
+    gas_share: dict[int, float] = Field(
+        default_factory=lambda: {
+            2020: 0,
+            2025: 0,
+            2030: 0,
+            2035: 0,
+            2040: 0,
+            2045: 0,
+            2050: 0,
+        },
+        description="Share of urban central heat demand served by gas boilers and gas CHP.",
+    )
+    electricity_share: dict[int, float] = Field(
+        default_factory=lambda: {
+            2020: 0,
+            2025: 0,
+            2030: 0,
+            2035: 0,
+            2040: 0,
+            2045: 0,
+            2050: 0,
+        },
+        description="Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+    )
+
+    @field_validator("gas_share", "electricity_share")
+    @classmethod
+    def validate_shares(cls, shares: dict[int, float]) -> dict[int, float]:
+        if invalid := {
+            year: share for year, share in shares.items() if not 0 <= share <= 1
+        }:
+            raise ValueError(
+                f"Urban central heat shares must be between 0 and 1; got {invalid}."
+            )
+        return shares
+
+    @model_validator(mode="after")
+    def validate_total_share(self) -> "_UrbanCentralHeatSplitConfig":
+        years = self.gas_share.keys() & self.electricity_share.keys()
+        if invalid := {
+            year: self.gas_share[year] + self.electricity_share[year]
+            for year in years
+            if self.gas_share[year] + self.electricity_share[year] > 1
+        }:
+            raise ValueError(
+                "Gas and electricity urban central heat shares must sum to at most 1; "
+                f"got {invalid}."
+            )
+        return self
+
+
+class _OilFromH2Config(ConfigModel):
+    """Configuration for reserving a share of oil demand for H2-based fuels."""
+
+    enable: bool = Field(
+        False,
+        description="Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+    )
+    share: dict[int, float] = Field(
+        default_factory=lambda: {
+            2020: 0,
+            2025: 0,
+            2030: 0,
+            2035: 0,
+            2040: 0,
+            2045: 0,
+            2050: 0,
+        },
+        description="Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+    )
+
+    @field_validator("share")
+    @classmethod
+    def validate_share(cls, shares: dict[int, float]) -> dict[int, float]:
+        if invalid := {
+            year: share for year, share in shares.items() if not 0 <= share <= 1
+        }:
+            raise ValueError(
+                f"All oil-from-H2 shares must be between 0 and 1; got {invalid}."
+            )
+        return shares
 
 
 class _ResidentialHeatConfig(BaseModel):
@@ -380,6 +470,10 @@ class SectorConfig(BaseModel):
     district_heating: _DistrictHeatingConfig = Field(
         default_factory=_DistrictHeatingConfig,
         description="District heating configuration.",
+    )
+    urban_central_heat_split: _UrbanCentralHeatSplitConfig = Field(
+        default_factory=_UrbanCentralHeatSplitConfig,
+        description="Urban central heat demand split configuration.",
     )
 
     heat_pump_sources: dict[str, list[str]] = Field(
@@ -729,6 +823,10 @@ class SectorConfig(BaseModel):
     regional_oil_demand: bool = Field(
         True,
         description="Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
+    )
+    oil_from_h2: _OilFromH2Config = Field(
+        default_factory=_OilFromH2Config,
+        description="Restricted H2-based oil demand configuration.",
     )
     regional_coal_demand: bool = Field(False, description="Regional coal demand.")
 

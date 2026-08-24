@@ -1,0 +1,629 @@
+# Cross-validation matrix for the original deterministic scenario names.
+# Each scenario's capacities are tested against the operations of every
+# other scenario. Self-combinations are excluded.
+
+validation_runs:
+
+  BASE___ELEC_HEAT:
+    capacities_from: BASE
+    operations_on: ELEC_HEAT
+
+  BASE___ELEC_ROAD:
+    capacities_from: BASE
+    operations_on: ELEC_ROAD
+
+  BASE___ELEC_IND:
+    capacities_from: BASE
+    operations_on: ELEC_IND
+
+  BASE___OILGAS_TRANS:
+    capacities_from: BASE
+    operations_on: OILGAS_TRANS
+
+  BASE___OILGAS_IND:
+    capacities_from: BASE
+    operations_on: OILGAS_IND
+
+  BASE___OILGAS_HEAT:
+    capacities_from: BASE
+    operations_on: OILGAS_HEAT
+
+  BASE___MEOH_AIR:
+    capacities_from: BASE
+    operations_on: MEOH_AIR
+
+  BASE___MEOH_IND:
+    capacities_from: BASE
+    operations_on: MEOH_IND
+
+  BASE___MEOH_SHIP:
+    capacities_from: BASE
+    operations_on: MEOH_SHIP
+
+  BASE___H2_IND:
+    capacities_from: BASE
+    operations_on: H2_IND
+
+  BASE___H2_TRANS:
+    capacities_from: BASE
+    operations_on: H2_TRANS
+
+  BASE___H2_OIL:
+    capacities_from: BASE
+    operations_on: H2_OIL
+
+  ELEC_HEAT___BASE:
+    capacities_from: ELEC_HEAT
+    operations_on: BASE
+
+  ELEC_HEAT___ELEC_ROAD:
+    capacities_from: ELEC_HEAT
+    operations_on: ELEC_ROAD
+
+  ELEC_HEAT___ELEC_IND:
+    capacities_from: ELEC_HEAT
+    operations_on: ELEC_IND
+
+  ELEC_HEAT___OILGAS_TRANS:
+    capacities_from: ELEC_HEAT
+    operations_on: OILGAS_TRANS
+
+  ELEC_HEAT___OILGAS_IND:
+    capacities_from: ELEC_HEAT
+    operations_on: OILGAS_IND
+
+  ELEC_HEAT___OILGAS_HEAT:
+    capacities_from: ELEC_HEAT
+    operations_on: OILGAS_HEAT
+
+  ELEC_HEAT___MEOH_AIR:
+    capacities_from: ELEC_HEAT
+    operations_on: MEOH_AIR
+
+  ELEC_HEAT___MEOH_IND:
+    capacities_from: ELEC_HEAT
+    operations_on: MEOH_IND
+
+  ELEC_HEAT___MEOH_SHIP:
+    capacities_from: ELEC_HEAT
+    operations_on: MEOH_SHIP
+
+  ELEC_HEAT___H2_IND:
+    capacities_from: ELEC_HEAT
+    operations_on: H2_IND
+
+  ELEC_HEAT___H2_TRANS:
+    capacities_from: ELEC_HEAT
+    operations_on: H2_TRANS
+
+  ELEC_HEAT___H2_OIL:
+    capacities_from: ELEC_HEAT
+    operations_on: H2_OIL
+
+  ELEC_ROAD___BASE:
+    capacities_from: ELEC_ROAD
+    operations_on: BASE
+
+  ELEC_ROAD___ELEC_HEAT:
+    capacities_from: ELEC_ROAD
+    operations_on: ELEC_HEAT
+
+  ELEC_ROAD___ELEC_IND:
+    capacities_from: ELEC_ROAD
+    operations_on: ELEC_IND
+
+  ELEC_ROAD___OILGAS_TRANS:
+    capacities_from: ELEC_ROAD
+    operations_on: OILGAS_TRANS
+
+  ELEC_ROAD___OILGAS_IND:
+    capacities_from: ELEC_ROAD
+    operations_on: OILGAS_IND
+
+  ELEC_ROAD___OILGAS_HEAT:
+    capacities_from: ELEC_ROAD
+    operations_on: OILGAS_HEAT
+
+  ELEC_ROAD___MEOH_AIR:
+    capacities_from: ELEC_ROAD
+    operations_on: MEOH_AIR
+
+  ELEC_ROAD___MEOH_IND:
+    capacities_from: ELEC_ROAD
+    operations_on: MEOH_IND
+
+  ELEC_ROAD___MEOH_SHIP:
+    capacities_from: ELEC_ROAD
+    operations_on: MEOH_SHIP
+
+  ELEC_ROAD___H2_IND:
+    capacities_from: ELEC_ROAD
+    operations_on: H2_IND
+
+  ELEC_ROAD___H2_TRANS:
+    capacities_from: ELEC_ROAD
+    operations_on: H2_TRANS
+
+  ELEC_ROAD___H2_OIL:
+    capacities_from: ELEC_ROAD
+    operations_on: H2_OIL
+
+  ELEC_IND___BASE:
+    capacities_from: ELEC_IND
+    operations_on: BASE
+
+  ELEC_IND___ELEC_HEAT:
+    capacities_from: ELEC_IND
+    operations_on: ELEC_HEAT
+
+  ELEC_IND___ELEC_ROAD:
+    capacities_from: ELEC_IND
+    operations_on: ELEC_ROAD
+
+  ELEC_IND___OILGAS_TRANS:
+    capacities_from: ELEC_IND
+    operations_on: OILGAS_TRANS
+
+  ELEC_IND___OILGAS_IND:
+    capacities_from: ELEC_IND
+    operations_on: OILGAS_IND
+
+  ELEC_IND___OILGAS_HEAT:
+    capacities_from: ELEC_IND
+    operations_on: OILGAS_HEAT
+
+  ELEC_IND___MEOH_AIR:
+    capacities_from: ELEC_IND
+    operations_on: MEOH_AIR
+
+  ELEC_IND___MEOH_IND:
+    capacities_from: ELEC_IND
+    operations_on: MEOH_IND
+
+  ELEC_IND___MEOH_SHIP:
+    capacities_from: ELEC_IND
+    operations_on: MEOH_SHIP
+
+  ELEC_IND___H2_IND:
+    capacities_from: ELEC_IND
+    operations_on: H2_IND
+
+  ELEC_IND___H2_TRANS:
+    capacities_from: ELEC_IND
+    operations_on: H2_TRANS
+
+  ELEC_IND___H2_OIL:
+    capacities_from: ELEC_IND
+    operations_on: H2_OIL
+
+  OILGAS_TRANS___BASE:
+    capacities_from: OILGAS_TRANS
+    operations_on: BASE
+
+  OILGAS_TRANS___ELEC_HEAT:
+    capacities_from: OILGAS_TRANS
+    operations_on: ELEC_HEAT
+
+  OILGAS_TRANS___ELEC_ROAD:
+    capacities_from: OILGAS_TRANS
+    operations_on: ELEC_ROAD
+
+  OILGAS_TRANS___ELEC_IND:
+    capacities_from: OILGAS_TRANS
+    operations_on: ELEC_IND
+
+  OILGAS_TRANS___OILGAS_IND:
+    capacities_from: OILGAS_TRANS
+    operations_on: OILGAS_IND
+
+  OILGAS_TRANS___OILGAS_HEAT:
+    capacities_from: OILGAS_TRANS
+    operations_on: OILGAS_HEAT
+
+  OILGAS_TRANS___MEOH_AIR:
+    capacities_from: OILGAS_TRANS
+    operations_on: MEOH_AIR
+
+  OILGAS_TRANS___MEOH_IND:
+    capacities_from: OILGAS_TRANS
+    operations_on: MEOH_IND
+
+  OILGAS_TRANS___MEOH_SHIP:
+    capacities_from: OILGAS_TRANS
+    operations_on: MEOH_SHIP
+
+  OILGAS_TRANS___H2_IND:
+    capacities_from: OILGAS_TRANS
+    operations_on: H2_IND
+
+  OILGAS_TRANS___H2_TRANS:
+    capacities_from: OILGAS_TRANS
+    operations_on: H2_TRANS
+
+  OILGAS_TRANS___H2_OIL:
+    capacities_from: OILGAS_TRANS
+    operations_on: H2_OIL
+
+  OILGAS_IND___BASE:
+    capacities_from: OILGAS_IND
+    operations_on: BASE
+
+  OILGAS_IND___ELEC_HEAT:
+    capacities_from: OILGAS_IND
+    operations_on: ELEC_HEAT
+
+  OILGAS_IND___ELEC_ROAD:
+    capacities_from: OILGAS_IND
+    operations_on: ELEC_ROAD
+
+  OILGAS_IND___ELEC_IND:
+    capacities_from: OILGAS_IND
+    operations_on: ELEC_IND
+
+  OILGAS_IND___OILGAS_TRANS:
+    capacities_from: OILGAS_IND
+    operations_on: OILGAS_TRANS
+
+  OILGAS_IND___OILGAS_HEAT:
+    capacities_from: OILGAS_IND
+    operations_on: OILGAS_HEAT
+
+  OILGAS_IND___MEOH_AIR:
+    capacities_from: OILGAS_IND
+    operations_on: MEOH_AIR
+
+  OILGAS_IND___MEOH_IND:
+    capacities_from: OILGAS_IND
+    operations_on: MEOH_IND
+
+  OILGAS_IND___MEOH_SHIP:
+    capacities_from: OILGAS_IND
+    operations_on: MEOH_SHIP
+
+  OILGAS_IND___H2_IND:
+    capacities_from: OILGAS_IND
+    operations_on: H2_IND
+
+  OILGAS_IND___H2_TRANS:
+    capacities_from: OILGAS_IND
+    operations_on: H2_TRANS
+
+  OILGAS_IND___H2_OIL:
+    capacities_from: OILGAS_IND
+    operations_on: H2_OIL
+
+  OILGAS_HEAT___BASE:
+    capacities_from: OILGAS_HEAT
+    operations_on: BASE
+
+  OILGAS_HEAT___ELEC_HEAT:
+    capacities_from: OILGAS_HEAT
+    operations_on: ELEC_HEAT
+
+  OILGAS_HEAT___ELEC_ROAD:
+    capacities_from: OILGAS_HEAT
+    operations_on: ELEC_ROAD
+
+  OILGAS_HEAT___ELEC_IND:
+    capacities_from: OILGAS_HEAT
+    operations_on: ELEC_IND
+
+  OILGAS_HEAT___OILGAS_TRANS:
+    capacities_from: OILGAS_HEAT
+    operations_on: OILGAS_TRANS
+
+  OILGAS_HEAT___OILGAS_IND:
+    capacities_from: OILGAS_HEAT
+    operations_on: OILGAS_IND
+
+  OILGAS_HEAT___MEOH_AIR:
+    capacities_from: OILGAS_HEAT
+    operations_on: MEOH_AIR
+
+  OILGAS_HEAT___MEOH_IND:
+    capacities_from: OILGAS_HEAT
+    operations_on: MEOH_IND
+
+  OILGAS_HEAT___MEOH_SHIP:
+    capacities_from: OILGAS_HEAT
+    operations_on: MEOH_SHIP
+
+  OILGAS_HEAT___H2_IND:
+    capacities_from: OILGAS_HEAT
+    operations_on: H2_IND
+
+  OILGAS_HEAT___H2_TRANS:
+    capacities_from: OILGAS_HEAT
+    operations_on: H2_TRANS
+
+  OILGAS_HEAT___H2_OIL:
+    capacities_from: OILGAS_HEAT
+    operations_on: H2_OIL
+
+  MEOH_AIR___BASE:
+    capacities_from: MEOH_AIR
+    operations_on: BASE
+
+  MEOH_AIR___ELEC_HEAT:
+    capacities_from: MEOH_AIR
+    operations_on: ELEC_HEAT
+
+  MEOH_AIR___ELEC_ROAD:
+    capacities_from: MEOH_AIR
+    operations_on: ELEC_ROAD
+
+  MEOH_AIR___ELEC_IND:
+    capacities_from: MEOH_AIR
+    operations_on: ELEC_IND
+
+  MEOH_AIR___OILGAS_TRANS:
+    capacities_from: MEOH_AIR
+    operations_on: OILGAS_TRANS
+
+  MEOH_AIR___OILGAS_IND:
+    capacities_from: MEOH_AIR
+    operations_on: OILGAS_IND
+
+  MEOH_AIR___OILGAS_HEAT:
+    capacities_from: MEOH_AIR
+    operations_on: OILGAS_HEAT
+
+  MEOH_AIR___MEOH_IND:
+    capacities_from: MEOH_AIR
+    operations_on: MEOH_IND
+
+  MEOH_AIR___MEOH_SHIP:
+    capacities_from: MEOH_AIR
+    operations_on: MEOH_SHIP
+
+  MEOH_AIR___H2_IND:
+    capacities_from: MEOH_AIR
+    operations_on: H2_IND
+
+  MEOH_AIR___H2_TRANS:
+    capacities_from: MEOH_AIR
+    operations_on: H2_TRANS
+
+  MEOH_AIR___H2_OIL:
+    capacities_from: MEOH_AIR
+    operations_on: H2_OIL
+
+  MEOH_IND___BASE:
+    capacities_from: MEOH_IND
+    operations_on: BASE
+
+  MEOH_IND___ELEC_HEAT:
+    capacities_from: MEOH_IND
+    operations_on: ELEC_HEAT
+
+  MEOH_IND___ELEC_ROAD:
+    capacities_from: MEOH_IND
+    operations_on: ELEC_ROAD
+
+  MEOH_IND___ELEC_IND:
+    capacities_from: MEOH_IND
+    operations_on: ELEC_IND
+
+  MEOH_IND___OILGAS_TRANS:
+    capacities_from: MEOH_IND
+    operations_on: OILGAS_TRANS
+
+  MEOH_IND___OILGAS_IND:
+    capacities_from: MEOH_IND
+    operations_on: OILGAS_IND
+
+  MEOH_IND___OILGAS_HEAT:
+    capacities_from: MEOH_IND
+    operations_on: OILGAS_HEAT
+
+  MEOH_IND___MEOH_AIR:
+    capacities_from: MEOH_IND
+    operations_on: MEOH_AIR
+
+  MEOH_IND___MEOH_SHIP:
+    capacities_from: MEOH_IND
+    operations_on: MEOH_SHIP
+
+  MEOH_IND___H2_IND:
+    capacities_from: MEOH_IND
+    operations_on: H2_IND
+
+  MEOH_IND___H2_TRANS:
+    capacities_from: MEOH_IND
+    operations_on: H2_TRANS
+
+  MEOH_IND___H2_OIL:
+    capacities_from: MEOH_IND
+    operations_on: H2_OIL
+
+  MEOH_SHIP___BASE:
+    capacities_from: MEOH_SHIP
+    operations_on: BASE
+
+  MEOH_SHIP___ELEC_HEAT:
+    capacities_from: MEOH_SHIP
+    operations_on: ELEC_HEAT
+
+  MEOH_SHIP___ELEC_ROAD:
+    capacities_from: MEOH_SHIP
+    operations_on: ELEC_ROAD
+
+  MEOH_SHIP___ELEC_IND:
+    capacities_from: MEOH_SHIP
+    operations_on: ELEC_IND
+
+  MEOH_SHIP___OILGAS_TRANS:
+    capacities_from: MEOH_SHIP
+    operations_on: OILGAS_TRANS
+
+  MEOH_SHIP___OILGAS_IND:
+    capacities_from: MEOH_SHIP
+    operations_on: OILGAS_IND
+
+  MEOH_SHIP___OILGAS_HEAT:
+    capacities_from: MEOH_SHIP
+    operations_on: OILGAS_HEAT
+
+  MEOH_SHIP___MEOH_AIR:
+    capacities_from: MEOH_SHIP
+    operations_on: MEOH_AIR
+
+  MEOH_SHIP___MEOH_IND:
+    capacities_from: MEOH_SHIP
+    operations_on: MEOH_IND
+
+  MEOH_SHIP___H2_IND:
+    capacities_from: MEOH_SHIP
+    operations_on: H2_IND
+
+  MEOH_SHIP___H2_TRANS:
+    capacities_from: MEOH_SHIP
+    operations_on: H2_TRANS
+
+  MEOH_SHIP___H2_OIL:
+    capacities_from: MEOH_SHIP
+    operations_on: H2_OIL
+
+  H2_IND___BASE:
+    capacities_from: H2_IND
+    operations_on: BASE
+
+  H2_IND___ELEC_HEAT:
+    capacities_from: H2_IND
+    operations_on: ELEC_HEAT
+
+  H2_IND___ELEC_ROAD:
+    capacities_from: H2_IND
+    operations_on: ELEC_ROAD
+
+  H2_IND___ELEC_IND:
+    capacities_from: H2_IND
+    operations_on: ELEC_IND
+
+  H2_IND___OILGAS_TRANS:
+    capacities_from: H2_IND
+    operations_on: OILGAS_TRANS
+
+  H2_IND___OILGAS_IND:
+    capacities_from: H2_IND
+    operations_on: OILGAS_IND
+
+  H2_IND___OILGAS_HEAT:
+    capacities_from: H2_IND
+    operations_on: OILGAS_HEAT
+
+  H2_IND___MEOH_AIR:
+    capacities_from: H2_IND
+    operations_on: MEOH_AIR
+
+  H2_IND___MEOH_IND:
+    capacities_from: H2_IND
+    operations_on: MEOH_IND
+
+  H2_IND___MEOH_SHIP:
+    capacities_from: H2_IND
+    operations_on: MEOH_SHIP
+
+  H2_IND___H2_TRANS:
+    capacities_from: H2_IND
+    operations_on: H2_TRANS
+
+  H2_IND___H2_OIL:
+    capacities_from: H2_IND
+    operations_on: H2_OIL
+
+  H2_TRANS___BASE:
+    capacities_from: H2_TRANS
+    operations_on: BASE
+
+  H2_TRANS___ELEC_HEAT:
+    capacities_from: H2_TRANS
+    operations_on: ELEC_HEAT
+
+  H2_TRANS___ELEC_ROAD:
+    capacities_from: H2_TRANS
+    operations_on: ELEC_ROAD
+
+  H2_TRANS___ELEC_IND:
+    capacities_from: H2_TRANS
+    operations_on: ELEC_IND
+
+  H2_TRANS___OILGAS_TRANS:
+    capacities_from: H2_TRANS
+    operations_on: OILGAS_TRANS
+
+  H2_TRANS___OILGAS_IND:
+    capacities_from: H2_TRANS
+    operations_on: OILGAS_IND
+
+  H2_TRANS___OILGAS_HEAT:
+    capacities_from: H2_TRANS
+    operations_on: OILGAS_HEAT
+
+  H2_TRANS___MEOH_AIR:
+    capacities_from: H2_TRANS
+    operations_on: MEOH_AIR
+
+  H2_TRANS___MEOH_IND:
+    capacities_from: H2_TRANS
+    operations_on: MEOH_IND
+
+  H2_TRANS___MEOH_SHIP:
+    capacities_from: H2_TRANS
+    operations_on: MEOH_SHIP
+
+  H2_TRANS___H2_IND:
+    capacities_from: H2_TRANS
+    operations_on: H2_IND
+
+  H2_TRANS___H2_OIL:
+    capacities_from: H2_TRANS
+    operations_on: H2_OIL
+
+  H2_OIL___BASE:
+    capacities_from: H2_OIL
+    operations_on: BASE
+
+  H2_OIL___ELEC_HEAT:
+    capacities_from: H2_OIL
+    operations_on: ELEC_HEAT
+
+  H2_OIL___ELEC_ROAD:
+    capacities_from: H2_OIL
+    operations_on: ELEC_ROAD
+
+  H2_OIL___ELEC_IND:
+    capacities_from: H2_OIL
+    operations_on: ELEC_IND
+
+  H2_OIL___OILGAS_TRANS:
+    capacities_from: H2_OIL
+    operations_on: OILGAS_TRANS
+
+  H2_OIL___OILGAS_IND:
+    capacities_from: H2_OIL
+    operations_on: OILGAS_IND
+
+  H2_OIL___OILGAS_HEAT:
+    capacities_from: H2_OIL
+    operations_on: OILGAS_HEAT
+
+  H2_OIL___MEOH_AIR:
+    capacities_from: H2_OIL
+    operations_on: MEOH_AIR
+
+  H2_OIL___MEOH_IND:
+    capacities_from: H2_OIL
+    operations_on: MEOH_IND
+
+  H2_OIL___MEOH_SHIP:
+    capacities_from: H2_OIL
+    operations_on: MEOH_SHIP
+
+  H2_OIL___H2_IND:
+    capacities_from: H2_OIL
+    operations_on: H2_IND
+
+  H2_OIL___H2_TRANS:
+    capacities_from: H2_OIL
+    operations_on: H2_TRANS

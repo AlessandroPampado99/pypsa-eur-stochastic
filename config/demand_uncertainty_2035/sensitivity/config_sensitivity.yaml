@@ -1,19 +1,20 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "cutouts_det_capexp_nols"
+  prefix: "demand_uncertainty_sensitivity"
   name: all
   scenarios:
-    enable: false
-    file: config/cutouts_prices_uncertainty/scenarios.yaml
+    enable: true
+    file: config/demand_uncertainty_2035/sensitivity/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
 
-validation:
-  enable: true
-  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
+stochastic_scenarios:
+  enable: false
+  file: config/demand_uncertainty_2035/sensitivity/scenarios_determinstic_definition.yaml
+  active_scenario:    # change this label to run one scenario at a time
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -24,38 +25,17 @@ scenario:
   sector_opts:
   - ""
   planning_horizons:
-  - 2050
+  - 2035
 
-snapshots:
-  start: "2000-01-01"
-  end: "2001-01-01"
-  inclusive: left
-
-  # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#atlite
-atlite:
-  default_cutout: "europe-2000-era5"
-  nprocesses: 16
-  show_progress: true
-  cutouts:
-    "europe-2000-era5":
-      module: era5
-      x:
-      - -12.0
-      - 42.0
-      'y':
-      - 33.0
-      - 72.0
-      dx: 0.3
-      dy: 0.3
-      time:
-      - '2000'
-      - '2000'
-      chunks:
-        time: 500
-      prepare_kwargs:
-        features: []
-        monthly_requests: true
-        tmpdir: ./cutouts_tmp/
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#co2_budget
+co2_budget:
+  2020: 0.72
+  2025: 0.648
+  2030: 0.45
+  2035: 0.30
+  2040: 0.1
+  2045: 0.05
+  2050: 0.0
 
 electricity:
   extendable_carriers:
@@ -75,33 +55,37 @@ electricity:
     - H2
     Link: []
 
-# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#load
-load:
-  fill_gaps:
-    enable: true
-    interpolate_limit: 6
-    time_shift_for_large_gaps: 1w
-  manual_adjustments: true
-  scaling_factor: 1.0
-  fixed_year: 2013
-  supplement_synthetic: true
-  distribution_key:
-    gdp: 0.6
-    population: 0.4
-
 biomass:
-  year: 2050
+  year: 2035
 
 costs:
-  year: 2040
+  year: 2030
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
+  urban_central_heat_split:
+    enable: true
+    gas_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.25
+      2040: 0
+      2045: 0
+      2050: 0
+    electricity_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.25
+      2040: 0
+      2045: 0
+      2050: 0
   land_transport_fuel_cell_share:
     2020: 0
     2025: 0
     2030: 0
-    2035: 0
+    2035: 0.01
     2040: 0
     2045: 0
     2050: 0.05
@@ -109,7 +93,7 @@ sector:
     2020: 0
     2025: 0.05
     2030: 0.2
-    2035: 0.45
+    2035: 0.44
     2040: 0.7
     2045: 0.85
     2050: 0.70
@@ -133,7 +117,7 @@ sector:
     2020: 0
     2025: 0
     2030: 0
-    2035: 0
+    2035: 0.01
     2040: 0
     2045: 0
     2050: 0.05
@@ -141,7 +125,7 @@ sector:
     2020: 0
     2025: 0
     2030: 0.15
-    2035: 0.35
+    2035: 0.34
     2040: 0.55
     2045: 0.8
     2050: 0.8
@@ -156,19 +140,22 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
-  allam_cycle_gas: true
+  aviation_methanol_to_kerosene: true
+  aviation_methanol_kerosene_share:
+    2020: 0.0
+    2025: 0.0
+    2030: 0.0
+    2035: 0.2
+    2040: 0.0
+    2045: 0.0
+    2050: 0.5
   methanol:
     regional_methanol_demand: true
     methanol_reforming: true
     methanol_reforming_cc: true
     methanol_to_kerosene: true
     methanol_to_power:
-      ccgt: true
-      ccgt_cc: false
       ocgt: true
-      allam: true
-    biomass_to_methanol: false
-    biomass_to_methanol_cc: false
   H2_network: true
   gas_network: true
   H2_retrofit: false
@@ -177,6 +164,16 @@ sector:
   gas_distribution_grid: true
   gas_distribution_grid_cost_factor: 1.0
   biomass_spatial: true
+  oil_from_h2:
+    enable: true
+    share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.01
+      2040: 0
+      2045: 0
+      2050: 0
   biomass_transport: false
   biogas_upgrading: true
   biogas_upgrading_cc: false
@@ -186,10 +183,6 @@ sector:
   biomass_to_liquid: true
   biomass_to_liquid_cc: false
   electrobiofuels: true
-  biosng: true
-  biosng_cc: false
-  bioH2: false
-  municipal_solid_waste: false
 
 
 clustering:
@@ -201,15 +194,7 @@ clustering:
     resolution_sector: 3H
 
 solving:
-  options:
-    load_shedding: true
-    dispatch_exclude_carriers:
-      - co2 stored
-      - co2 sequestered
-      - co2 atmosphere
-      - oil primary
-      - gas
-      
+  load_shedding: true
 
-    validation_missing_capacity_policy: fix_current
-    io_api: direct
+
+

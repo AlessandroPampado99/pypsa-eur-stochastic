@@ -48,8 +48,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/cutouts_det_capexp_")
-OUTPUT_DIR = Path("results/cutouts_det_capexp_/analysis_output/validation_heatmaps")
+ROOT_DIR = Path("results/cutouts_det_capexp_nols")
+OUTPUT_DIR = Path("results/cutouts_det_capexp_nols/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
 DIAGONAL_FILENAME = "base_s_adm___2050.nc"

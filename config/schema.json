@@ -4158,6 +4158,30 @@
             }
           }
         },
+        "urban_central_heat_split": {
+          "description": "Configuration for splitting urban central heat demand by technology.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+              "type": "boolean"
+            },
+            "gas_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+              "type": "object"
+            },
+            "electricity_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+              "type": "object"
+            }
+          }
+        },
         "heat_pump_sources": {
           "additionalProperties": {
             "items": {
@@ -4595,6 +4619,23 @@
           "default": true,
           "description": "Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
           "type": "boolean"
+        },
+        "oil_from_h2": {
+          "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+              "type": "boolean"
+            },
+            "share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+              "type": "object"
+            }
+          }
         },
         "regional_coal_demand": {
           "default": false,
@@ -6970,6 +7011,23 @@
         }
       }
     },
+    "_OilFromH2Config": {
+      "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+          "type": "boolean"
+        },
+        "share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+          "type": "object"
+        }
+      }
+    },
     "_OnwindConfig": {
       "description": "Configuration for onshore wind.",
       "properties": {
@@ -7873,6 +7931,30 @@
             "type": "number"
           },
           "description": "Electricity distribution grid efficiency.",
+          "type": "object"
+        }
+      }
+    },
+    "_UrbanCentralHeatSplitConfig": {
+      "description": "Configuration for splitting urban central heat demand by technology.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+          "type": "boolean"
+        },
+        "gas_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+          "type": "object"
+        },
+        "electricity_share": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
           "type": "object"
         }
       }
@@ -10436,6 +10518,30 @@
             }
           }
         },
+        "urban_central_heat_split": {
+          "description": "Configuration for splitting urban central heat demand by technology.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+              "type": "boolean"
+            },
+            "gas_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by gas boilers and gas CHP.",
+              "type": "object"
+            },
+            "electricity_share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+              "type": "object"
+            }
+          }
+        },
         "heat_pump_sources": {
           "additionalProperties": {
             "items": {
@@ -10873,6 +10979,23 @@
           "default": true,
           "description": "Spatially resolve oil demand. Set to true if regional CO2 constraints needed.",
           "type": "boolean"
+        },
+        "oil_from_h2": {
+          "description": "Configuration for reserving a share of oil demand for H2-based fuels.",
+          "properties": {
+            "enable": {
+              "default": false,
+              "description": "Serve a share of fixed oil demand from a restricted oil-from-H2 bus.",
+              "type": "boolean"
+            },
+            "share": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Share of fixed oil demand served only by Fischer-Tropsch and electrobiofuels.",
+              "type": "object"
+            }
+          }
         },
         "regional_coal_demand": {
           "default": false,

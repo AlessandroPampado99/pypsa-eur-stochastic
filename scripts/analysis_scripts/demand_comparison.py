@@ -41,10 +41,10 @@ import pypsa
 
 # Folder containing scenario subfolders:
 # results/<PREFIX>/<scenario>/networks/*.nc
-PREFIX_DIR = Path("results/demand_uncertainty_")  # e.g. "results/prices_and_renewables"
+PREFIX_DIR = Path("results/demand_uncertainty_2035")  # e.g. "results/prices_and_renewables"
 
 # Choose the base network explicitly (can be anywhere)
-BASE_NETWORK_PATH = Path("/home/pampado/stochastic/pypsa-eur/results/demand_uncertainty_/BASE/networks/base_s_adm___2050.nc")
+BASE_NETWORK_PATH = Path("/home/pampado/stochastic/pypsa-eur/results/demand_uncertainty_2035/BASE/networks/base_s_adm___2035.nc")
 BASE_NAME = "__BASE__"  # column name for base in outputs
 
 # If each scenario has multiple .nc in networks/, constrain which one to pick.
@@ -64,7 +64,7 @@ GroupByField = Literal["carrier", "bus", "load_name"]
 GROUPBY: GroupByField = "carrier"
 
 # Output folder (will contain three Excel files)
-OUT_DIR = Path("results/demand_uncertainty_/analysis_output/postprocess_demand_compare")
+OUT_DIR = Path("results/demand_uncertainty_2035/analysis_output/postprocess_demand_compare")
 
 # File name prefix for exported Excel files
 OUT_STEM = "demand_compare"

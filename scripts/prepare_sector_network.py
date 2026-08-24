@@ -176,6 +176,9 @@ def define_spatial(nodes, options):
 
     spatial.oil.nodes = ["EU oil"]
     spatial.oil.locations = ["EU"]
+    spatial.oil.from_h2 = pd.Index(spatial.oil.nodes).str.replace(
+        " oil", " oil from H2", regex=False
+    )
 
     if options["regional_oil_demand"]:
         spatial.oil.demand_locations = nodes
@@ -1591,7 +1594,9 @@ def insert_electricity_distribution_grid(
 
     # this catches regular electricity load and "industry electricity" and
     # "agriculture machinery electric" and "agriculture electricity"
-    loads = n.loads.index[n.loads.carrier.str.contains("electric")]
+    loads = n.loads.index[
+        n.loads.carrier.str.contains("electric") & ~n.loads.carrier.str.contains("heat")
+    ]
     n.loads.loc[loads, "bus"] += " low voltage"
 
     bevs = n.links.index[n.links.carrier == "BEV charger"]
@@ -2750,6 +2755,43 @@ def build_heat_demand(
     return heat_demand
 
 
+def duplicate_components(
+    n: pypsa.Network,
+    component: str,
+    names: pd.Index,
+    suffix: str,
+    **overrides,
+) -> None:
+    """Duplicate existing components, including their time-dependent attributes."""
+    if names.empty:
+        return
+
+    components = n.components[component]
+    input_attrs = components.defaults.index[
+        components.defaults.status.str.startswith("Input")
+    ]
+    attrs = input_attrs.intersection(components.static.columns).drop(
+        "name", errors="ignore"
+    )
+    kwargs = {attr: components.static.loc[names, attr].to_numpy() for attr in attrs}
+    kwargs.update(
+        {
+            attr: value.to_numpy() if isinstance(value, pd.Series) else value
+            for attr, value in overrides.items()
+        }
+    )
+
+    new_names = names.astype(str) + suffix
+    n.add(component, new_names, **kwargs)
+
+    for attr, data in components.dynamic.items():
+        columns = names.intersection(data.columns)
+        if columns.empty:
+            continue
+        new_columns = columns.astype(str) + suffix
+        data[new_columns] = data.loc[:, columns].set_axis(new_columns, axis=1)
+
+
 def add_heat(
     n: pypsa.Network,
     costs: pd.DataFrame,
@@ -2896,6 +2938,31 @@ def add_heat(
             unit="MWh_th",
         )
 
+        urban_central_heat_split = options.get(
+            "urban_central_heat_split", {"enable": False}
+        )
+        split_urban_central_heat = (
+            heat_system == HeatSystem.URBAN_CENTRAL
+            and urban_central_heat_split["enable"]
+        )
+        if split_urban_central_heat:
+            gas_heat_share = get(urban_central_heat_split["gas_share"], investment_year)
+            electricity_heat_share = get(
+                urban_central_heat_split["electricity_share"], investment_year
+            )
+            shared_heat_share = 1 - gas_heat_share - electricity_heat_share
+
+            for prefix in ["gas", "electricity"]:
+                carrier = f"{prefix} urban central heat"
+                n.add("Carrier", carrier)
+                n.add(
+                    "Bus",
+                    nodes + f" {carrier}",
+                    location=nodes,
+                    carrier=carrier,
+                    unit="MWh_th",
+                )
+
         # if heat_system == HeatSystem.URBAN_CENTRAL and options["central_heat_vent"]:
         if options["heat_vent"][heat_system.system_type.value]:
             n.add(
@@ -2939,14 +3006,30 @@ def add_heat(
                 )
             )
 
-        n.add(
-            "Load",
-            nodes,
-            suffix=f" {heat_system} heat",
-            bus=nodes + f" {heat_system} heat",
-            carrier=f"{heat_system} heat",
-            p_set=heat_load.loc[n.snapshots],
-        )
+        if split_urban_central_heat:
+            heat_load_splits = {
+                "urban central heat": shared_heat_share,
+                "gas urban central heat": gas_heat_share,
+                "electricity urban central heat": electricity_heat_share,
+            }
+            for carrier, share in heat_load_splits.items():
+                n.add(
+                    "Load",
+                    nodes,
+                    suffix=f" {carrier}",
+                    bus=nodes + f" {carrier}",
+                    carrier=carrier,
+                    p_set=share * heat_load.loc[n.snapshots],
+                )
+        else:
+            n.add(
+                "Load",
+                nodes,
+                suffix=f" {heat_system} heat",
+                bus=nodes + f" {heat_system} heat",
+                carrier=f"{heat_system} heat",
+                p_set=heat_load.loc[n.snapshots],
+            )
 
         if options["residential_heat"]["dsm"]["enable"] and heat_system in [
             HeatSystem.RESIDENTIAL_RURAL,
@@ -3407,7 +3490,6 @@ def add_heat(
 
         if options["resistive_heaters"]:
             key = f"{heat_system.central_or_decentral} resistive heater"
-
             n.add(
                 "Link",
                 nodes + f" {heat_system} resistive heater",
@@ -3424,7 +3506,6 @@ def add_heat(
 
         if options["boilers"]:
             key = f"{heat_system.central_or_decentral} gas boiler"
-
             n.add(
                 "Link",
                 nodes + f" {heat_system} gas boiler",
@@ -3443,7 +3524,6 @@ def add_heat(
 
         if options["solar_thermal"]:
             n.add("Carrier", f"{heat_system} solar thermal")
-
             n.add(
                 "Generator",
                 nodes,
@@ -3544,6 +3624,92 @@ def add_heat(
                 efficiency3=costs.at["gas", "CO2 intensity"],
                 capital_cost=costs.at["micro CHP", "capital_cost"],
                 lifetime=costs.at["micro CHP", "lifetime"],
+            )
+
+        if split_urban_central_heat:
+            gas_links = n.links.index[
+                n.links.carrier.isin(
+                    [
+                        "urban central gas boiler",
+                        "urban central gas CHP",
+                        "urban central gas CHP CC",
+                    ]
+                )
+            ]
+            gas_output = n.links.loc[gas_links, "bus1"].where(
+                n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                n.links.loc[gas_links, "bus2"],
+            )
+            gas_output = gas_output.str.replace(
+                " urban central heat", " gas urban central heat", regex=False
+            )
+            duplicate_components(
+                n,
+                "Link",
+                gas_links,
+                " gas-only",
+                bus1=np.where(
+                    n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                    gas_output,
+                    n.links.loc[gas_links, "bus1"],
+                ),
+                bus2=np.where(
+                    n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                    n.links.loc[gas_links, "bus2"],
+                    gas_output,
+                ),
+            )
+
+            electricity_links = n.links.index[
+                n.links.carrier.isin(
+                    [
+                        "urban central air heat pump",
+                        "urban central resistive heater",
+                    ]
+                )
+            ]
+            electricity_output = n.links.loc[electricity_links, "bus1"].where(
+                n.links.loc[electricity_links, "carrier"]
+                == "urban central resistive heater",
+                n.links.loc[electricity_links, "bus0"],
+            )
+            electricity_output = electricity_output.str.replace(
+                " urban central heat",
+                " electricity urban central heat",
+                regex=False,
+            )
+            duplicate_components(
+                n,
+                "Link",
+                electricity_links,
+                " electricity-only",
+                bus0=np.where(
+                    n.links.loc[electricity_links, "carrier"]
+                    == "urban central air heat pump",
+                    electricity_output,
+                    n.links.loc[electricity_links, "bus0"],
+                ),
+                bus1=np.where(
+                    n.links.loc[electricity_links, "carrier"]
+                    == "urban central resistive heater",
+                    electricity_output,
+                    n.links.loc[electricity_links, "bus1"],
+                ),
+            )
+
+            solar_thermal = n.generators.index[
+                n.generators.carrier == "urban central solar thermal"
+            ]
+            duplicate_components(
+                n,
+                "Generator",
+                solar_thermal,
+                " electricity-only",
+                bus=n.generators.loc[solar_thermal, "bus"].str.replace(
+                    " urban central heat",
+                    " electricity urban central heat",
+                    regex=False,
+                ),
             )
 
     if options["retrofitting"]["retro_endogen"]:
@@ -5158,9 +5324,7 @@ def add_aviation(
     )
     aviation_methanol_to_kerosene = options["aviation_methanol_to_kerosene"]
     methanol_kerosene_share = (
-        configured_methanol_kerosene_share
-        if aviation_methanol_to_kerosene
-        else 0.0
+        configured_methanol_kerosene_share if aviation_methanol_to_kerosene else 0.0
     )
     kerosene_share = 1 - methanol_kerosene_share
     if not aviation_methanol_to_kerosene and configured_methanol_kerosene_share:
@@ -5706,6 +5870,93 @@ def add_agriculture(
             p_nom_extendable=True,
             efficiency2=costs.at["oil", "CO2 intensity"],
         )
+
+
+def add_oil_from_h2_demand(
+    n: pypsa.Network,
+    costs: pd.DataFrame,
+    spatial: SimpleNamespace,
+    options: dict,
+    investment_year: int,
+) -> None:
+    """Reserve a share of fixed oil demand for H2-based oil production routes."""
+    config = options.get("oil_from_h2", {"enable": False})
+    if not config["enable"]:
+        return
+
+    share = get(config["share"], investment_year)
+    residual_share = 1 - share
+    fixed_oil_carriers = {
+        "land transport oil",
+        "naphtha for industry",
+        "kerosene for aviation",
+        "shipping oil",
+        "agriculture machinery oil",
+    }
+    oil_loads = n.loads.index[n.loads.carrier.isin(fixed_oil_carriers)]
+    if oil_loads.empty:
+        raise ValueError(
+            "sector.oil_from_h2 is enabled, but the network has no fixed oil demand."
+        )
+
+    original_demand = n.get_switchable_as_dense("Load", "p_set", n.snapshots, oil_loads)
+    oil_from_h2_demand = share * original_demand.sum(axis=1)
+
+    n.loads.loc[oil_loads, "p_set"] *= residual_share
+    dynamic_loads = oil_loads.intersection(n.loads_t.p_set.columns)
+    n.loads_t.p_set.loc[:, dynamic_loads] *= residual_share
+
+    n.add("Carrier", "oil from H2")
+    n.add(
+        "Bus",
+        spatial.oil.from_h2,
+        location=spatial.oil.locations,
+        carrier="oil from H2",
+        unit="MWh_LHV",
+    )
+    n.add(
+        "Load",
+        spatial.oil.from_h2,
+        bus=spatial.oil.from_h2,
+        carrier="oil from H2",
+        p_set=oil_from_h2_demand.to_frame(name=spatial.oil.from_h2[0]),
+    )
+    n.add(
+        "Load",
+        "oil from H2 emissions",
+        bus="co2 atmosphere",
+        carrier="oil from H2 emissions",
+        p_set=-costs.at["oil", "CO2 intensity"] * oil_from_h2_demand,
+    )
+
+    oil_stores = n.stores.index[n.stores.bus.isin(spatial.oil.nodes)]
+    oil_bus_map = dict(zip(spatial.oil.nodes, spatial.oil.from_h2))
+    duplicate_components(
+        n,
+        "Store",
+        oil_stores,
+        " from H2",
+        bus=n.stores.loc[oil_stores, "bus"].map(oil_bus_map),
+        carrier=np.repeat("oil from H2", len(oil_stores)),
+    )
+
+    h2_oil_links = n.links.index[
+        n.links.carrier.isin(["Fischer-Tropsch", "electrobiofuels"])
+        & n.links.bus1.isin(spatial.oil.nodes)
+    ]
+    duplicate_components(
+        n,
+        "Link",
+        h2_oil_links,
+        " oil-from-H2-only",
+        bus1=n.links.loc[h2_oil_links, "bus1"].map(oil_bus_map),
+    )
+
+    logger.info(
+        "Serving %.2f%% of fixed oil demand from Fischer-Tropsch and "
+        "electrobiofuels only.",
+        100 * share,
+    )
 
 
 def decentral(n):
@@ -6543,6 +6794,14 @@ if __name__ == "__main__":
 
     if options["dac"]:
         add_dac(n, costs)
+
+    add_oil_from_h2_demand(
+        n=n,
+        costs=costs,
+        spatial=spatial,
+        options=options,
+        investment_year=investment_year,
+    )
 
     if not options["electricity_transmission_grid"]:
         decentral(n)

@@ -37,10 +37,12 @@ PATH_KEYS = {
     "PREFIX_DIR",
     "BASE_NETWORK_PATH",
     "OUTPUT_EXCEL",
+    "OUTPUT_CSV",
     "OUTPUT_DIR",
     "OUTPUT_PLOTS_DIR",
     "OUT_DIR",
     "EXCEL_PATH",
+    "OUTPUT_CSV",
     "CONFIG_YAML",
     "PLOTTING_YAML",
     "HEATMAPS_DIR",
@@ -92,24 +94,29 @@ DEFAULT_SCRIPTS: dict[str, dict[str, Any]] = {
     "analysis_network_batch": {
         "file": "analysis_network_batch.py",
         "outputs": {"OUTPUT_EXCEL": "csvs/analysis_networks_energy.xlsx"},
+        "requires_base_network": True,
     },
     "analysis_network_powers": {
         "file": "analysis_network_powers.py",
         "outputs": {"OUTPUT_EXCEL": "csvs/analysis_networks_power.xlsx"},
+        "requires_base_network": True,
     },
     "analysis_stores_batch": {
         "file": "analysis_stores_batch.py",
         "outputs": {"OUTPUT_EXCEL": "csvs/analysis_stores.xlsx"},
+        "requires_base_network": True,
     },
     "demand_comparison": {
         "file": "demand_comparison.py",
         "outputs": {"OUT_DIR": "postprocess_demand_compare"},
         "defaults": {"OUT_STEM": "demand_compare", "GROUPBY": "carrier"},
+        "requires_base_network": True,
     },
     "objective_comparison": {
         "file": "objective_comparison.py",
         "outputs": {"OUT_DIR": "_postprocess_objectives"},
         "defaults": {"OUT_STEM": "objectives", "TRY_LOG": True, "SORT_BY_TOTAL": False},
+        "requires_base_network": True,
     },
     "plot_capacity_energybalance": {
         "file": "plot_capacity_energybalance.py",
@@ -129,6 +136,21 @@ DEFAULT_SCRIPTS: dict[str, dict[str, Any]] = {
         "defaults": {
             "OUT_STEM": "scenario_energy_balance",
             "TOTAL_MODE": "positive",
+        },
+    },
+    "plot_scenario_optimal_capacity": {
+        "file": "plot_scenario_optimal_capacity.py",
+        "outputs": {
+            "EXCEL_PATH": "csvs/analysis_networks_power.xlsx",
+            "OUTPUT_DIR": "graphs/scenario_optimal_capacity",
+        },
+        "defaults": {"OUT_STEM": "scenario_optimal_capacity"},
+    },
+    "plot_scenario_capacity_factors": {
+        "file": "plot_scenario_capacity_factors.py",
+        "outputs": {
+            "OUTPUT_CSV": "csvs/scenario_capacity_factors.csv",
+            "OUTPUT_DIR": "graphs/scenario_capacity_factors",
         },
     },
     "plot_demand_bars": {
@@ -234,10 +256,11 @@ def compact_common_settings(config: dict[str, Any]) -> dict[str, Any]:
     input_dir = Path(config.get("input_dir", config.get("root_dir", "results/prices_and_renewables")))
     network_file = config.get("network_file", "base_s_adm___2040.nc")
     network_glob = config.get("network_glob", f"networks/{network_file}")
-    base_network_path = config.get(
-        "base_network_path",
-        str(input_dir / "base" / "networks" / network_file),
-    )
+    if "base_network_path" in config:
+        base_network_path = config["base_network_path"] or None
+    else:
+        base_network_path = str(input_dir / "base" / "networks" / network_file)
+    include_base = base_network_path is not None
 
     excluded = config.get("excluded_scenarios", ["base"])
     common = {
@@ -246,6 +269,7 @@ def compact_common_settings(config: dict[str, Any]) -> dict[str, Any]:
         "NETWORK_GLOB": network_glob,
         "NETWORK_PICKER": config.get("network_picker", network_file),
         "BASE_NETWORK_PATH": base_network_path,
+        "INCLUDE_BASE": include_base,
         "BASE_NAME": config.get("base_name", "__BASE__"),
         "BASE_LABEL": config.get("base_label", "__BASE__"),
         "CONFIG_YAML": config.get("model_config", config.get("config_yaml", "config/prices_renewables/config.yaml")),
@@ -296,6 +320,10 @@ def compact_scripts(config: dict[str, Any], output_dir: Path) -> dict[str, dict[
             "enabled": user_entry.get("enabled", True),
             "file": user_entry.get("file", base["file"]),
             "overrides": overrides,
+            "requires_base_network": user_entry.get(
+                "requires_base_network",
+                base.get("requires_base_network", False),
+            ),
         }
 
     return scripts
@@ -410,6 +438,14 @@ def run_one(
 
     overrides = entry.get("overrides", {})
     settings = deep_merge(common_settings, overrides)
+    base_network_path = settings.get("BASE_NETWORK_PATH")
+
+    if entry.get("requires_base_network") and not base_network_path:
+        raise ValueError(
+            f"Script '{script_name}' requires a base network, but "
+            "'base_network_path' is disabled. Configure a path or disable "
+            f"the '{script_name}' script."
+        )
 
     print("\n" + "=" * 80)
     print(f"[RUN] {script_name}")

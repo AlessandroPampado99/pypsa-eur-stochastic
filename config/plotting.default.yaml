@@ -594,6 +594,8 @@ plotting:
     services rural heat: '#ff9c9c'
     central heat: '#cc1f1f'
     urban central heat: '#d15959'
+    gas urban central heat: '#634643'
+    electricity urban central heat: '#ace37f'
     urban central heat dsm: '#d15959'
     urban central heat vent: '#a74747'
     decentral heat: '#750606'
@@ -660,6 +662,8 @@ plotting:
     H2 turbine: '#991f83'
     H2 Electrolysis: '#ff29d9'
     H2 electrolysis: '#ff29d9'
+    oil from H2: '#46caf0'
+    oil from H2 emissions: '#468c8b'
     # ammonia
     NH3: '#46caf0'
     ammonia: '#46caf0'
