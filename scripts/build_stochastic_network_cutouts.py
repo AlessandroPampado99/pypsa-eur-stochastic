@@ -9,8 +9,6 @@ The network is prepared before scenarios are created, matching the existing
 ``stochasticify_network.py`` / ``solve_network.py`` contract.
 """
 
-from __future__ import annotations
-
 import logging
 import sys
 from pathlib import Path
@@ -33,6 +31,28 @@ from scripts.solve_network import prepare_network  # noqa: E402
 
 LOGGER = logging.getLogger(__name__)
 
+SCENARIO_INVARIANT_ATTRIBUTES = {
+    "name",
+    "bus",
+    "type",
+    "p_nom_extendable",
+    "s_nom_extendable",
+    "e_nom_extendable",
+    "p_nom_mod",
+    "s_nom_mod",
+    "e_nom_mod",
+    "committable",
+    "sign",
+    "carrier",
+    "weight",
+    "p_nom_opt",
+    "s_nom_opt",
+    "e_nom_opt",
+    "build_year",
+    "lifetime",
+    "active",
+}
+
 
 def read_representatives(path: Path) -> pd.Series:
     """Read representative probabilities and validate their normalization."""
@@ -54,6 +74,54 @@ def read_representatives(path: Path) -> pd.Series:
             f"Representative probabilities sum to {probabilities.sum()}, not one"
         )
     return probabilities
+
+
+def _relabel_snapshots(network: pypsa.Network, snapshots: pd.Index) -> None:
+    """Relabel snapshot-dependent tables positionally without changing values."""
+    if len(network.snapshots) != len(snapshots):
+        raise ValueError("Cannot relabel snapshots with a different length")
+    for component_name in network.components.keys():
+        for table in network.components[component_name].dynamic.values():
+            if table.empty or len(table.index) == len(snapshots):
+                table.index = snapshots
+            else:
+                raise ValueError(
+                    f"Unexpected snapshot length in {component_name} time series"
+                )
+    network._snapshots_data.index = snapshots
+
+
+def harmonize_snapshots(networks: dict[str, pypsa.Network]) -> None:
+    """Drop leap days and give all representative networks one calendar index."""
+    canonical: pd.Index | None = None
+    canonical_scenario: str | None = None
+    for scenario, network in networks.items():
+        snapshots = network.snapshots
+        if isinstance(snapshots, pd.DatetimeIndex):
+            leap_day = (snapshots.month == 2) & (snapshots.day == 29)
+            if leap_day.any():
+                LOGGER.info(
+                    "Removing %d February 29 snapshots from %s",
+                    int(leap_day.sum()),
+                    scenario,
+                )
+                network.set_snapshots(snapshots[~leap_day])
+            normalized = pd.DatetimeIndex(
+                [timestamp.replace(year=2001) for timestamp in network.snapshots],
+                name=network.snapshots.name,
+            )
+        else:
+            normalized = network.snapshots.copy()
+
+        if canonical is None:
+            canonical = normalized
+            canonical_scenario = scenario
+        elif not normalized.equals(canonical):
+            raise ValueError(
+                "Snapshot positions still differ after leap-day removal and calendar "
+                f"normalization: {scenario} versus {canonical_scenario}"
+            )
+        _relabel_snapshots(network, canonical)
 
 
 def _component_names(index: pd.Index) -> pd.Index:
@@ -127,11 +195,10 @@ def _validate_network_axes(
         source_names = set(
             _component_names(source.components[component_name].static.index)
         )
-        if base_names != source_names:
-            missing = sorted(base_names - source_names)
-            extra = sorted(source_names - base_names)
+        extra = sorted(source_names - base_names)
+        if extra:
             raise ValueError(
-                f"{component_name} names differ for {scenario}; missing={missing[:5]}, extra={extra[:5]}"
+                f"{component_name} in {scenario} has names absent from the stochastic template: {extra[:5]}"
             )
 
 
@@ -144,12 +211,38 @@ def copy_scenario_values(
         target_component = target.components[component_name]
         source_component = source.components[component_name]
         source_static = source_component.static
-        if source_static.empty:
-            continue
         target_static = target_component.static
         names = _component_names(source_static.index)
+        target_names = _component_names(target_static.index)
+        missing_names = target_names.difference(names)
+        if len(missing_names):
+            missing_rows = _scenario_static_index(
+                target_static.index, scenario, missing_names
+            )
+            for column in (
+                "p_nom",
+                "e_nom",
+                "s_nom",
+                "p_min_pu",
+                "p_max_pu",
+            ):
+                if column in target_static.columns:
+                    target_static.loc[missing_rows, column] = 0.0
+            for target_ts in target_component.dynamic.values():
+                if target_ts.empty:
+                    continue
+                available_missing = missing_names.intersection(
+                    _component_names(target_ts.columns)
+                )
+                if len(available_missing):
+                    missing_columns = _scenario_dynamic_columns(
+                        target_ts.columns, scenario, available_missing
+                    )
+                    target_ts.loc[:, missing_columns] = 0.0
         source_static = source_static.reindex(names)
-        common_columns = source_static.columns.intersection(target_static.columns)
+        common_columns = source_static.columns.intersection(
+            target_static.columns
+        ).difference(SCENARIO_INVARIANT_ATTRIBUTES)
         target_rows = _scenario_static_index(target_static.index, scenario, names)
         target_static.loc[target_rows, common_columns] = source_static.loc[
             names, common_columns
@@ -198,6 +291,7 @@ def build_stochastic_network(
         scenario: pypsa.Network(network_paths[scenario])
         for scenario in probabilities.index
     }
+    harmonize_snapshots(sources)
     for source in sources.values():
         prepare_network(
             source,
@@ -207,7 +301,21 @@ def build_stochastic_network(
             co2_sequestration_potential=co2_sequestration_potential,
             limit_max_growth=limit_max_growth,
         )
-    base = sources[probabilities.index[0]].copy()
+    for source in sources.values():
+        for component in source.components.values():
+            optimized_columns = [
+                column for column in component.static.columns if column.endswith("_opt")
+            ]
+            if optimized_columns:
+                component.static.drop(columns=optimized_columns, inplace=True)
+    template_scenario = max(
+        sources,
+        key=lambda scenario: sum(
+            len(component.static) for component in sources[scenario].components.values()
+        ),
+    )
+    LOGGER.info("Using %s as the union-rich stochastic template", template_scenario)
+    base = sources[template_scenario].copy()
     base.set_scenarios(probabilities.to_dict())
     for scenario, source in sources.items():
         LOGGER.info("Copying deterministic network values for scenario %s", scenario)

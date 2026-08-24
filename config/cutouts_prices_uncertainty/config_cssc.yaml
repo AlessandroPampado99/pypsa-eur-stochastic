@@ -1,0 +1,230 @@
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
+run:
+  prefix: "cutouts_det_capexp_"
+  name: stochastic_network
+  scenarios:
+    enable: false
+    file: config/cutouts_prices_uncertainty/scenarios.yaml
+  disable_progressbar: false
+  shared_resources:
+    policy: false
+    exclude: []
+  use_shadow_directory: false
+
+validation:
+  enable: false
+  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
+
+cssc_scenario_reduction:
+  enable: true
+  results_prefix: results/cutouts_det_capexp_
+  network_name: base_s_adm___2050.nc
+  workbook: results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx
+  output_dir: results/cutouts_det_capexp_/analysis_output/cssc
+  k:
+  - 3
+  solver: gurobi
+  workbook_cost_scale: 1.0e9
+  time_limit: null
+  mip_gap: null
+  mem_mb: 4000
+  runtime: 1h
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
+scenario:
+  clusters:
+  - 'adm'
+  opts:
+  - ""
+  sector_opts:
+  - ""
+  planning_horizons:
+  - 2050
+
+snapshots:
+  start: "2000-01-01"
+  end: "2001-01-01"
+  inclusive: left
+
+  # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#atlite
+atlite:
+  default_cutout: "europe-2000-era5"
+  nprocesses: 16
+  show_progress: true
+  cutouts:
+    "europe-2000-era5":
+      module: era5
+      x:
+      - -12.0
+      - 42.0
+      'y':
+      - 33.0
+      - 72.0
+      dx: 0.3
+      dy: 0.3
+      time:
+      - '2000'
+      - '2000'
+      chunks:
+        time: 500
+      prepare_kwargs:
+        features: []
+        monthly_requests: true
+        tmpdir: ./cutouts_tmp/
+
+electricity:
+  extendable_carriers:
+    Generator:
+    - solar
+    - "solar-hsat"
+    - onwind
+    - "offwind-ac"
+    - "offwind-dc"
+    - "offwind-float"
+    - OCGT
+    - CCGT
+    - nuclear
+    StorageUnit: []
+    Store:
+    - battery
+    - H2
+    Link: []
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#load
+load:
+  fill_gaps:
+    enable: true
+    interpolate_limit: 6
+    time_shift_for_large_gaps: 1w
+  manual_adjustments: true
+  scaling_factor: 1.0
+  fixed_year: 2013
+  supplement_synthetic: true
+  distribution_key:
+    gdp: 0.6
+    population: 0.4
+
+biomass:
+  year: 2050
+
+costs:
+  year: 2040
+
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
+sector:
+  land_transport_fuel_cell_share:
+    2020: 0
+    2025: 0
+    2030: 0
+    2035: 0
+    2040: 0
+    2045: 0
+    2050: 0.05
+  land_transport_electric_share:
+    2020: 0
+    2025: 0.05
+    2030: 0.2
+    2035: 0.45
+    2040: 0.7
+    2045: 0.85
+    2050: 0.70
+  land_transport_ice_share:
+    2020: 1
+    2025: 0.95
+    2030: 0.8
+    2035: 0.55
+    2040: 0.3
+    2045: 0.15
+    2050: 0.25
+  transport_electric_efficiency: 53.19
+  transport_fuel_cell_efficiency: 30.003
+  transport_ice_efficiency: 16.0712
+  agriculture_machinery_electric_share: 0.5
+  agriculture_machinery_oil_share: 0.5
+  agriculture_machinery_fuel_efficiency: 0.7
+  agriculture_machinery_electric_efficiency: 0.3
+  shipping_hydrogen_liquefaction: true
+  shipping_hydrogen_share:
+    2020: 0
+    2025: 0
+    2030: 0
+    2035: 0
+    2040: 0
+    2045: 0
+    2050: 0.05
+  shipping_methanol_share:
+    2020: 0
+    2025: 0
+    2030: 0.15
+    2035: 0.35
+    2040: 0.55
+    2045: 0.8
+    2050: 0.8
+  shipping_oil_share:
+    2020: 1
+    2025: 1
+    2030: 0.85
+    2035: 0.65
+    2040: 0.45
+    2045: 0.2
+    2050: 0.15
+  shipping_methanol_efficiency: 0.46
+  shipping_oil_efficiency: 0.4
+  aviation_demand_factor: 1.0
+  allam_cycle_gas: true
+  methanol:
+    regional_methanol_demand: true
+    methanol_reforming: true
+    methanol_reforming_cc: true
+    methanol_to_kerosene: true
+    methanol_to_power:
+      ccgt: true
+      ccgt_cc: false
+      ocgt: true
+      allam: true
+    biomass_to_methanol: false
+    biomass_to_methanol_cc: false
+  H2_network: true
+  gas_network: true
+  H2_retrofit: false
+  H2_retrofit_capacity_per_CH4: 0.6
+  gas_network_connectivity_upgrade: 1
+  gas_distribution_grid: true
+  gas_distribution_grid_cost_factor: 1.0
+  biomass_spatial: true
+  biomass_transport: false
+  biogas_upgrading: true
+  biogas_upgrading_cc: false
+  conventional_generation:
+    OCGT: gas
+    CCGT: gas
+  biomass_to_liquid: true
+  biomass_to_liquid_cc: false
+  electrobiofuels: true
+  biosng: true
+  biosng_cc: false
+  bioH2: false
+  municipal_solid_waste: false
+
+
+clustering:
+  mode: administrative
+  administrative:
+    level: 0
+
+  temporal: 
+    resolution_sector: 3H
+
+solving:
+  options:
+    load_shedding: true
+    dispatch_exclude_carriers:
+      - co2 stored
+      - co2 sequestered
+      - co2 atmosphere
+      - oil primary
+      - gas
+      
+
+    validation_missing_capacity_policy: fix_current
+    io_api: direct

@@ -860,6 +860,95 @@
       },
       "type": "array"
     },
+    "CsscScenarioReductionConfig": {
+      "description": "Configuration for CSSC selection and the reduced stochastic solve.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable the CSSC scenario-selection and stochastic-solve rules.",
+          "type": "boolean"
+        },
+        "results_prefix": {
+          "default": "results/cutouts_det_capexp_",
+          "description": "Directory containing deterministic scenario result folders.",
+          "type": "string"
+        },
+        "network_name": {
+          "default": "base_s_adm___2050.nc",
+          "description": "Deterministic network filename used for scenario discovery and stochastic inputs.",
+          "type": "string"
+        },
+        "workbook": {
+          "default": "results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx",
+          "description": "Validation workbook containing the total-cost opportunity matrix.",
+          "type": "string"
+        },
+        "output_dir": {
+          "default": "results/cutouts_det_capexp_/analysis_output/cssc",
+          "description": "Root output directory; each K is written to its own child directory.",
+          "type": "string"
+        },
+        "k": {
+          "description": "Numbers of representative scenarios to select.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "solver": {
+          "default": "gurobi",
+          "description": "MILP solver passed to Linopy for the CSSC partitioning problem.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "workbook_cost_scale": {
+          "default": 1000000000.0,
+          "description": "Factor restoring workbook presentation values to raw objective units.",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "time_limit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional CSSC solver time limit in seconds."
+        },
+        "mip_gap": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional relative CSSC MILP optimality gap."
+        },
+        "mem_mb": {
+          "default": 4000,
+          "description": "Memory requested by the CSSC selection rule in MB.",
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "runtime": {
+          "default": "1h",
+          "description": "Runtime requested by the CSSC selection rule.",
+          "minLength": 1,
+          "type": "string"
+        }
+      }
+    },
     "DataConfig": {
       "description": "Configuration for `data` settings.",
       "properties": {
@@ -11778,6 +11867,95 @@
               "type": "integer"
             }
           }
+        }
+      }
+    },
+    "cssc_scenario_reduction": {
+      "description": "Configuration for CSSC selection and the reduced stochastic solve.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable the CSSC scenario-selection and stochastic-solve rules.",
+          "type": "boolean"
+        },
+        "results_prefix": {
+          "default": "results/cutouts_det_capexp_",
+          "description": "Directory containing deterministic scenario result folders.",
+          "type": "string"
+        },
+        "network_name": {
+          "default": "base_s_adm___2050.nc",
+          "description": "Deterministic network filename used for scenario discovery and stochastic inputs.",
+          "type": "string"
+        },
+        "workbook": {
+          "default": "results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx",
+          "description": "Validation workbook containing the total-cost opportunity matrix.",
+          "type": "string"
+        },
+        "output_dir": {
+          "default": "results/cutouts_det_capexp_/analysis_output/cssc",
+          "description": "Root output directory; each K is written to its own child directory.",
+          "type": "string"
+        },
+        "k": {
+          "description": "Numbers of representative scenarios to select.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "solver": {
+          "default": "gurobi",
+          "description": "MILP solver passed to Linopy for the CSSC partitioning problem.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "workbook_cost_scale": {
+          "default": 1000000000.0,
+          "description": "Factor restoring workbook presentation values to raw objective units.",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "time_limit": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional CSSC solver time limit in seconds."
+        },
+        "mip_gap": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional relative CSSC MILP optimality gap."
+        },
+        "mem_mb": {
+          "default": 4000,
+          "description": "Memory requested by the CSSC selection rule in MB.",
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "runtime": {
+          "default": "1h",
+          "description": "Runtime requested by the CSSC selection rule.",
+          "minLength": 1,
+          "type": "string"
         }
       }
     },
