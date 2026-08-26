@@ -1,0 +1,32 @@
+input_dir: "results/demand_uncertainty_sensitivity"
+output_dir: "results/demand_uncertainty_sensitivity/analysis_output/OILGAS_HEAT"
+network_file: "base_s_adm___2035.nc"
+base_network_path: "results/demand_uncertainty_sensitivity/BASE/networks/base_s_adm___2035.nc"
+included_scenarios: [OILGAS_HEAT_100, OILGAS_HEAT_200, OILGAS_HEAT_300, OILGAS_HEAT_400]
+model_config: "config/demand_uncertainty/config_deterministic.yaml"
+plotting_config: "config/plotting.default.yaml"
+parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 300, zero_tol: 1.0e-9}
+
+scripts:
+  plot_scenario_energy_balance:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        OILGAS_HEAT:
+          - OILGAS_HEAT_100
+          - OILGAS_HEAT_200
+          - OILGAS_HEAT_300
+          - OILGAS_HEAT_400
+      FAMILY_ORDER: [BASE, OILGAS_HEAT]
+  plot_scenario_optimal_capacity:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        OILGAS_HEAT:
+          - OILGAS_HEAT_100
+          - OILGAS_HEAT_200
+          - OILGAS_HEAT_300
+          - OILGAS_HEAT_400
+      FAMILY_ORDER: [BASE, OILGAS_HEAT]

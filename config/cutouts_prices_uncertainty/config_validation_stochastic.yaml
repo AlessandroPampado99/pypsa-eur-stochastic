@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "cutouts_det_capexp_"
-  name: stochastic_network
+  name: all
   scenarios:
     enable: false
     file: config/cutouts_prices_uncertainty/scenarios.yaml
@@ -12,31 +12,8 @@ run:
   use_shadow_directory: false
 
 validation:
-  enable: false
-  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
-
-cssc_scenario_reduction:
   enable: true
-  results_prefix: results/cutouts_det_capexp_
-  network_name: base_s_adm___2050.nc
-  workbook: results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx
-  output_dir: results/cutouts_det_capexp_/analysis_output/cssc
-  k:
-  - 1
-  - 2
-  - 3
-  - 4
-  - 5
-  - 6
-  - 7
-  - 8
-  - 9
-  solver: gurobi
-  workbook_cost_scale: 1.0e9
-  time_limit: null
-  mip_gap: null
-  mem_mb: 4000
-  runtime: 1h
+  config: config/cutouts_prices_uncertainty/validation_stochastic_K3.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -179,20 +156,12 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
-  aviation_methanol_to_kerosene: true
-  aviation_methanol_kerosene_share:
-    2020: 0
-    2025: 0
-    2030: 0
-    2035: 0
-    2040: 0
-    2045: 0
-    2050: 0.5
   allam_cycle_gas: true
   methanol:
     regional_methanol_demand: true
     methanol_reforming: true
     methanol_reforming_cc: true
+    methanol_to_kerosene: true
     methanol_to_power:
       ccgt: true
       ccgt_cc: false

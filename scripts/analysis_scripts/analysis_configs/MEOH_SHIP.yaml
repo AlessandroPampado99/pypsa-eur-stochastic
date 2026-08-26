@@ -1,0 +1,32 @@
+input_dir: "results/demand_uncertainty_sensitivity"
+output_dir: "results/demand_uncertainty_sensitivity/analysis_output/MEOH_SHIP"
+network_file: "base_s_adm___2035.nc"
+base_network_path: "results/demand_uncertainty_sensitivity/BASE/networks/base_s_adm___2035.nc"
+included_scenarios: [MEOH_SHIP_50, MEOH_SHIP_100, MEOH_SHIP_150, MEOH_SHIP_200]
+model_config: "config/demand_uncertainty/config_deterministic.yaml"
+plotting_config: "config/plotting.default.yaml"
+parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 300, zero_tol: 1.0e-9}
+
+scripts:
+  plot_scenario_energy_balance:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        MEOH_SHIP:
+          - MEOH_SHIP_50
+          - MEOH_SHIP_100
+          - MEOH_SHIP_150
+          - MEOH_SHIP_200
+      FAMILY_ORDER: [BASE, MEOH_SHIP]
+  plot_scenario_optimal_capacity:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        MEOH_SHIP:
+          - MEOH_SHIP_50
+          - MEOH_SHIP_100
+          - MEOH_SHIP_150
+          - MEOH_SHIP_200
+      FAMILY_ORDER: [BASE, MEOH_SHIP]

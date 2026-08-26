@@ -44,18 +44,18 @@ import matplotlib.pyplot as plt
 # USER SETTINGS (EDIT HERE)
 # =========================
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/cutouts_det_capexp_nols")
+ROOT_DIR = Path("results/cutouts_det_capexp_")
 OUTPUT_DIR = Path("results/cutouts_det_capexp_nols/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
 DIAGONAL_FILENAME = "base_s_adm___2050.nc"
 
 # Diagonal stochastic expected-value solved network
-DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2050__exp.nc"
+DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2050.nc"
 
 # Off-diagonal validation solved network
 CROSS_FILENAME_TEMPLATE = "base_s_adm___2050__cap-{cap_source}__op-{op_source}.nc"
@@ -63,6 +63,11 @@ CROSS_FILENAME_TEMPLATE = "base_s_adm___2050__cap-{cap_source}__op-{op_source}.n
 # Output names
 OUTPUT_FIGURE = OUTPUT_DIR / "validation_heatmaps.png"
 OUTPUT_EXCEL = OUTPUT_DIR / "validation_heatmaps.xlsx"
+
+# Optionally export each in-memory deterministic expected view used to evaluate
+# a stochastic network. Deterministic input networks are not exported.
+EXPORT_EXPECTED_NETWORKS = True
+EXPECTED_NETWORKS_DIR = OUTPUT_DIR / "expected_networks"
 
 # Reuse the existing Excel tables instead of loading all solved networks again.
 # Set to False to recompute the metrics and overwrite the workbook.
@@ -270,15 +275,57 @@ def _get_snapshot_weightings(n: pypsa.Network) -> pd.Series:
 
     raise TypeError(f"Unsupported snapshot_weightings type: {type(sw)}")
 
-def _compute_total_cost(n: pypsa.Network) -> float:
+
+def _network_is_stochastic(n: pypsa.Network) -> bool:
+    """Return whether the network contains PyPSA stochastic scenarios."""
+    if hasattr(n, "has_scenarios"):
+        return bool(n.has_scenarios)
+
+    # Compatibility fallback for PyPSA versions without has_scenarios.
+    try:
+        columns = n.loads_t.p_set.columns
+        return isinstance(columns, pd.MultiIndex) and columns.nlevels >= 2
+    except (AttributeError, TypeError):
+        return False
+
+
+def _build_expected_network(n: pypsa.Network) -> pypsa.Network:
+    """Build an in-memory deterministic expected view of a stochastic network."""
+    from scripts.export_stochastic_views import build_view
+
+    scenario_weightings = n.scenario_weightings
+    if "weight" not in scenario_weightings.columns:
+        raise ValueError("Stochastic network has no 'weight' scenario weighting column.")
+
+    probabilities = scenario_weightings["weight"].astype(float).to_dict()
+    return build_view(n, mode="expected", probs=probabilities, scenario=None)
+
+
+def _compute_total_cost(
+    n: pypsa.Network,
+    expected_network_export_path: Path | None = None,
+) -> float:
     """
-    Compute total cost as CAPEX + OPEX from PyPSA statistics.
+    Compute the total objective value.
+
+    Stochastic networks are first converted to an in-memory deterministic
+    expected view. CAPEX + OPEX are then computed from PyPSA statistics for
+    both stochastic and deterministic inputs.
 
     If the resulting total cost is zero (or numerically close to zero),
     treat the solution as invalid and return NaN.
     """
-    capex = float(n.statistics.capex().sum())
-    opex = float(n.statistics.opex().sum())
+    if _network_is_stochastic(n):
+        evaluation_network = _build_expected_network(n)
+        if expected_network_export_path is not None:
+            expected_network_export_path.parent.mkdir(parents=True, exist_ok=True)
+            evaluation_network.export_to_netcdf(expected_network_export_path)
+            print(f"[INFO] Exported expected network: {expected_network_export_path}")
+    else:
+        evaluation_network = n
+
+    capex = float(evaluation_network.statistics.capex().sum())
+    opex = float(evaluation_network.statistics.opex().sum())
     total = capex + opex
 
     if not np.isfinite(total):
@@ -355,10 +402,14 @@ def _compute_renewable_curtailment(n: pypsa.Network) -> float:
     return float(total)
 
 
-def _extract_metrics(n: pypsa.Network) -> dict[str, float]:
+def _extract_metrics(
+    n: pypsa.Network,
+    expected_network_export_path: Path | None = None,
+) -> dict[str, float]:
     """Extract all metrics from one network."""
     return {
-        "total_cost": _compute_total_cost(n) / TOTAL_COST_SCALE,
+        "total_cost": _compute_total_cost(n, expected_network_export_path)
+        / TOTAL_COST_SCALE,
         "load_curtailment": _compute_load_curtailment_from_generators(n) / LOAD_CURTAILMENT_SCALE,
         "renewable_curtailment": _compute_renewable_curtailment(n) / RES_CURTAILMENT_SCALE,
     }
@@ -378,6 +429,8 @@ def _safe_load_network(path: Path) -> pypsa.Network | None:
 def _build_metric_matrices(
     root_dir: Path,
     scenarios: list[str],
+    existing_matrices: dict[str, pd.DataFrame] | None = None,
+    existing_invalid_masks: dict[str, pd.DataFrame] | None = None,
 ) -> tuple[dict[str, pd.DataFrame], dict[str, pd.DataFrame]]:
     """
     Build one matrix per metric and one boolean mask per metric for invalid
@@ -388,18 +441,34 @@ def _build_metric_matrices(
     """
     metric_names = ["total_cost", "load_curtailment", "renewable_curtailment"]
 
-    matrices = {
-        m: pd.DataFrame(index=scenarios, columns=scenarios, dtype=float)
-        for m in metric_names
-    }
+    matrices = {}
+    invalid_masks = {}
+    for m in metric_names:
+        if existing_matrices is None:
+            matrices[m] = pd.DataFrame(index=scenarios, columns=scenarios, dtype=float)
+        else:
+            matrices[m] = existing_matrices[m].reindex(index=scenarios, columns=scenarios)
 
-    invalid_masks = {
-        m: pd.DataFrame(False, index=scenarios, columns=scenarios, dtype=bool)
-        for m in metric_names
-    }
+        if existing_invalid_masks is None:
+            invalid_masks[m] = pd.DataFrame(
+                False, index=scenarios, columns=scenarios, dtype=bool
+            )
+        else:
+            invalid_masks[m] = existing_invalid_masks[m].reindex(
+                index=scenarios, columns=scenarios, fill_value=False
+            ).astype(bool)
 
     for cap_source in scenarios:
         for op_source in scenarios:
+            already_computed = all(
+                pd.notna(matrices[m].loc[cap_source, op_source])
+                or invalid_masks[m].loc[cap_source, op_source]
+                for m in metric_names
+            )
+            if already_computed:
+                print(f"[INFO] Reusing {cap_source} vs {op_source} from Excel")
+                continue
+
             path = _pair_network_path(root_dir, cap_source, op_source)
             print(f"[INFO] Loading {cap_source} vs {op_source}: {path}")
 
@@ -410,7 +479,13 @@ def _build_metric_matrices(
                     invalid_masks[m].loc[cap_source, op_source] = False
                 continue
 
-            vals = _extract_metrics(n)
+            expected_network_export_path = None
+            if EXPORT_EXPECTED_NETWORKS:
+                expected_network_export_path = EXPECTED_NETWORKS_DIR / (
+                    f"expected__cap-{cap_source}__op-{op_source}.nc"
+                )
+
+            vals = _extract_metrics(n, expected_network_export_path)
 
             for m in metric_names:
                 val = vals[m]
@@ -527,13 +602,18 @@ def _plot_single_heatmap(
     cbar.ax.tick_params(labelsize=9)
 
 
-def _write_excel(matrices: dict[str, pd.DataFrame], output_excel: Path) -> None:
-    """Write metric matrices to Excel."""
+def _write_excel(
+    matrices: dict[str, pd.DataFrame],
+    invalid_masks: dict[str, pd.DataFrame],
+    output_excel: Path,
+) -> None:
+    """Write metric matrices and invalid-cell metadata to Excel."""
     output_excel.parent.mkdir(parents=True, exist_ok=True)
 
     with pd.ExcelWriter(output_excel, engine="openpyxl") as writer:
         for name, df in matrices.items():
             df.to_excel(writer, sheet_name=name[:31])
+            invalid_masks[name].to_excel(writer, sheet_name=f"invalid_{name}"[:31])
 
 
 def _read_excel(
@@ -558,14 +638,25 @@ def _read_excel(
         df.columns = df.columns.map(str)
         matrices[name] = df.apply(pd.to_numeric, errors="coerce")
 
-        # Older workbooks do not store whether an empty cell came from a
-        # missing file or an invalid solution, so leave empty cells unlabelled.
-        invalid_masks[name] = pd.DataFrame(
-            False,
-            index=matrices[name].index,
-            columns=matrices[name].columns,
-            dtype=bool,
-        )
+        mask_name = f"invalid_{name}"[:31]
+        if mask_name in sheets:
+            mask = sheets[mask_name]
+            mask.index = mask.index.map(str)
+            mask.columns = mask.columns.map(str)
+            invalid_masks[name] = mask.reindex(
+                index=matrices[name].index,
+                columns=matrices[name].columns,
+                fill_value=False,
+            ).fillna(False).astype(bool)
+        else:
+            # Older workbooks do not distinguish a missing file from an
+            # invalid solution. Empty cells are therefore retried once.
+            invalid_masks[name] = pd.DataFrame(
+                False,
+                index=matrices[name].index,
+                columns=matrices[name].columns,
+                dtype=bool,
+            )
 
     return matrices, invalid_masks
 
@@ -628,20 +719,24 @@ def _plot_metric_heatmap(
 
 
 def main():
+    scenarios = _list_scenarios(ROOT_DIR)
+
+    print("[INFO] Scenarios used:")
+    for s in scenarios:
+        print(f"  - {s}")
+
     if REUSE_EXISTING_EXCEL and OUTPUT_EXCEL.exists():
-        print(f"[INFO] Reusing existing Excel file: {OUTPUT_EXCEL}")
-        matrices, invalid_masks = _read_excel(OUTPUT_EXCEL)
-        excel_status = f"Excel reused from: {OUTPUT_EXCEL}"
+        print(f"[INFO] Updating existing Excel file: {OUTPUT_EXCEL}")
+        existing_matrices, existing_invalid_masks = _read_excel(OUTPUT_EXCEL)
+        matrices, invalid_masks = _build_metric_matrices(
+            ROOT_DIR, scenarios, existing_matrices, existing_invalid_masks
+        )
+        excel_status = f"Excel updated at: {OUTPUT_EXCEL}"
     else:
-        scenarios = _list_scenarios(ROOT_DIR)
-
-        print("[INFO] Scenarios used:")
-        for s in scenarios:
-            print(f"  - {s}")
-
         matrices, invalid_masks = _build_metric_matrices(ROOT_DIR, scenarios)
-        _write_excel(matrices, OUTPUT_EXCEL)
         excel_status = f"Excel written to: {OUTPUT_EXCEL}"
+
+    _write_excel(matrices, invalid_masks, OUTPUT_EXCEL)
 
     for metric_name, df in matrices.items():
         _plot_metric_heatmap(

@@ -13,8 +13,6 @@ python scripts/scenario_reduction_cssc.py \
     --solver gurobi
 """
 
-
-
 from __future__ import annotations
 
 import argparse
@@ -434,19 +432,15 @@ def main() -> None:
     logging.basicConfig(level=args.log_level, format="%(levelname)s: %(message)s")
     results_dir = args.results_prefix.resolve()
     workbook = (args.workbook or results_dir / DEFAULT_WORKBOOK).resolve()
-    output_dir = (args.output_dir or results_dir / "analysis_output" / "cssc").resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_root = (
+        args.output_dir or results_dir / "analysis_output" / "cssc"
+    ).resolve()
 
     scenarios = discover_scenarios(results_dir, args.network_name)
     scenario_to_index = {scenario: i for i, scenario in enumerate(scenarios)}
     matrix = load_opportunity_cost_matrix(
         workbook, scenarios, args.sheet_name, args.workbook_cost_scale
     )
-    matrix.to_csv(output_dir / "opportunity_cost_matrix.csv")
-    (output_dir / "scenario_to_index.json").write_text(
-        json.dumps(scenario_to_index, indent=2) + "\n", encoding="utf-8"
-    )
-
     n = len(scenarios)
     LOGGER.info("Number of scenarios: %d", n)
     LOGGER.info("Expected matrix entries: %d", n * n)
@@ -461,6 +455,12 @@ def main() -> None:
             "Duplicate K values supplied; each distinct K will be solved once"
         )
     for k in dict.fromkeys(args.k):
+        output_dir = output_root / str(k)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        matrix.to_csv(output_dir / "opportunity_cost_matrix.csv")
+        (output_dir / "scenario_to_index.json").write_text(
+            json.dumps(scenario_to_index, indent=2) + "\n", encoding="utf-8"
+        )
         LOGGER.info("Solving CSSC for K=%d with %s", k, args.solver)
         result = solve_cssc(
             matrix, k, args.solver, args.time_limit, args.mip_gap, args.tolerance
