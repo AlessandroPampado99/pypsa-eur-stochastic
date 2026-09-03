@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_2035"
-  name: all
+  name: BASE
   scenarios:
     enable: true
     file: config/demand_uncertainty_2035/scenarios/scenarios_deterministic.yaml
@@ -78,6 +78,42 @@ sector:
       2025: 0
       2030: 0
       2035: 0.25
+      2040: 0
+      2045: 0
+      2050: 0
+  urban_decentral_heat_split:
+    enable: true
+    gas_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.2
+      2040: 0
+      2045: 0
+      2050: 0
+    electricity_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.5
+      2040: 0
+      2045: 0
+      2050: 0
+  rural_heat_split:
+    enable: true
+    gas_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.05
+      2040: 0
+      2045: 0
+      2050: 0
+    electricity_share:
+      2020: 0
+      2025: 0
+      2030: 0
+      2035: 0.75
       2040: 0
       2045: 0
       2050: 0

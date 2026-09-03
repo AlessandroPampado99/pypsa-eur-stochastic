@@ -42,6 +42,14 @@ EXCLUDED_GROUPS: set[str] = set()
 GROUP_ALIASES = {
     "gas urban central heat": "urban central heat",
     "electricity urban central heat": "urban central heat",
+    "gas residential urban decentral heat": "residential urban decentral heat",
+    "electricity residential urban decentral heat": "residential urban decentral heat",
+    "gas services urban decentral heat": "services urban decentral heat",
+    "electricity services urban decentral heat": "services urban decentral heat",
+    "gas residential rural heat": "residential rural heat",
+    "electricity residential rural heat": "residential rural heat",
+    "gas services rural heat": "services rural heat",
+    "electricity services rural heat": "services rural heat",
     "oil from H2": "oil",
 }
 ZERO_BALANCE_TOLERANCE = 1e-12

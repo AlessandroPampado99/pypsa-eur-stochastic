@@ -2938,22 +2938,26 @@ def add_heat(
             unit="MWh_th",
         )
 
-        urban_central_heat_split = options.get(
-            "urban_central_heat_split", {"enable": False}
-        )
+        if heat_system == HeatSystem.URBAN_CENTRAL:
+            heat_split = options.get("urban_central_heat_split", {"enable": False})
+        elif heat_system.is_urban_decentral:
+            heat_split = options.get("urban_decentral_heat_split", {"enable": False})
+        else:
+            heat_split = options.get("rural_heat_split", {"enable": False})
+
+        split_heat = heat_split["enable"]
         split_urban_central_heat = (
-            heat_system == HeatSystem.URBAN_CENTRAL
-            and urban_central_heat_split["enable"]
+            split_heat and heat_system == HeatSystem.URBAN_CENTRAL
         )
-        if split_urban_central_heat:
-            gas_heat_share = get(urban_central_heat_split["gas_share"], investment_year)
+        if split_heat:
+            gas_heat_share = get(heat_split["gas_share"], investment_year)
             electricity_heat_share = get(
-                urban_central_heat_split["electricity_share"], investment_year
+                heat_split["electricity_share"], investment_year
             )
             shared_heat_share = 1 - gas_heat_share - electricity_heat_share
 
             for prefix in ["gas", "electricity"]:
-                carrier = f"{prefix} urban central heat"
+                carrier = f"{prefix} {heat_system} heat"
                 n.add("Carrier", carrier)
                 n.add(
                     "Bus",
@@ -3006,11 +3010,11 @@ def add_heat(
                 )
             )
 
-        if split_urban_central_heat:
+        if split_heat:
             heat_load_splits = {
-                "urban central heat": shared_heat_share,
-                "gas urban central heat": gas_heat_share,
-                "electricity urban central heat": electricity_heat_share,
+                f"{heat_system} heat": shared_heat_share,
+                f"gas {heat_system} heat": gas_heat_share,
+                f"electricity {heat_system} heat": electricity_heat_share,
             }
             for carrier, share in heat_load_splits.items():
                 n.add(
@@ -3626,22 +3630,25 @@ def add_heat(
                 lifetime=costs.at["micro CHP", "lifetime"],
             )
 
-        if split_urban_central_heat:
-            gas_links = n.links.index[
-                n.links.carrier.isin(
-                    [
-                        "urban central gas boiler",
-                        "urban central gas CHP",
-                        "urban central gas CHP CC",
-                    ]
+        if split_heat:
+            gas_carriers = [f"{heat_system} gas boiler"]
+            if split_urban_central_heat:
+                gas_carriers.extend(
+                    ["urban central gas CHP", "urban central gas CHP CC"]
                 )
-            ]
+            else:
+                gas_carriers.append(f"{heat_system} micro gas CHP")
+
+            gas_links = n.links.index[n.links.carrier.isin(gas_carriers)]
+            is_gas_boiler = (
+                n.links.loc[gas_links, "carrier"] == f"{heat_system} gas boiler"
+            )
             gas_output = n.links.loc[gas_links, "bus1"].where(
-                n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                is_gas_boiler,
                 n.links.loc[gas_links, "bus2"],
             )
             gas_output = gas_output.str.replace(
-                " urban central heat", " gas urban central heat", regex=False
+                f" {heat_system} heat", f" gas {heat_system} heat", regex=False
             )
             duplicate_components(
                 n,
@@ -3649,33 +3656,35 @@ def add_heat(
                 gas_links,
                 " gas-only",
                 bus1=np.where(
-                    n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                    is_gas_boiler,
                     gas_output,
                     n.links.loc[gas_links, "bus1"],
                 ),
                 bus2=np.where(
-                    n.links.loc[gas_links, "carrier"] == "urban central gas boiler",
+                    is_gas_boiler,
                     n.links.loc[gas_links, "bus2"],
                     gas_output,
                 ),
             )
 
-            electricity_links = n.links.index[
-                n.links.carrier.isin(
-                    [
-                        "urban central air heat pump",
-                        "urban central resistive heater",
-                    ]
-                )
+            electricity_carriers = [f"{heat_system} resistive heater"] + [
+                f"{heat_system} {source} heat pump"
+                for source in params.heat_pump_sources[heat_system.system_type.value]
             ]
-            electricity_output = n.links.loc[electricity_links, "bus1"].where(
+            electricity_links = n.links.index[
+                n.links.carrier.isin(electricity_carriers)
+            ]
+            is_resistive_heater = (
                 n.links.loc[electricity_links, "carrier"]
-                == "urban central resistive heater",
+                == f"{heat_system} resistive heater"
+            )
+            electricity_output = n.links.loc[electricity_links, "bus1"].where(
+                is_resistive_heater,
                 n.links.loc[electricity_links, "bus0"],
             )
             electricity_output = electricity_output.str.replace(
-                " urban central heat",
-                " electricity urban central heat",
+                f" {heat_system} heat",
+                f" electricity {heat_system} heat",
                 regex=False,
             )
             duplicate_components(
@@ -3684,21 +3693,19 @@ def add_heat(
                 electricity_links,
                 " electricity-only",
                 bus0=np.where(
-                    n.links.loc[electricity_links, "carrier"]
-                    == "urban central air heat pump",
-                    electricity_output,
+                    is_resistive_heater,
                     n.links.loc[electricity_links, "bus0"],
+                    electricity_output,
                 ),
                 bus1=np.where(
-                    n.links.loc[electricity_links, "carrier"]
-                    == "urban central resistive heater",
+                    is_resistive_heater,
                     electricity_output,
                     n.links.loc[electricity_links, "bus1"],
                 ),
             )
 
             solar_thermal = n.generators.index[
-                n.generators.carrier == "urban central solar thermal"
+                n.generators.carrier == f"{heat_system} solar thermal"
             ]
             duplicate_components(
                 n,
@@ -3706,8 +3713,8 @@ def add_heat(
                 solar_thermal,
                 " electricity-only",
                 bus=n.generators.loc[solar_thermal, "bus"].str.replace(
-                    " urban central heat",
-                    " electricity urban central heat",
+                    f" {heat_system} heat",
+                    f" electricity {heat_system} heat",
                     regex=False,
                 ),
             )

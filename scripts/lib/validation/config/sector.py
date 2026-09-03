@@ -148,12 +148,12 @@ class _ResidentialHeatDsmConfig(BaseModel):
     )
 
 
-class _UrbanCentralHeatSplitConfig(ConfigModel):
-    """Configuration for splitting urban central heat demand by technology."""
+class _HeatSplitConfig(ConfigModel):
+    """Configuration for splitting heat demand by technology."""
 
     enable: bool = Field(
         False,
-        description="Split urban central heat demand across gas-only, electricity-only, and shared heat buses.",
+        description="Split heat demand across gas-only, electricity-only, and shared heat buses.",
     )
     gas_share: dict[int, float] = Field(
         default_factory=lambda: {
@@ -165,7 +165,7 @@ class _UrbanCentralHeatSplitConfig(ConfigModel):
             2045: 0,
             2050: 0,
         },
-        description="Share of urban central heat demand served by gas boilers and gas CHP.",
+        description="Share of heat demand served by gas boilers and gas CHP.",
     )
     electricity_share: dict[int, float] = Field(
         default_factory=lambda: {
@@ -177,7 +177,7 @@ class _UrbanCentralHeatSplitConfig(ConfigModel):
             2045: 0,
             2050: 0,
         },
-        description="Share of urban central heat demand served by solar thermal, air heat pumps, and resistive heaters.",
+        description="Share of heat demand served by solar thermal, heat pumps, and resistive heaters.",
     )
 
     @field_validator("gas_share", "electricity_share")
@@ -187,12 +187,12 @@ class _UrbanCentralHeatSplitConfig(ConfigModel):
             year: share for year, share in shares.items() if not 0 <= share <= 1
         }:
             raise ValueError(
-                f"Urban central heat shares must be between 0 and 1; got {invalid}."
+                f"Heat shares must be between 0 and 1; got {invalid}."
             )
         return shares
 
     @model_validator(mode="after")
-    def validate_total_share(self) -> "_UrbanCentralHeatSplitConfig":
+    def validate_total_share(self) -> "_HeatSplitConfig":
         years = self.gas_share.keys() & self.electricity_share.keys()
         if invalid := {
             year: self.gas_share[year] + self.electricity_share[year]
@@ -200,7 +200,7 @@ class _UrbanCentralHeatSplitConfig(ConfigModel):
             if self.gas_share[year] + self.electricity_share[year] > 1
         }:
             raise ValueError(
-                "Gas and electricity urban central heat shares must sum to at most 1; "
+                "Gas and electricity heat shares must sum to at most 1; "
                 f"got {invalid}."
             )
         return self
@@ -471,9 +471,17 @@ class SectorConfig(BaseModel):
         default_factory=_DistrictHeatingConfig,
         description="District heating configuration.",
     )
-    urban_central_heat_split: _UrbanCentralHeatSplitConfig = Field(
-        default_factory=_UrbanCentralHeatSplitConfig,
+    urban_central_heat_split: _HeatSplitConfig = Field(
+        default_factory=_HeatSplitConfig,
         description="Urban central heat demand split configuration.",
+    )
+    urban_decentral_heat_split: _HeatSplitConfig = Field(
+        default_factory=_HeatSplitConfig,
+        description="Urban decentral heat demand split configuration.",
+    )
+    rural_heat_split: _HeatSplitConfig = Field(
+        default_factory=_HeatSplitConfig,
+        description="Rural heat demand split configuration.",
     )
 
     heat_pump_sources: dict[str, list[str]] = Field(
