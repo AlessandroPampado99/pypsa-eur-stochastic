@@ -1,15 +1,19 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
-  prefix: "cutouts_det_capexp_nols"
+  prefix: "cutouts_det_capexp_"
   name: all
   scenarios:
-    enable: true
+    enable: false
     file: config/cutouts_prices_uncertainty/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+validation:
+  enable: true
+  config: config/cutouts_prices_uncertainty/validation_stochastic_K3.yaml
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -152,20 +156,12 @@ sector:
   shipping_methanol_efficiency: 0.46
   shipping_oil_efficiency: 0.4
   aviation_demand_factor: 1.0
-  aviation_methanol_to_kerosene: true
-  aviation_methanol_kerosene_share:
-    2020: 0
-    2025: 0
-    2030: 0
-    2035: 0
-    2040: 0
-    2045: 0
-    2050: 0.5
   allam_cycle_gas: true
   methanol:
     regional_methanol_demand: true
     methanol_reforming: true
     methanol_reforming_cc: true
+    methanol_to_kerosene: true
     methanol_to_power:
       ccgt: true
       ccgt_cc: false
@@ -205,4 +201,15 @@ clustering:
     resolution_sector: 3H
 
 solving:
-  load_shedding: false
+  options:
+    load_shedding: true
+    dispatch_exclude_carriers:
+      - co2 stored
+      - co2 sequestered
+      - co2 atmosphere
+      - oil primary
+      - gas
+      
+
+    validation_missing_capacity_policy: fix_current
+    io_api: direct

@@ -45,6 +45,22 @@ scenario:
   planning_horizons:
   - 2050
 
+# docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#cssc_scenario_reduction
+cssc_scenario_reduction:
+  enable: false
+  results_prefix: results/cutouts_det_capexp_
+  network_name: base_s_adm___2050.nc
+  workbook: results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx
+  output_dir: results/cutouts_det_capexp_/analysis_output/cssc
+  k:
+  - 3
+  solver: gurobi
+  workbook_cost_scale: 1.0e9
+  time_limit: null
+  mip_gap: null
+  mem_mb: 4000
+  runtime: 1h
+
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#countries
 countries:
 - AL

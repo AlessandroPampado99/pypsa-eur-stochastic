@@ -1,0 +1,32 @@
+input_dir: "results/demand_uncertainty_sensitivity"
+output_dir: "results/demand_uncertainty_sensitivity/analysis_output/H2_TRANS"
+network_file: "base_s_adm___2035.nc"
+base_network_path: "results/demand_uncertainty_sensitivity/BASE/networks/base_s_adm___2035.nc"
+included_scenarios: [H2_TRANS_50, H2_TRANS_100, H2_TRANS_150, H2_TRANS_200]
+model_config: "config/demand_uncertainty/config_deterministic.yaml"
+plotting_config: "config/plotting.default.yaml"
+parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 300, zero_tol: 1.0e-9}
+
+scripts:
+  plot_scenario_energy_balance:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        H2_TRANS:
+          - H2_TRANS_50
+          - H2_TRANS_100
+          - H2_TRANS_150
+          - H2_TRANS_200
+      FAMILY_ORDER: [BASE, H2_TRANS]
+  plot_scenario_optimal_capacity:
+    overrides:
+      FAMILY_GROUPS:
+        BASE:
+          - __BASE__
+        H2_TRANS:
+          - H2_TRANS_50
+          - H2_TRANS_100
+          - H2_TRANS_150
+          - H2_TRANS_200
+      FAMILY_ORDER: [BASE, H2_TRANS]

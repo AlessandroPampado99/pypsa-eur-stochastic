@@ -1,15 +1,42 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "cutouts_det_capexp_nols"
-  name: all
+  name: stochastic_network
   scenarios:
-    enable: true
+    enable: false
     file: config/cutouts_prices_uncertainty/scenarios.yaml
   disable_progressbar: false
   shared_resources:
     policy: false
     exclude: []
   use_shadow_directory: false
+
+validation:
+  enable: false
+  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
+
+cssc_scenario_reduction:
+  enable: true
+  results_prefix: results/cutouts_det_capexp_nols
+  network_name: base_s_adm___2050.nc
+  workbook: results/cutouts_det_capexp_/analysis_output/validation_heatmaps/validation_heatmaps.xlsx
+  output_dir: results/cutouts_det_capexp_/analysis_output/cssc
+  k:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  solver: gurobi
+  workbook_cost_scale: 1.0e9
+  time_limit: null
+  mip_gap: null
+  mem_mb: 4000
+  runtime: 1h
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:
@@ -205,4 +232,15 @@ clustering:
     resolution_sector: 3H
 
 solving:
-  load_shedding: false
+  options:
+    load_shedding: true
+    dispatch_exclude_carriers:
+      - co2 stored
+      - co2 sequestered
+      - co2 atmosphere
+      - oil primary
+      - gas
+      
+
+    validation_missing_capacity_policy: fix_current
+    io_api: direct

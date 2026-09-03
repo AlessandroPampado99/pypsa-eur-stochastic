@@ -1,0 +1,123 @@
+validation_runs:
+
+  stochastic_K3___1995:
+    capacities_from: &stochastic_K3
+      name: stochastic_K3
+      path: results/cutouts_det_capexp_/stochastic_network/networks/base_s_cssc_K3_adm___2050.nc
+    operations_on: d_1995
+
+  stochastic_K3___1996:
+    capacities_from: *stochastic_K3
+    operations_on: d_1996
+
+  stochastic_K3___1997:
+    capacities_from: *stochastic_K3
+    operations_on: d_1997
+
+  stochastic_K3___1998:
+    capacities_from: *stochastic_K3
+    operations_on: d_1998
+
+  stochastic_K3___1999:
+    capacities_from: *stochastic_K3
+    operations_on: d_1999
+
+  stochastic_K3___2000:
+    capacities_from: *stochastic_K3
+    operations_on: d_2000
+
+  stochastic_K3___2001:
+    capacities_from: *stochastic_K3
+    operations_on: d_2001
+
+  stochastic_K3___2002:
+    capacities_from: *stochastic_K3
+    operations_on: d_2002
+
+  stochastic_K3___2003:
+    capacities_from: *stochastic_K3
+    operations_on: d_2003
+
+  stochastic_K3___2004:
+    capacities_from: *stochastic_K3
+    operations_on: d_2004
+
+  stochastic_K3___2005:
+    capacities_from: *stochastic_K3
+    operations_on: d_2005
+
+  stochastic_K3___2006:
+    capacities_from: *stochastic_K3
+    operations_on: d_2006
+
+  stochastic_K3___2007:
+    capacities_from: *stochastic_K3
+    operations_on: d_2007
+
+  stochastic_K3___2008:
+    capacities_from: *stochastic_K3
+    operations_on: d_2008
+
+  stochastic_K3___2009:
+    capacities_from: *stochastic_K3
+    operations_on: d_2009
+
+  stochastic_K3___2010:
+    capacities_from: *stochastic_K3
+    operations_on: d_2010
+
+  stochastic_K3___2011:
+    capacities_from: *stochastic_K3
+    operations_on: d_2011
+
+  stochastic_K3___2012:
+    capacities_from: *stochastic_K3
+    operations_on: d_2012
+
+  stochastic_K3___2013:
+    capacities_from: *stochastic_K3
+    operations_on: d_2013
+
+  stochastic_K3___2014:
+    capacities_from: *stochastic_K3
+    operations_on: d_2014
+
+  stochastic_K3___2015:
+    capacities_from: *stochastic_K3
+    operations_on: d_2015
+
+  stochastic_K3___2016:
+    capacities_from: *stochastic_K3
+    operations_on: d_2016
+
+  stochastic_K3___2017:
+    capacities_from: *stochastic_K3
+    operations_on: d_2017
+
+  stochastic_K3___2018:
+    capacities_from: *stochastic_K3
+    operations_on: d_2018
+
+  stochastic_K3___2019:
+    capacities_from: *stochastic_K3
+    operations_on: d_2019
+
+  stochastic_K3___2020:
+    capacities_from: *stochastic_K3
+    operations_on: d_2020
+
+  stochastic_K3___2021:
+    capacities_from: *stochastic_K3
+    operations_on: d_2021
+
+  stochastic_K3___2022:
+    capacities_from: *stochastic_K3
+    operations_on: d_2022
+
+  stochastic_K3___2023:
+    capacities_from: *stochastic_K3
+    operations_on: d_2023
+
+  stochastic_K3___2024:
+    capacities_from: *stochastic_K3
+    operations_on: d_2024

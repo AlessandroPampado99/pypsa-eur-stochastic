@@ -25,6 +25,7 @@ from scripts.lib.validation.config.co2_budget import Co2BudgetConfig
 from scripts.lib.validation.config.conventional import ConventionalConfig
 from scripts.lib.validation.config.costs import CostsConfig
 from scripts.lib.validation.config.countries import CountriesConfig
+from scripts.lib.validation.config.cssc import CsscScenarioReductionConfig
 from scripts.lib.validation.config.data import DataConfig
 from scripts.lib.validation.config.electricity import ElectricityConfig
 from scripts.lib.validation.config.enable import EnableConfig
@@ -198,6 +199,10 @@ class ConfigSchema(BaseModel):
     costs: CostsConfig = Field(
         default_factory=CostsConfig,
         description="Cost assumptions configuration.",
+    )
+    cssc_scenario_reduction: CsscScenarioReductionConfig = Field(
+        default_factory=CsscScenarioReductionConfig,
+        description="CSSC scenario reduction and stochastic-solve configuration.",
     )
     clustering: ClusteringConfig = Field(
         default_factory=ClusteringConfig,

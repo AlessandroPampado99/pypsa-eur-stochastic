@@ -1,48 +1,576 @@
 validation_runs:
-  base___price_gas_3:
-    capacities_from: base
+  price_gas_3___price_gas_3:
+    capacities_from: price_gas_3
     operations_on: price_gas_3
 
-  base___price_gas_5:
-    capacities_from: base
+  price_gas_3___price_gas_5:
+    capacities_from: price_gas_3
     operations_on: price_gas_5
 
-  base___price_gas_8:
-    capacities_from: base
+  price_gas_3___price_gas_8:
+    capacities_from: price_gas_3
     operations_on: price_gas_8
 
-  base___price_oil_3:
-    capacities_from: base
+  price_gas_3___price_oil_3:
+    capacities_from: price_gas_3
     operations_on: price_oil_3
 
-  base___price_oil_5:
-    capacities_from: base
+  price_gas_3___price_oil_5:
+    capacities_from: price_gas_3
     operations_on: price_oil_5
 
-  base___price_oil_8:
-    capacities_from: base
+  price_gas_3___price_oil_8:
+    capacities_from: price_gas_3
     operations_on: price_oil_8
 
-  base___pmaxpu_solar_battery_0.8:
-    capacities_from: base
+  price_gas_3___pmaxpu_solar_battery_0.8:
+    capacities_from: price_gas_3
     operations_on: pmaxpu_solar_battery_0.8
 
-  base___pmaxpu_solar_battery_0.5:
-    capacities_from: base
+  price_gas_3___pmaxpu_solar_battery_0.5:
+    capacities_from: price_gas_3
     operations_on: pmaxpu_solar_battery_0.5
 
-  base___pmaxpu_solar_battery_0.2:
-    capacities_from: base
+  price_gas_3___pmaxpu_solar_battery_0.2:
+    capacities_from: price_gas_3
     operations_on: pmaxpu_solar_battery_0.2
 
-  base___pmaxpu_wind_0.8:
-    capacities_from: base
+  price_gas_3___pmaxpu_wind_0.8:
+    capacities_from: price_gas_3
     operations_on: pmaxpu_wind_0.8
 
-  base___pmaxpu_wind_0.5:
-    capacities_from: base
+  price_gas_3___pmaxpu_wind_0.5:
+    capacities_from: price_gas_3
     operations_on: pmaxpu_wind_0.5
 
-  base___pmaxpu_wind_0.2:
-    capacities_from: base
+  price_gas_3___pmaxpu_wind_0.2:
+    capacities_from: price_gas_3
+    operations_on: pmaxpu_wind_0.2
+
+  price_gas_5___price_gas_3:
+    capacities_from: price_gas_5
+    operations_on: price_gas_3
+
+  price_gas_5___price_gas_5:
+    capacities_from: price_gas_5
+    operations_on: price_gas_5
+
+  price_gas_5___price_gas_8:
+    capacities_from: price_gas_5
+    operations_on: price_gas_8
+
+  price_gas_5___price_oil_3:
+    capacities_from: price_gas_5
+    operations_on: price_oil_3
+
+  price_gas_5___price_oil_5:
+    capacities_from: price_gas_5
+    operations_on: price_oil_5
+
+  price_gas_5___price_oil_8:
+    capacities_from: price_gas_5
+    operations_on: price_oil_8
+
+  price_gas_5___pmaxpu_solar_battery_0.8:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_solar_battery_0.8
+
+  price_gas_5___pmaxpu_solar_battery_0.5:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_solar_battery_0.5
+
+  price_gas_5___pmaxpu_solar_battery_0.2:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_solar_battery_0.2
+
+  price_gas_5___pmaxpu_wind_0.8:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_wind_0.8
+
+  price_gas_5___pmaxpu_wind_0.5:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_wind_0.5
+
+  price_gas_5___pmaxpu_wind_0.2:
+    capacities_from: price_gas_5
+    operations_on: pmaxpu_wind_0.2
+
+  price_gas_8___price_gas_3:
+    capacities_from: price_gas_8
+    operations_on: price_gas_3
+
+  price_gas_8___price_gas_5:
+    capacities_from: price_gas_8
+    operations_on: price_gas_5
+
+  price_gas_8___price_gas_8:
+    capacities_from: price_gas_8
+    operations_on: price_gas_8
+
+  price_gas_8___price_oil_3:
+    capacities_from: price_gas_8
+    operations_on: price_oil_3
+
+  price_gas_8___price_oil_5:
+    capacities_from: price_gas_8
+    operations_on: price_oil_5
+
+  price_gas_8___price_oil_8:
+    capacities_from: price_gas_8
+    operations_on: price_oil_8
+
+  price_gas_8___pmaxpu_solar_battery_0.8:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_solar_battery_0.8
+
+  price_gas_8___pmaxpu_solar_battery_0.5:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_solar_battery_0.5
+
+  price_gas_8___pmaxpu_solar_battery_0.2:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_solar_battery_0.2
+
+  price_gas_8___pmaxpu_wind_0.8:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_wind_0.8
+
+  price_gas_8___pmaxpu_wind_0.5:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_wind_0.5
+
+  price_gas_8___pmaxpu_wind_0.2:
+    capacities_from: price_gas_8
+    operations_on: pmaxpu_wind_0.2
+
+  price_oil_3___price_gas_3:
+    capacities_from: price_oil_3
+    operations_on: price_gas_3
+
+  price_oil_3___price_gas_5:
+    capacities_from: price_oil_3
+    operations_on: price_gas_5
+
+  price_oil_3___price_gas_8:
+    capacities_from: price_oil_3
+    operations_on: price_gas_8
+
+  price_oil_3___price_oil_3:
+    capacities_from: price_oil_3
+    operations_on: price_oil_3
+
+  price_oil_3___price_oil_5:
+    capacities_from: price_oil_3
+    operations_on: price_oil_5
+
+  price_oil_3___price_oil_8:
+    capacities_from: price_oil_3
+    operations_on: price_oil_8
+
+  price_oil_3___pmaxpu_solar_battery_0.8:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_solar_battery_0.8
+
+  price_oil_3___pmaxpu_solar_battery_0.5:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_solar_battery_0.5
+
+  price_oil_3___pmaxpu_solar_battery_0.2:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_solar_battery_0.2
+
+  price_oil_3___pmaxpu_wind_0.8:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_wind_0.8
+
+  price_oil_3___pmaxpu_wind_0.5:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_wind_0.5
+
+  price_oil_3___pmaxpu_wind_0.2:
+    capacities_from: price_oil_3
+    operations_on: pmaxpu_wind_0.2
+
+  price_oil_5___price_gas_3:
+    capacities_from: price_oil_5
+    operations_on: price_gas_3
+
+  price_oil_5___price_gas_5:
+    capacities_from: price_oil_5
+    operations_on: price_gas_5
+
+  price_oil_5___price_gas_8:
+    capacities_from: price_oil_5
+    operations_on: price_gas_8
+
+  price_oil_5___price_oil_3:
+    capacities_from: price_oil_5
+    operations_on: price_oil_3
+
+  price_oil_5___price_oil_5:
+    capacities_from: price_oil_5
+    operations_on: price_oil_5
+
+  price_oil_5___price_oil_8:
+    capacities_from: price_oil_5
+    operations_on: price_oil_8
+
+  price_oil_5___pmaxpu_solar_battery_0.8:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_solar_battery_0.8
+
+  price_oil_5___pmaxpu_solar_battery_0.5:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_solar_battery_0.5
+
+  price_oil_5___pmaxpu_solar_battery_0.2:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_solar_battery_0.2
+
+  price_oil_5___pmaxpu_wind_0.8:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_wind_0.8
+
+  price_oil_5___pmaxpu_wind_0.5:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_wind_0.5
+
+  price_oil_5___pmaxpu_wind_0.2:
+    capacities_from: price_oil_5
+    operations_on: pmaxpu_wind_0.2
+
+  price_oil_8___price_gas_3:
+    capacities_from: price_oil_8
+    operations_on: price_gas_3
+
+  price_oil_8___price_gas_5:
+    capacities_from: price_oil_8
+    operations_on: price_gas_5
+
+  price_oil_8___price_gas_8:
+    capacities_from: price_oil_8
+    operations_on: price_gas_8
+
+  price_oil_8___price_oil_3:
+    capacities_from: price_oil_8
+    operations_on: price_oil_3
+
+  price_oil_8___price_oil_5:
+    capacities_from: price_oil_8
+    operations_on: price_oil_5
+
+  price_oil_8___price_oil_8:
+    capacities_from: price_oil_8
+    operations_on: price_oil_8
+
+  price_oil_8___pmaxpu_solar_battery_0.8:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_solar_battery_0.8
+
+  price_oil_8___pmaxpu_solar_battery_0.5:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_solar_battery_0.5
+
+  price_oil_8___pmaxpu_solar_battery_0.2:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_solar_battery_0.2
+
+  price_oil_8___pmaxpu_wind_0.8:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_wind_0.8
+
+  price_oil_8___pmaxpu_wind_0.5:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_wind_0.5
+
+  price_oil_8___pmaxpu_wind_0.2:
+    capacities_from: price_oil_8
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_solar_battery_0.8___price_gas_3:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_gas_3
+
+  pmaxpu_solar_battery_0.8___price_gas_5:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_gas_5
+
+  pmaxpu_solar_battery_0.8___price_gas_8:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_gas_8
+
+  pmaxpu_solar_battery_0.8___price_oil_3:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_oil_3
+
+  pmaxpu_solar_battery_0.8___price_oil_5:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_oil_5
+
+  pmaxpu_solar_battery_0.8___price_oil_8:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: price_oil_8
+
+  pmaxpu_solar_battery_0.8___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_solar_battery_0.8___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_solar_battery_0.8___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_solar_battery_0.8___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_solar_battery_0.8___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_solar_battery_0.8___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_solar_battery_0.5___price_gas_3:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_gas_3
+
+  pmaxpu_solar_battery_0.5___price_gas_5:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_gas_5
+
+  pmaxpu_solar_battery_0.5___price_gas_8:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_gas_8
+
+  pmaxpu_solar_battery_0.5___price_oil_3:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_oil_3
+
+  pmaxpu_solar_battery_0.5___price_oil_5:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_oil_5
+
+  pmaxpu_solar_battery_0.5___price_oil_8:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: price_oil_8
+
+  pmaxpu_solar_battery_0.5___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_solar_battery_0.5___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_solar_battery_0.5___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_solar_battery_0.5___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_solar_battery_0.5___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_solar_battery_0.5___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_solar_battery_0.2___price_gas_3:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_gas_3
+
+  pmaxpu_solar_battery_0.2___price_gas_5:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_gas_5
+
+  pmaxpu_solar_battery_0.2___price_gas_8:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_gas_8
+
+  pmaxpu_solar_battery_0.2___price_oil_3:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_oil_3
+
+  pmaxpu_solar_battery_0.2___price_oil_5:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_oil_5
+
+  pmaxpu_solar_battery_0.2___price_oil_8:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: price_oil_8
+
+  pmaxpu_solar_battery_0.2___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_solar_battery_0.2___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_solar_battery_0.2___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_solar_battery_0.2___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_solar_battery_0.2___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_solar_battery_0.2___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_wind_0.8___price_gas_3:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_gas_3
+
+  pmaxpu_wind_0.8___price_gas_5:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_gas_5
+
+  pmaxpu_wind_0.8___price_gas_8:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_gas_8
+
+  pmaxpu_wind_0.8___price_oil_3:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_oil_3
+
+  pmaxpu_wind_0.8___price_oil_5:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_oil_5
+
+  pmaxpu_wind_0.8___price_oil_8:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: price_oil_8
+
+  pmaxpu_wind_0.8___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_wind_0.8___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_wind_0.8___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_wind_0.8___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_wind_0.8___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_wind_0.8___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_wind_0.5___price_gas_3:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_gas_3
+
+  pmaxpu_wind_0.5___price_gas_5:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_gas_5
+
+  pmaxpu_wind_0.5___price_gas_8:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_gas_8
+
+  pmaxpu_wind_0.5___price_oil_3:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_oil_3
+
+  pmaxpu_wind_0.5___price_oil_5:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_oil_5
+
+  pmaxpu_wind_0.5___price_oil_8:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: price_oil_8
+
+  pmaxpu_wind_0.5___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_wind_0.5___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_wind_0.5___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_wind_0.5___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_wind_0.5___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_wind_0.5___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: pmaxpu_wind_0.2
+
+  pmaxpu_wind_0.2___price_gas_3:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_gas_3
+
+  pmaxpu_wind_0.2___price_gas_5:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_gas_5
+
+  pmaxpu_wind_0.2___price_gas_8:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_gas_8
+
+  pmaxpu_wind_0.2___price_oil_3:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_oil_3
+
+  pmaxpu_wind_0.2___price_oil_5:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_oil_5
+
+  pmaxpu_wind_0.2___price_oil_8:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: price_oil_8
+
+  pmaxpu_wind_0.2___pmaxpu_solar_battery_0.8:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: pmaxpu_solar_battery_0.8
+
+  pmaxpu_wind_0.2___pmaxpu_solar_battery_0.5:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: pmaxpu_solar_battery_0.5
+
+  pmaxpu_wind_0.2___pmaxpu_solar_battery_0.2:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: pmaxpu_solar_battery_0.2
+
+  pmaxpu_wind_0.2___pmaxpu_wind_0.8:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: pmaxpu_wind_0.8
+
+  pmaxpu_wind_0.2___pmaxpu_wind_0.5:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: pmaxpu_wind_0.5
+
+  pmaxpu_wind_0.2___pmaxpu_wind_0.2:
+    capacities_from: pmaxpu_wind_0.2
     operations_on: pmaxpu_wind_0.2

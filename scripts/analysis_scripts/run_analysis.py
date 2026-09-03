@@ -262,7 +262,18 @@ def compact_common_settings(config: dict[str, Any]) -> dict[str, Any]:
         base_network_path = str(input_dir / "base" / "networks" / network_file)
     include_base = base_network_path is not None
 
-    excluded = config.get("excluded_scenarios", ["base"])
+    excluded = set(config.get("excluded_scenarios", ["base"]))
+    included = config.get("included_scenarios")
+    if included is not None:
+        included = set(included)
+        scenario_dirs = {path.name for path in input_dir.iterdir() if path.is_dir()}
+        missing = included - scenario_dirs
+        if missing:
+            raise FileNotFoundError(
+                f"Included scenarios not found under {input_dir}: {sorted(missing)}"
+            )
+        excluded.update(scenario_dirs - included)
+    excluded = sorted(excluded)
     common = {
         "ROOT_DIR": str(input_dir),
         "PREFIX_DIR": str(input_dir),
