@@ -22,24 +22,41 @@ families:
       conservative: 400
 
     entries:
-      building_heat:
+      # Creati appositamente - posso shiftare tutto in quanto creati appositamente - efficienza 1 perché è domanda finale
+      building_heat_central:
         source: gas urban central heat
         target: electricity urban central heat
         cap: 0.990
         type: shift
         efficiency_factor: 1.0
 
+      building_heat_decentral:
+        source: gas urban decentral heat
+        target: electricity urban decentral heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      building_heat_rural:
+        source: gas rural heat
+        target: electricity rural heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      # Scambio di efficienza perché a parità di km ho bisogno di meno energia se uso motore elettrico
+      # Non ho un link che mi fa il conto
       land_transport_oil:
         source: land transport oil
         target: land transport EV
-        cap: 0.950
+        cap: 0.745
         type: shift
         efficiency_factor: 0.302145139124
 
       agriculture_machinery_oil:
         source: agriculture machinery oil
         target: agriculture machinery electric
-        cap: 0.950
+        cap: 0.70 # valore al 2040
         type: shift
         efficiency_factor: 2.333333333333
 
@@ -50,14 +67,35 @@ families:
         type: shift
         efficiency_factor: 1.0
 
+      gas_for_industry:
+        source: gas for industry
+        target: industry electricity
+        cap: 0.575
+        type: shift
+        efficiency_factor: 1.0
+
   OILGAS:
     targets:
       conservative: 400
 
     entries:
-      building_heat:
+      building_heat_central:
         source: electricity urban central heat
         target: gas urban central heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      building_heat_decentral:
+        source: electricity urban decentral heat
+        target: gas urban decentral heat
+        cap: 0.990
+        type: shift
+        efficiency_factor: 1.0
+
+      building_heat_rural:
+        source: electricity rural heat
+        target: gas rural heat
         cap: 0.990
         type: shift
         efficiency_factor: 1.0
@@ -76,18 +114,17 @@ families:
         type: shift
         efficiency_factor: 1.0
 
-      low_temperature_heat_for_industry:
-        source: low-temperature heat for industry
+      solid_biomass_for_industry:
+        source: solid biomass for industry
         target: gas for industry
-        cap: 0.950
+        cap: 0.432
         type: shift
         efficiency_factor: 1.0
 
       shipping_methanol:
-        source:
-          carrier: shipping methanol
+        source: shipping methanol
         target: shipping oil
-        cap: 0.950
+        cap: 0.950 # shipping methanol era 0 al 2025
         type: shift
         efficiency_factor: 1.15
 
@@ -100,7 +137,7 @@ families:
 
   MEOH:
     targets:
-      conservative: 100
+      conservative: 100 # non raggiungi nemmeno la parità in kerosene for aviation...
 
     entries:
       aviation_kerosene:
@@ -110,52 +147,41 @@ families:
         type: shift
         efficiency_factor: 1.0
 
-      low_temperature_heat_for_industry:
-        source: low-temperature heat for industry
-        target: industry methanol
+      naphta_for_industry:
+        source: naphta for industry
+        target: methanol for industry
         cap: 0.950
-        type: shift
-        efficiency_factor: 1.0
-
-      industry_electricity:
-        source: industry electricity
-        target: industry methanol
-        cap: 0.212
         type: shift
         efficiency_factor: 1.0
 
       shipping_oil:
         source: shipping oil
-        target:
-          carrier: shipping methanol
-        cap: 0.950
+        target: shipping methanol
+        cap: 0.653
         type: shift
         efficiency_factor: 0.869565217391
 
       shipping_h2:
         source: H2 for shipping
-        target:
-          carrier: shipping methanol
+        target: shipping methanol
         cap: 0.950
         type: shift
         efficiency_factor: 1.0
 
   H2:
     targets:
-      conservative: 100
+      conservative: 100 # manco sufficiente a ciucciare tutto il metanolo...
 
     entries:
-      low_temperature_heat_for_industry:
-        source:
-          - low-temperature heat for industry
+      gas_for_industry:
+        source: gas for industry
         target: H2 for industry
-        cap: 0.950
+        cap: 0.575
         type: shift
         efficiency_factor: 1.0
 
       industry_electricity:
-        source:
-          - industry electricity
+        source: industry electricity
         target: H2 for industry
         cap: 0.212
         type: shift
@@ -164,6 +190,13 @@ families:
       shipping_oil:
         source: shipping oil
         target: H2 for shipping
+        cap: 0.653
+        type: shift
+        efficiency_factor: 1.0
+
+      shipping_methanol:
+        source: shipping methanol
+        target: H2 for shipping
         cap: 0.950
         type: shift
         efficiency_factor: 1.0
@@ -171,7 +204,7 @@ families:
       land_transport_oil:
         source: land transport oil
         target: land transport fuel cell
-        cap: 0.950
+        cap: 0.745
         type: shift
         efficiency_factor: 0.535651226544
 
@@ -194,9 +227,12 @@ scenario_definitions:
       family: ELEC
       target: conservative
       priority:
-        - building_heat
+        - building_heat_central
+        - building_heat_decentral
+        - building_heat_rural
         - land_transport_oil
         - agriculture_machinery_oil
+        - gas_for_industry
         - solid_biomass_for_industry
 
   ELEC_ROAD:
@@ -206,19 +242,40 @@ scenario_definitions:
       priority:
         - land_transport_oil
         - agriculture_machinery_oil
-        - building_heat
+        - gas_for_industry
         - solid_biomass_for_industry
+        - building_heat_central
+        - building_heat_decentral
+        - building_heat_rural
+
 
   ELEC_IND:
     demand_transition:
       family: ELEC
       target: conservative
       priority:
+        - gas_for_industry
         - solid_biomass_for_industry
+        - building_heat_central
+        - building_heat_decentral
+        - building_heat_rural
         - land_transport_oil
         - agriculture_machinery_oil
-        - building_heat
 
+
+  OILGAS_HEAT:
+    demand_transition:
+      family: OILGAS
+      target: conservative
+      priority:
+        - building_heat_decentral
+        - building_heat_central
+        - building_heat_rural
+        - shipping_methanol
+        - land_transport_EV
+        - agriculture_machinery_electric
+        - industry_electricity
+        - solid_biomass_for_industry
 
   OILGAS_TRANS:
     demand_transition:
@@ -228,7 +285,11 @@ scenario_definitions:
         - shipping_methanol
         - land_transport_EV
         - agriculture_machinery_electric
-        - low_temperature_heat_for_industry
+        - industry_electricity
+        - solid_biomass_for_industry
+        - building_heat_decentral
+        - building_heat_central
+        - building_heat_rural
 
   OILGAS_IND:
     demand_transition:
@@ -236,19 +297,14 @@ scenario_definitions:
       target: conservative
       priority:
         - industry_electricity
-        - low_temperature_heat_for_industry
-        - land_transport_EV
-        - building_heat
-
-  OILGAS_HEAT:
-    demand_transition:
-      family: OILGAS
-      target: conservative
-      priority:
-        - building_heat
-        - low_temperature_heat_for_industry
+        - solid_biomass_for_industry
+        - building_heat_decentral
+        - building_heat_central
+        - building_heat_rural
+        - shipping_methanol
         - land_transport_EV
         - agriculture_machinery_electric
+
 
   MEOH_AIR:
     demand_transition:
@@ -257,18 +313,8 @@ scenario_definitions:
       priority:
         - aviation_kerosene
         - shipping_oil
-        - industry_electricity
-        - low_temperature_heat_for_industry
-
-  MEOH_IND:
-    demand_transition:
-      family: MEOH
-      target: conservative
-      priority:
-        - industry_electricity
-        - low_temperature_heat_for_industry
-        - aviation_kerosene
-        - shipping_oil
+        - shipping_h2
+        - naphta_for_industry
 
   MEOH_SHIP:
     demand_transition:
@@ -277,31 +323,18 @@ scenario_definitions:
       priority:
         - shipping_oil
         - shipping_h2
-        - industry_electricity
-        - low_temperature_heat_for_industry
+        - naphta_for_industry
         - aviation_kerosene
 
-  H2_IND:
+  MEOH_IND:
     demand_transition:
-      family: H2
+      family: MEOH
       target: conservative
       priority:
-        - industry_electricity
-        - low_temperature_heat_for_industry
+        - naphta_for_industry
+        - aviation_kerosene
         - shipping_oil
-        - oil_from_H2
-        - land_transport_oil
-
-  H2_TRANS:
-    demand_transition:
-      family: H2
-      target: conservative
-      priority:
-        - land_transport_oil
-        - shipping_oil
-        - oil_from_H2
-        - industry_electricity
-        - low_temperature_heat_for_industry
+        - shipping_h2
 
   H2_OIL:
     demand_transition:
@@ -309,5 +342,35 @@ scenario_definitions:
       target: conservative
       priority:
         - oil_from_H2
+        - shipping_methanol
+        - shipping_oil
+        - land_transport_oil
+        - gas_for_industry
         - industry_electricity
-        - low_temperature_heat_for_industry
+
+  H2_TRANS:
+    demand_transition:
+      family: H2
+      target: conservative
+      priority:
+        - shipping_methanol
+        - shipping_oil
+        - land_transport_oil
+        - gas_for_industry
+        - industry_electricity
+        - oil_from_H2
+
+
+  H2_IND:
+    demand_transition:
+      family: H2
+      target: conservative
+      priority:
+        - gas_for_industry
+        - industry_electricity
+        - oil_from_H2
+        - shipping_methanol
+        - shipping_oil
+        - land_transport_oil
+
+
