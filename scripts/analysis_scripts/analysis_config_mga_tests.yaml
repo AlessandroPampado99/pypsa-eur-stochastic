@@ -1,0 +1,70 @@
+# Analysis configuration for the networks produced by the MGA test workflow.
+#
+# Run with:
+#   python scripts/analysis_scripts/run_analysis.py \
+#     --config scripts/analysis_scripts/analysis_config_mga_tests.yaml
+
+input_dir: "results/mga_tests"
+output_dir: "results/mga_tests/analysis_output"
+
+# MGA outputs have scenario-specific filenames (for example,
+# mga_nuclear_min.nc), so discover the single NetCDF file in each scenario.
+network_glob: "networks/*.nc"
+network_picker: null
+
+base_network_path: "results/mga_tests/ELEC_HEAT/networks/base_s_adm___2035.nc"
+base_name: "ELEC_HEAT"
+base_label: "ELEC_HEAT"
+
+model_config: "config/demand_uncertainty_2035/config_deterministic.yaml"
+plotting_config: "config/plotting.default.yaml"
+
+# Only analyse the MGA scenario folders. BASE is supplied separately through
+# base_network_path and used as the comparison reference.
+included_scenarios:
+  - urban_gas_boiler_min
+  - urban_gas_boiler_max
+excluded_scenarios:
+  - BASE
+  - nuclear_min
+  - nuclear_max
+
+parameters:
+  scenario_name_mode: "folder"
+  save_png: true
+  save_pdf: false
+  dpi: 300
+  zero_tol: 1.0e-9
+
+# All analysis scripts are enabled by default. These explicit entries document
+# the complete pipeline and provide MGA-specific grouping for the bar charts.
+scripts:
+  analysis_network_batch: true
+  analysis_network_powers: true
+  analysis_stores_batch: true
+  demand_comparison: true
+  objective_comparison: true
+  plot_capacity_energybalance: true
+  plot_scenario_energy_balance:
+    overrides:
+      FAMILY_GROUPS:
+        ELEC_HEAT:
+          - ELEC_HEAT
+        urban_gas_boiler:
+          - urban_gas_boiler_min
+          - urban_gas_boiler_max
+      FAMILY_ORDER:
+        - ELEC_HEAT
+        - urban_gas_boiler
+      TOTAL_MODE: positive
+      SEGMENT_LABEL_MODE: percent
+      SEGMENT_LABEL_MIN_VALUE: 1.0
+      SEGMENT_LABEL_MIN_PERCENT: 5.0
+      CONSUMPTION_HATCH: "//"
+      ENERGY_THRESHOLD_TWH: 0.0
+      EXCLUDED_GROUPS: []
+  plot_scenario_optimal_capacity: true
+  plot_scenario_capacity_factors: true
+  plot_demand_bars: true
+  plot_heatmap_vs_base: true
+  plot_heatmap_vs_base_size: true

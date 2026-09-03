@@ -20,21 +20,32 @@ import pypsa
 # USER CONFIGURATION
 # =============================================================================
 
-NETWORK = Path("results/demand_uncertainty_2035/BASE/networks/base_s_adm___2035.nc")
+NETWORK = Path(
+    "results/demand_uncertainty_2035/ELEC_HEAT/networks/base_s_adm___2035.nc"
+)
 OUTPUT_FOLDER = Path("results/mga_tests")
 
-# Carrier whose extendable nominal capacity is used as the MGA objective.
-CARRIER = "nuclear"
+# Carrier patterns whose combined extendable nominal capacity is the MGA
+# objective. Multiple entries are allowed, e.g. ("nuclear", "coal").
+CARRIERS = ("urban central gas CHP")
 
-# PyPSA components to include. Nuclear capacity is normally represented by
-# Generators. Add "Link", "Store", or "StorageUnit" when appropriate.
-COMPONENTS = ("Generator",)
+# "exact", "contains", or "regex". With "contains", the example above matches
+# carriers such as "urban central gas boiler" and "urban decentral gas boiler".
+CARRIER_MATCH_MODE = "contains"
+CASE_SENSITIVE = False
+
+# Used in output filenames and log messages.
+OBJECTIVE_NAME = "gas_boilers"
+
+# Components whose matching assets form the combined MGA objective.
+# Gas boilers are Links; nuclear plants are usually Generators.
+COMPONENTS = ("Link",)
 
 # Run both alternatives, or choose only one of "min" / "max".
 SENSES = ("min", "max")
 
 # Maximum cost increase relative to the cost-optimal solution (0.05 = 5%).
-SLACK = 0.05
+SLACK = 0.03
 
 # "auto": solve only if the file has no finite objective; "solve": always
 # recompute the cost optimum; "reuse": require a solved input network.
@@ -46,14 +57,14 @@ EXPORT_BASELINE = False
 # Solver and options passed to both n.optimize() and n.optimize.optimize_mga().
 SOLVER_NAME = "gurobi"
 SOLVER_OPTIONS = {
-      "threads": 32,
-      "method": 2,
-      "crossover": 0,
-      "BarConvTol": 1.0e-05,
-      "Seed": 123,
-      "AggFill": 0,
-      "PreDual": 0,
-      "GURO_PAR_BARDENSETHRESH": 200,
+    "threads": 32,
+    "method": 2,
+    "crossover": 0,
+    "BarConvTol": 1.0e-05,
+    "Seed": 123,
+    "AggFill": 0,
+    "PreDual": 0,
+    "GURO_PAR_BARDENSETHRESH": 200,
 }
 
 # Set to True for networks with multiple investment periods.
@@ -94,7 +105,29 @@ def selected_assets(n: pypsa.Network) -> dict[str, pd.Index]:
         table = n.static(component)
         if "carrier" not in table:
             raise ValueError(f"Component {component!r} has no 'carrier' column.")
-        selected[component] = table.index[table.carrier == CARRIER]
+        carriers = table.carrier.fillna("").astype(str)
+        if CARRIER_MATCH_MODE == "exact":
+            patterns = (
+                CARRIERS
+                if CASE_SENSITIVE
+                else tuple(carrier.casefold() for carrier in CARRIERS)
+            )
+            values = carriers if CASE_SENSITIVE else carriers.str.casefold()
+            mask = values.isin(patterns)
+        elif CARRIER_MATCH_MODE in {"contains", "regex"}:
+            mask = pd.Series(False, index=table.index)
+            for pattern in CARRIERS:
+                mask |= carriers.str.contains(
+                    pattern,
+                    case=CASE_SENSITIVE,
+                    regex=CARRIER_MATCH_MODE == "regex",
+                    na=False,
+                )
+        else:
+            raise ValueError(
+                "CARRIER_MATCH_MODE must be 'exact', 'contains', or 'regex'."
+            )
+        selected[component] = table.index[mask]
 
     if not any(len(index) for index in selected.values()):
         available = sorted(
@@ -105,7 +138,8 @@ def selected_assets(n: pypsa.Network) -> dict[str, pd.Index]:
             }
         )
         raise ValueError(
-            f"No assets with carrier {CARRIER!r} in {COMPONENTS}. "
+            f"No assets matching {CARRIERS!r} ({CARRIER_MATCH_MODE}) in "
+            f"{COMPONENTS}. "
             f"Available carriers include: {', '.join(available)}"
         )
     return selected
@@ -127,7 +161,7 @@ def mga_weights(n: pypsa.Network) -> dict[str, dict[str, pd.Series]]:
 
     if not weights:
         raise ValueError(
-            f"Assets with carrier {CARRIER!r} exist, but none of their nominal "
+            f"Assets matching {CARRIERS!r} exist, but none of their nominal "
             "capacities are extendable. MGA can only vary optimization variables."
         )
     return weights
@@ -187,6 +221,8 @@ def solve_baseline(n: pypsa.Network) -> None:
 
 
 def main() -> None:
+    if not CARRIERS or any(not carrier for carrier in CARRIERS):
+        raise ValueError("CARRIERS must contain at least one non-empty pattern.")
     if BASELINE_MODE not in {"auto", "solve", "reuse"}:
         raise ValueError("BASELINE_MODE must be 'auto', 'solve', or 'reuse'.")
     if not SENSES or any(sense not in {"min", "max"} for sense in SENSES):
@@ -218,7 +254,7 @@ def main() -> None:
 
     records = []
     for sense in SENSES:
-        print(f"Running {sense}imum-{CARRIER} MGA with {SLACK:.1%} slack ...")
+        print(f"Running {sense}imum-{OBJECTIVE_NAME} MGA with {SLACK:.1%} slack ...")
         alternative = baseline.copy()
         status, condition = alternative.optimize.optimize_mga(
             snapshots=SNAPSHOTS,
@@ -229,14 +265,15 @@ def main() -> None:
             solver_name=SOLVER_NAME,
             solver_options=SOLVER_OPTIONS,
         )
-        validate_solution(status, condition, f"{sense}imum-{CARRIER} MGA")
+        validate_solution(status, condition, f"{sense}imum-{OBJECTIVE_NAME} MGA")
 
-        output = OUTPUT_FOLDER / f"mga_{CARRIER}_{sense}.nc"
+        output = OUTPUT_FOLDER / f"mga_{OBJECTIVE_NAME}_{sense}.nc"
         alternative.export_to_netcdf(output)
         records.append(
             {
                 "sense": sense,
-                "carrier": CARRIER,
+                "carrier_patterns": " | ".join(CARRIERS),
+                "carrier_match_mode": CARRIER_MATCH_MODE,
                 "slack": SLACK,
                 "baseline_objective": float(baseline.objective),
                 "output_network": str(output),
