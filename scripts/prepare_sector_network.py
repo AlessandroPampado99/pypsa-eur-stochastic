@@ -3704,15 +3704,15 @@ def add_heat(
                 ),
             )
 
-            solar_thermal = n.generators.index[
+            solar_thermal_generators = n.generators.index[
                 n.generators.carrier == f"{heat_system} solar thermal"
             ]
             duplicate_components(
                 n,
                 "Generator",
-                solar_thermal,
+                solar_thermal_generators,
                 " electricity-only",
-                bus=n.generators.loc[solar_thermal, "bus"].str.replace(
+                bus=n.generators.loc[solar_thermal_generators, "bus"].str.replace(
                     f" {heat_system} heat",
                     f" electricity {heat_system} heat",
                     regex=False,

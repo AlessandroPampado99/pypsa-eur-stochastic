@@ -49,6 +49,28 @@ EXCLUDED_GROUPS: set[str] = set()
 EXCLUDED_COMPONENTS: set[str] = {"Load"}
 INCLUDED_COMPONENTS: set[str] | None = None
 EXCLUDED_CARRIERS: set[str] = {"<none>"}
+GROUP_ALIASES = {
+    "AC": "electricity",
+    "low voltage": "electricity",
+    "gas urban central heat": "urban central heat",
+    "electricity urban central heat": "urban central heat",
+    "gas urban decentral heat": "urban decentral heat",
+    "electricity urban decentral heat": "urban decentral heat",
+    "residential urban decentral heat": "urban decentral heat",
+    "gas residential urban decentral heat": "urban decentral heat",
+    "electricity residential urban decentral heat": "urban decentral heat",
+    "services urban decentral heat": "urban decentral heat",
+    "gas services urban decentral heat": "urban decentral heat",
+    "electricity services urban decentral heat": "urban decentral heat",
+    "gas rural heat": "rural heat",
+    "electricity rural heat": "rural heat",
+    "residential rural heat": "rural heat",
+    "gas residential rural heat": "rural heat",
+    "electricity residential rural heat": "rural heat",
+    "services rural heat": "rural heat",
+    "gas services rural heat": "rural heat",
+    "electricity services rural heat": "rural heat",
+}
 
 SCENARIO_ORDER: list[str] | None = None
 FAMILY_GROUPS: dict[str, list[str]] | None = None
@@ -142,10 +164,10 @@ def order_and_group_scenarios(
     scenarios: Sequence[str],
 ) -> tuple[list[str], dict[str, str]]:
     discovered = list(dict.fromkeys(map(str, scenarios)))
-    scenario_rank = {
-        name: i for i, name in enumerate(SCENARIO_ORDER or discovered)
-    }
-    discovered.sort(key=lambda name: (scenario_rank.get(name, len(scenario_rank)), name))
+    scenario_rank = {name: i for i, name in enumerate(SCENARIO_ORDER or discovered)}
+    discovered.sort(
+        key=lambda name: (scenario_rank.get(name, len(scenario_rank)), name)
+    )
     family_by_scenario = _family_mapping(discovered)
     encountered = list(dict.fromkeys(family_by_scenario[name] for name in discovered))
     family_order = list(FAMILY_ORDER or [])
@@ -189,6 +211,7 @@ def read_capacity_workbook(path: Path) -> pd.DataFrame:
     long["scenario"] = long["scenario_column"].astype(str).str[len(VALUE_PREFIX) :]
     long["carrier"] = long["carrier"].astype(str).map(rename_techs)
     long["group"] = long["group"].astype(str)
+    long["group"] = long["group"].replace(GROUP_ALIASES)
     long["component"] = long["component"].astype(str)
     long["metric"] = long["metric"].astype(str)
     long = long[~long["group"].isin(EXCLUDED_GROUPS or set())]
@@ -209,14 +232,11 @@ def read_capacity_workbook(path: Path) -> pd.DataFrame:
     long = long[~long["carrier"].isin(EXCLUDED_CARRIERS or set())]
     if long.empty:
         raise ValueError("No capacity records remain after applying filters.")
-    return (
-        long.groupby(
-            ["group", "component", "metric", "scenario", "carrier"],
-            as_index=False,
-            sort=False,
-        )["value"]
-        .sum()
-    )
+    return long.groupby(
+        ["group", "component", "metric", "scenario", "carrier"],
+        as_index=False,
+        sort=False,
+    )["value"].sum()
 
 
 def _positions(
@@ -249,13 +269,16 @@ def plot_capacity(
     output_dir: Path,
 ) -> bool:
     scale, unit = _scale_and_unit(metric)
-    table = records.pivot_table(
-        index="scenario",
-        columns="carrier",
-        values="value",
-        aggfunc="sum",
-        fill_value=0.0,
-    ) / scale
+    table = (
+        records.pivot_table(
+            index="scenario",
+            columns="carrier",
+            values="value",
+            aggfunc="sum",
+            fill_value=0.0,
+        )
+        / scale
+    )
     scenarios, families = order_and_group_scenarios(table.index)
     table = table.reindex(scenarios)
     table = table.loc[:, table.abs().max() >= CAPACITY_THRESHOLD]
@@ -283,17 +306,27 @@ def plot_capacity(
     for carrier in carriers:
         values = table[carrier].to_numpy(float)
         ax.bar(
-            x, values, BAR_WIDTH, bottom=bottom, color=colors[carrier],
-            linewidth=0, label=carrier,
+            x,
+            values,
+            BAR_WIDTH,
+            bottom=bottom,
+            color=colors[carrier],
+            linewidth=0,
+            label=carrier,
         )
         if ANNOTATE_SEGMENTS:
             for i, value in enumerate(values):
-                share = 100.0 * abs(value) / abs(totals.iloc[i]) if totals.iloc[i] else 0
+                share = (
+                    100.0 * abs(value) / abs(totals.iloc[i]) if totals.iloc[i] else 0
+                )
                 if value and share >= SEGMENT_LABEL_MIN_PERCENT:
                     ax.text(
-                        x[i], bottom[i] + value / 2,
+                        x[i],
+                        bottom[i] + value / 2,
                         f"{value:.{SEGMENT_LABEL_DECIMALS}f}",
-                        ha="center", va="center", fontsize=7,
+                        ha="center",
+                        va="center",
+                        fontsize=7,
                     )
         bottom += values
 
@@ -301,27 +334,42 @@ def plot_capacity(
     if ANNOTATE_TOTALS:
         for xpos, top in zip(x, bottom):
             ax.text(
-                xpos, top + 0.015 * span, f"{top:.{TOTAL_DECIMALS}f}",
-                ha="center", va="bottom", fontsize=8, fontweight="bold",
+                xpos,
+                top + 0.015 * span,
+                f"{top:.{TOTAL_DECIMALS}f}",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+                fontweight="bold",
             )
     for family_index, (family, first, last) in enumerate(family_ranges):
         ax.text(
-            (x[first] + x[last]) / 2, -0.25, family,
-            transform=ax.get_xaxis_transform(), ha="center", va="top",
-            fontsize=10, fontweight="bold",
+            (x[first] + x[last]) / 2,
+            -0.25,
+            family,
+            transform=ax.get_xaxis_transform(),
+            ha="center",
+            va="top",
+            fontsize=10,
+            fontweight="bold",
         )
         if family_index < len(family_ranges) - 1:
             next_first = family_ranges[family_index + 1][1]
             ax.axvline(
                 (x[last] + x[next_first]) / 2,
-                color="0.35", linewidth=0.8, alpha=0.8,
+                color="0.35",
+                linewidth=0.8,
+                alpha=0.8,
             )
 
     ax.set_xticks(x)
     ax.set_xticklabels(scenarios, rotation=45, ha="right", fontweight="bold")
     ax.set_ylabel(f"Optimal capacity [{unit}]", fontweight="bold")
     ax.set_xlabel("Scenario", fontweight="bold")
-    ax.set_title(f"Optimal capacity: {group} — {metric.replace('_', ' ')}")
+    ax.set_title(
+        f"Optimal capacity: {group} — {metric.replace('_', ' ')}",
+        fontweight="bold",
+    )
     ax.grid(axis="y", alpha=0.25)
     ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1), frameon=False)
     ax.set_ylim(0, bottom.max() + 0.12 * span)
@@ -329,9 +377,7 @@ def plot_capacity(
 
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{OUT_STEM}_{_safe_filename(group)}_{_safe_filename(metric)}"
-    for enabled, suffix in (
-        (SAVE_PNG, "png"), (SAVE_SVG, "svg"), (SAVE_PDF, "pdf")
-    ):
+    for enabled, suffix in ((SAVE_PNG, "png"), (SAVE_SVG, "svg"), (SAVE_PDF, "pdf")):
         if enabled:
             path = output_dir / f"{stem}.{suffix}"
             fig.savefig(path, dpi=DPI if suffix == "png" else None, bbox_inches="tight")
@@ -353,12 +399,8 @@ def main() -> None:
     plotting = _load_yaml(PLOTTING_YAML)
     capacity = read_capacity_workbook(EXCEL_PATH)
     count = 0
-    for (group, metric), records in capacity.groupby(
-        ["group", "metric"], sort=True
-    ):
-        count += plot_capacity(
-            str(group), str(metric), records, plotting, OUTPUT_DIR
-        )
+    for (group, metric), records in capacity.groupby(["group", "metric"], sort=True):
+        count += plot_capacity(str(group), str(metric), records, plotting, OUTPUT_DIR)
     if not count:
         raise ValueError("No capacity plots were produced.")
     print(f"[DONE] Wrote {count} capacity plot set(s) to {OUTPUT_DIR}")

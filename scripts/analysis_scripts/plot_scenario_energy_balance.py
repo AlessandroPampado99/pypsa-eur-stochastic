@@ -40,18 +40,33 @@ INCLUDED_SCENARIOS: set[str] | None = None
 INCLUDED_GROUPS: set[str] | None = None
 EXCLUDED_GROUPS: set[str] = set()
 GROUP_ALIASES = {
+    "AC": "electricity",
+    "low voltage": "electricity",
     "gas urban central heat": "urban central heat",
     "electricity urban central heat": "urban central heat",
-    "gas residential urban decentral heat": "residential urban decentral heat",
-    "electricity residential urban decentral heat": "residential urban decentral heat",
-    "gas services urban decentral heat": "services urban decentral heat",
-    "electricity services urban decentral heat": "services urban decentral heat",
-    "gas residential rural heat": "residential rural heat",
-    "electricity residential rural heat": "residential rural heat",
-    "gas services rural heat": "services rural heat",
-    "electricity services rural heat": "services rural heat",
+    "gas urban decentral heat": "urban decentral heat",
+    "electricity urban decentral heat": "urban decentral heat",
+    "residential urban decentral heat": "urban decentral heat",
+    "gas residential urban decentral heat": "urban decentral heat",
+    "electricity residential urban decentral heat": "urban decentral heat",
+    "services urban decentral heat": "urban decentral heat",
+    "gas services urban decentral heat": "urban decentral heat",
+    "electricity services urban decentral heat": "urban decentral heat",
+    "gas rural heat": "rural heat",
+    "electricity rural heat": "rural heat",
+    "residential rural heat": "rural heat",
+    "gas residential rural heat": "rural heat",
+    "electricity residential rural heat": "rural heat",
+    "services rural heat": "rural heat",
+    "gas services rural heat": "rural heat",
+    "electricity services rural heat": "rural heat",
     "oil from H2": "oil",
 }
+ELECTRICITY_GROUP = "electricity"
+ELECTRICITY_SOURCE_GROUPS = {"AC", "low voltage"}
+DISTRIBUTION_GRID_TECHNOLOGY = "electricity distribution grid"
+GRID_LOSSES_TECHNOLOGY = "grid losses"
+GRID_LOSSES_COLOR = "#d62728"
 ZERO_BALANCE_TOLERANCE = 1e-12
 
 SCENARIO_ORDER: list[str] | None = None
@@ -241,17 +256,58 @@ def read_balance_workbook(path: Path) -> pd.DataFrame:
     if INCLUDED_SCENARIOS is not None:
         balance = balance[balance["scenario"].isin(set(INCLUDED_SCENARIOS))]
 
+    balance = _merge_electricity_groups(balance)
+    balance["group"] = balance["group"].replace(GROUP_ALIASES)
+
     balance = balance[~balance["group"].isin(set(EXCLUDED_GROUPS or set()))]
     if INCLUDED_GROUPS is not None:
         balance = balance[balance["group"].isin(set(INCLUDED_GROUPS))]
 
-    balance["group"] = balance["group"].replace(GROUP_ALIASES)
     balance = balance.groupby(
         ["group", "scenario", "technology"], as_index=False, sort=False
     )["value"].sum()
     if balance.empty:
         raise ValueError("No workbook records remain after scenario/group filters.")
     return balance
+
+
+def _merge_electricity_groups(balance: pd.DataFrame) -> pd.DataFrame:
+    """Merge AC and low voltage, retaining only the internal grid loss."""
+    electricity = balance[balance["group"].isin(ELECTRICITY_SOURCE_GROUPS)].copy()
+    if electricity.empty:
+        return balance
+
+    internal_grid = electricity["technology"].eq(DISTRIBUTION_GRID_TECHNOLOGY)
+    grid_flows = electricity[internal_grid]
+    external_flows = electricity[~internal_grid].copy()
+    external_flows["group"] = ELECTRICITY_GROUP
+
+    ac_consumption = (
+        -grid_flows[grid_flows["group"].eq("AC") & grid_flows["value"].lt(0.0)]
+        .groupby("scenario")["value"]
+        .sum()
+    )
+    low_voltage_supply = (
+        grid_flows[grid_flows["group"].eq("low voltage") & grid_flows["value"].gt(0.0)]
+        .groupby("scenario")["value"]
+        .sum()
+    )
+    scenarios = pd.Index(electricity["scenario"].unique(), name="scenario")
+    losses = (
+        ac_consumption.reindex(scenarios, fill_value=0.0)
+        - low_voltage_supply.reindex(scenarios, fill_value=0.0)
+    ).clip(lower=0.0)
+    loss_records = pd.DataFrame(
+        {
+            "group": ELECTRICITY_GROUP,
+            "technology": GRID_LOSSES_TECHNOLOGY,
+            "scenario": scenarios,
+            "value": -losses.to_numpy(),
+        }
+    )
+
+    other_groups = balance[~balance["group"].isin(ELECTRICITY_SOURCE_GROUPS)]
+    return pd.concat([other_groups, external_flows, loss_records], ignore_index=True)
 
 
 def build_group_tables(balance: pd.DataFrame) -> dict[str, pd.DataFrame]:
@@ -306,7 +362,11 @@ def _colors(technologies: Sequence[str], plotting: Mapping[str, Any]) -> dict[st
     configured = plotting.get("plotting", {}).get("tech_colors", {})
     cmap = plt.get_cmap("tab20")
     return {
-        technology: configured.get(technology, cmap(i % cmap.N))
+        technology: (
+            GRID_LOSSES_COLOR
+            if technology == GRID_LOSSES_TECHNOLOGY
+            else configured.get(technology, cmap(i % cmap.N))
+        )
         for i, technology in enumerate(technologies)
     }
 
@@ -496,7 +556,7 @@ def plot_group(
     ax.set_xlabel("Scenario", fontweight="bold")
     for label in ax.get_yticklabels():
         label.set_fontweight("bold")
-    ax.set_title(f"{TITLE_PREFIX}: {group}")
+    ax.set_title(f"{TITLE_PREFIX}: {group}", fontweight="bold")
     ax.grid(axis="y", alpha=0.25)
     ax.grid(axis="x", visible=False)
     supply_technologies = [
