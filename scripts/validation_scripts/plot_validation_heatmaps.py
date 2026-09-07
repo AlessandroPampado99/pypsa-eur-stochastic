@@ -48,7 +48,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/cutouts_det_capexp_")
+ROOT_DIR = Path("results/cutouts_det_capexp_nols")
 OUTPUT_DIR = Path("results/cutouts_det_capexp_nols/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
@@ -71,10 +71,10 @@ EXPECTED_NETWORKS_DIR = OUTPUT_DIR / "expected_networks"
 
 # Reuse the existing Excel tables instead of loading all solved networks again.
 # Set to False to recompute the metrics and overwrite the workbook.
-REUSE_EXISTING_EXCEL = True
+REUSE_EXISTING_EXCEL = False
 
 # Scenario selection
-EXCLUDED_SCENARIOS = set()
+EXCLUDED_SCENARIOS = ("base") # set()
 INCLUDE_STOCHASTIC_SCENARIOS = True
 
 # These scenarios, if included, use __exp on the diagonal

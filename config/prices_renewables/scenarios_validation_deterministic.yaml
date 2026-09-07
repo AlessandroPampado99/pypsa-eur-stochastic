@@ -1,7 +1,4 @@
 validation_runs:
-  price_gas_3___price_gas_3:
-    capacities_from: price_gas_3
-    operations_on: price_gas_3
 
   price_gas_3___price_gas_5:
     capacities_from: price_gas_3
@@ -51,10 +48,6 @@ validation_runs:
     capacities_from: price_gas_5
     operations_on: price_gas_3
 
-  price_gas_5___price_gas_5:
-    capacities_from: price_gas_5
-    operations_on: price_gas_5
-
   price_gas_5___price_gas_8:
     capacities_from: price_gas_5
     operations_on: price_gas_8
@@ -102,10 +95,6 @@ validation_runs:
   price_gas_8___price_gas_5:
     capacities_from: price_gas_8
     operations_on: price_gas_5
-
-  price_gas_8___price_gas_8:
-    capacities_from: price_gas_8
-    operations_on: price_gas_8
 
   price_gas_8___price_oil_3:
     capacities_from: price_gas_8
@@ -155,10 +144,6 @@ validation_runs:
     capacities_from: price_oil_3
     operations_on: price_gas_8
 
-  price_oil_3___price_oil_3:
-    capacities_from: price_oil_3
-    operations_on: price_oil_3
-
   price_oil_3___price_oil_5:
     capacities_from: price_oil_3
     operations_on: price_oil_5
@@ -206,10 +191,6 @@ validation_runs:
   price_oil_5___price_oil_3:
     capacities_from: price_oil_5
     operations_on: price_oil_3
-
-  price_oil_5___price_oil_5:
-    capacities_from: price_oil_5
-    operations_on: price_oil_5
 
   price_oil_5___price_oil_8:
     capacities_from: price_oil_5
@@ -259,10 +240,6 @@ validation_runs:
     capacities_from: price_oil_8
     operations_on: price_oil_5
 
-  price_oil_8___price_oil_8:
-    capacities_from: price_oil_8
-    operations_on: price_oil_8
-
   price_oil_8___pmaxpu_solar_battery_0.8:
     capacities_from: price_oil_8
     operations_on: pmaxpu_solar_battery_0.8
@@ -310,10 +287,6 @@ validation_runs:
   pmaxpu_solar_battery_0.8___price_oil_8:
     capacities_from: pmaxpu_solar_battery_0.8
     operations_on: price_oil_8
-
-  pmaxpu_solar_battery_0.8___pmaxpu_solar_battery_0.8:
-    capacities_from: pmaxpu_solar_battery_0.8
-    operations_on: pmaxpu_solar_battery_0.8
 
   pmaxpu_solar_battery_0.8___pmaxpu_solar_battery_0.5:
     capacities_from: pmaxpu_solar_battery_0.8
@@ -363,10 +336,6 @@ validation_runs:
     capacities_from: pmaxpu_solar_battery_0.5
     operations_on: pmaxpu_solar_battery_0.8
 
-  pmaxpu_solar_battery_0.5___pmaxpu_solar_battery_0.5:
-    capacities_from: pmaxpu_solar_battery_0.5
-    operations_on: pmaxpu_solar_battery_0.5
-
   pmaxpu_solar_battery_0.5___pmaxpu_solar_battery_0.2:
     capacities_from: pmaxpu_solar_battery_0.5
     operations_on: pmaxpu_solar_battery_0.2
@@ -414,10 +383,6 @@ validation_runs:
   pmaxpu_solar_battery_0.2___pmaxpu_solar_battery_0.5:
     capacities_from: pmaxpu_solar_battery_0.2
     operations_on: pmaxpu_solar_battery_0.5
-
-  pmaxpu_solar_battery_0.2___pmaxpu_solar_battery_0.2:
-    capacities_from: pmaxpu_solar_battery_0.2
-    operations_on: pmaxpu_solar_battery_0.2
 
   pmaxpu_solar_battery_0.2___pmaxpu_wind_0.8:
     capacities_from: pmaxpu_solar_battery_0.2
@@ -467,10 +432,6 @@ validation_runs:
     capacities_from: pmaxpu_wind_0.8
     operations_on: pmaxpu_solar_battery_0.2
 
-  pmaxpu_wind_0.8___pmaxpu_wind_0.8:
-    capacities_from: pmaxpu_wind_0.8
-    operations_on: pmaxpu_wind_0.8
-
   pmaxpu_wind_0.8___pmaxpu_wind_0.5:
     capacities_from: pmaxpu_wind_0.8
     operations_on: pmaxpu_wind_0.5
@@ -519,10 +480,6 @@ validation_runs:
     capacities_from: pmaxpu_wind_0.5
     operations_on: pmaxpu_wind_0.8
 
-  pmaxpu_wind_0.5___pmaxpu_wind_0.5:
-    capacities_from: pmaxpu_wind_0.5
-    operations_on: pmaxpu_wind_0.5
-
   pmaxpu_wind_0.5___pmaxpu_wind_0.2:
     capacities_from: pmaxpu_wind_0.5
     operations_on: pmaxpu_wind_0.2
@@ -570,7 +527,3 @@ validation_runs:
   pmaxpu_wind_0.2___pmaxpu_wind_0.5:
     capacities_from: pmaxpu_wind_0.2
     operations_on: pmaxpu_wind_0.5
-
-  pmaxpu_wind_0.2___pmaxpu_wind_0.2:
-    capacities_from: pmaxpu_wind_0.2
-    operations_on: pmaxpu_wind_0.2

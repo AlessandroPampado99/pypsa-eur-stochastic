@@ -399,21 +399,20 @@ def validation_operation_network(w):
 
     Resolution priority:
     1. explicit path from validation.yaml
-    2. canonical path under resources/<prefix>/<name>/networks/
+    2. optimized path under results/<prefix>/<name>/networks/
 
-    The stochasticified resource is used only when stochastic scenarios are enabled.
+    Use the optimized operation-scenario network so its operational assumptions,
+    including structured-scenario changes to costs and availability, are retained.
     """
     pair = _get_validation_pair(w)
 
     if pair["op_path"]:
         return pair["op_path"]
 
-    network_prefix = "base_s_stoch" if _stoch_enabled() else "base_s"
-
     return str(
-        _run_base_dir("resources", pair["op_prefix"], pair["op_source"])
+        _run_base_dir("results", pair["op_prefix"], pair["op_source"])
         / "networks"
-        / f"{network_prefix}_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
+        / f"base_s_{w.clusters}_{w.opts}_{w.sector_opts}_{w.planning_horizons}.nc"
     )
 
 

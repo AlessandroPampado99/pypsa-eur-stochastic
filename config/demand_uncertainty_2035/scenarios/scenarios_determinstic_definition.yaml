@@ -147,9 +147,9 @@ families:
         type: shift
         efficiency_factor: 1.0
 
-      naphta_for_industry:
-        source: naphta for industry
-        target: methanol for industry
+      naphtha_for_industry:
+        source: naphtha for industry
+        target: industry methanol
         cap: 0.950
         type: shift
         efficiency_factor: 1.0
@@ -314,7 +314,7 @@ scenario_definitions:
         - aviation_kerosene
         - shipping_oil
         - shipping_h2
-        - naphta_for_industry
+        - naphtha_for_industry
 
   MEOH_SHIP:
     demand_transition:
@@ -323,7 +323,7 @@ scenario_definitions:
       priority:
         - shipping_oil
         - shipping_h2
-        - naphta_for_industry
+        - naphtha_for_industry
         - aviation_kerosene
 
   MEOH_IND:
@@ -331,7 +331,7 @@ scenario_definitions:
       family: MEOH
       target: conservative
       priority:
-        - naphta_for_industry
+        - naphtha_for_industry
         - aviation_kerosene
         - shipping_oil
         - shipping_h2

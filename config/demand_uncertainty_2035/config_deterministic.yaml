@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_2035"
-  name: BASE
+  name: all
   scenarios:
     enable: true
     file: config/demand_uncertainty_2035/scenarios/scenarios_deterministic.yaml

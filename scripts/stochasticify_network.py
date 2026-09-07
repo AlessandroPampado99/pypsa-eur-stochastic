@@ -2129,10 +2129,10 @@ if __name__ == "__main__":
             "stochasticify_sector_network",
             opts="",
             clusters="adm",
-            configfiles="config/demand_uncertainty/config_deterministic.yaml",
+            configfiles="config/demand_uncertainty_2035/sensitivity/config_sensitivity.yaml",
             sector_opts="",
-            planning_horizons="2050",
-            run="ELEC_HEAT",
+            planning_horizons="2035",
+            run="OILGAS_HEAT_200",
         )
 
     configure_logging(snakemake)
