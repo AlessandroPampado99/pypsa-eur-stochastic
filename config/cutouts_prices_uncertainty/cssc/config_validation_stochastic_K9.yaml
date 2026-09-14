@@ -12,11 +12,11 @@ run:
   use_shadow_directory: false
 
 validation:
-  enable: false
-  config: config/cutouts_prices_uncertainty/validation_deterministic.yaml
+  enable: true
+  config: config/cutouts_prices_uncertainty/cssc/validation_stochastic_K9.yaml
 
 cssc_scenario_reduction:
-  enable: true
+  enable: false
   results_prefix: results/cutouts_det_capexp_nols
   network_name: base_s_adm___2050.nc
   workbook: results/cutouts_det_capexp_nols/analysis_output/validation_heatmaps/validation_heatmaps.xlsx

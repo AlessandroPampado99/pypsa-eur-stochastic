@@ -78,6 +78,7 @@ SHOW_FAMILY_SEPARATORS = True
 SHOW_FAMILY_LABELS = True
 
 ENERGY_THRESHOLD_TWH = 0.0
+LEGEND_MIN_PERCENT = 0.5
 ANNOTATE_TOTALS = True
 TOTAL_MODE = "positive"
 TOTAL_DECIMALS = 0
@@ -248,7 +249,9 @@ def read_balance_workbook(path: Path) -> pd.DataFrame:
     consumption = _read_level_sheet(path, CONSUMPTION_SHEET, sign=-1.0)
     balance = pd.concat([supply, consumption], ignore_index=True)
     balance["group"] = balance["group"].astype(str)
-    balance["technology"] = balance["technology"].astype(str).map(rename_techs)
+    balance["technology"] = balance["technology"].astype(str).map(
+        lambda label: rename_techs(label, preserve_chp=True)
+    )
     balance["scenario"] = balance["scenario"].astype(str)
 
     excluded_scenarios = set(EXCLUDED_SCENARIOS or set())
@@ -434,6 +437,20 @@ def _visible_table(table: pd.DataFrame) -> pd.DataFrame:
     return table.loc[:, keep]
 
 
+def _legend_technologies(
+    table: pd.DataFrame,
+    totals: pd.Series,
+    *,
+    supply: bool,
+) -> list[str]:
+    """Keep technologies reaching the legend share threshold in any scenario."""
+    values = table.clip(lower=0.0) if supply else -table.clip(upper=0.0)
+    denominator = totals.replace(0.0, np.nan)
+    shares = values.div(denominator, axis=0).fillna(0.0) * 100.0
+    keep = shares.max(axis=0) >= LEGEND_MIN_PERCENT
+    return [technology for technology in table.columns if keep[technology]]
+
+
 def plot_group(
     group: str,
     table: pd.DataFrame,
@@ -559,12 +576,12 @@ def plot_group(
     ax.set_title(f"{TITLE_PREFIX}: {group}", fontweight="bold")
     ax.grid(axis="y", alpha=0.25)
     ax.grid(axis="x", visible=False)
-    supply_technologies = [
-        technology for technology in technologies if (table[technology] > 0.0).any()
-    ]
-    consumption_technologies = [
-        technology for technology in technologies if (table[technology] < 0.0).any()
-    ]
+    supply_technologies = _legend_technologies(
+        table, totals["positive"], supply=True
+    )
+    consumption_technologies = _legend_technologies(
+        table, totals["consumption"], supply=False
+    )
     heading = Patch(facecolor="none", edgecolor="none")
     legend_handles = [heading]
     legend_labels = ["SUPPLY"]

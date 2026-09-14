@@ -79,6 +79,7 @@ INFER_FAMILY_FROM_NAME = True
 FAMILY_GAP = 0.7
 
 CAPACITY_THRESHOLD = 0.0  # in the plotted unit
+LEGEND_MIN_PERCENT = 0.5
 ANNOTATE_TOTALS = True
 TOTAL_DECIMALS = 0
 ANNOTATE_SEGMENTS = True
@@ -209,7 +210,9 @@ def read_capacity_workbook(path: Path) -> pd.DataFrame:
         value_name="value",
     )
     long["scenario"] = long["scenario_column"].astype(str).str[len(VALUE_PREFIX) :]
-    long["carrier"] = long["carrier"].astype(str).map(rename_techs)
+    long["carrier"] = long["carrier"].astype(str).map(
+        lambda label: rename_techs(label, preserve_chp=True)
+    )
     long["group"] = long["group"].astype(str)
     long["group"] = long["group"].replace(GROUP_ALIASES)
     long["component"] = long["component"].astype(str)
@@ -371,7 +374,28 @@ def plot_capacity(
         fontweight="bold",
     )
     ax.grid(axis="y", alpha=0.25)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1), frameon=False)
+    legend_shares = table.abs().div(totals.abs().replace(0.0, np.nan), axis=0)
+    legend_carriers = [
+        carrier
+        for carrier in carriers
+        if 100.0 * legend_shares[carrier].fillna(0.0).max()
+        >= LEGEND_MIN_PERCENT
+    ]
+    handles, labels = ax.get_legend_handles_labels()
+    visible_legend = [
+        (handle, label)
+        for handle, label in zip(handles, labels)
+        if label in legend_carriers
+    ]
+    if visible_legend:
+        visible_handles, visible_labels = zip(*visible_legend)
+        ax.legend(
+            visible_handles,
+            visible_labels,
+            loc="upper left",
+            bbox_to_anchor=(1.01, 1),
+            frameon=False,
+        )
     ax.set_ylim(0, bottom.max() + 0.12 * span)
     fig.subplots_adjust(bottom=0.28)
 

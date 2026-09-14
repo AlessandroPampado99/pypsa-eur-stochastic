@@ -83,9 +83,16 @@ scripts:
       LABELED_TECHNOLOGIES:
       CONSUMPTION_HATCH: "//"
       ENERGY_THRESHOLD_TWH: 0.0
+      # Hide a technology from the legend only when it remains below this
+      # share in every scenario. Its plotted segment and totals are unchanged.
+      LEGEND_MIN_PERCENT: 0.5
       # Optional exact bus-carrier selection, e.g. [AC, co2, H2].
       INCLUDED_GROUPS:
       EXCLUDED_GROUPS: []
+  plot_scenario_optimal_capacity:
+    overrides:
+      # Legend-only filter; capacities and exported totals remain unchanged.
+      LEGEND_MIN_PERCENT: 0.5
   plot_demand_bars: true
   plot_heatmap_vs_base: true
   plot_heatmap_vs_base_size: true

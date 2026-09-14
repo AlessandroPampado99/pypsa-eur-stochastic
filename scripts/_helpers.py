@@ -937,7 +937,7 @@ def sanitize_custom_columns(n: pypsa.Network):
         n.links.reversed = n.links.reversed.astype(bool)
 
 
-def rename_techs(label: str) -> str:
+def rename_techs(label: str, *, preserve_chp: bool = False) -> str:
     """
     Rename technology labels for better readability.
 
@@ -947,6 +947,9 @@ def rename_techs(label: str) -> str:
     ----------
     label: str
         Technology label to be renamed
+    preserve_chp: bool
+        Keep the full carrier name for CHP technologies instead of collapsing
+        every CHP fuel and carbon-capture variant to ``"CHP"``.
 
     Returns
     -------
@@ -1006,11 +1009,18 @@ def rename_techs(label: str) -> str:
         "B2B": "transmission lines",
     }
 
-    for ptr in prefix_to_remove:
-        if label[: len(ptr)] == ptr:
-            label = label[len(ptr) :]
+    is_chp = "CHP" in label
+
+    # Full CHP names carry information about fuel, heat system, and carbon
+    # capture. Preserve all of it when detailed technology plots request it.
+    if not (preserve_chp and is_chp):
+        for ptr in prefix_to_remove:
+            if label[: len(ptr)] == ptr:
+                label = label[len(ptr) :]
 
     for rif in rename_if_contains:
+        if preserve_chp and rif == "CHP":
+            continue
         if rif in label:
             label = rif
 

@@ -1,5 +1,54 @@
 validation_runs:
 
+  price_gas_3___base:
+    capacities_from: price_gas_3
+    operations_on: base
+
+  price_gas_5___base:
+    capacities_from: price_gas_5
+    operations_on: base
+
+  price_gas_8___base:
+    capacities_from: price_gas_8
+    operations_on: base
+
+  price_oil_3___base:
+    capacities_from: price_oil_3
+    operations_on: base
+
+  price_oil_5___base:
+    capacities_from: price_oil_5
+    operations_on: base
+
+  price_oil_8___base:
+    capacities_from: price_oil_8
+    operations_on: base
+
+  price_pmaxpu_solar_battery_0.8___base:
+    capacities_from: pmaxpu_solar_battery_0.8
+    operations_on: base
+  
+  price_pmaxpu_solar_battery_0.5___base:
+    capacities_from: pmaxpu_solar_battery_0.5
+    operations_on: base
+
+  price_pmaxpu_solar_battery_0.2___base:
+    capacities_from: pmaxpu_solar_battery_0.2
+    operations_on: base
+
+  price_pmaxpu_wind_0.8___base:
+    capacities_from: pmaxpu_wind_0.8
+    operations_on: base
+
+  price_pmaxpu_wind_0.5___base:
+    capacities_from: pmaxpu_wind_0.5
+    operations_on: base
+
+  price_pmaxpu_wind_0.2___base:
+    capacities_from: pmaxpu_wind_0.2
+    operations_on: base
+
+
   price_gas_3___price_gas_5:
     capacities_from: price_gas_3
     operations_on: price_gas_5

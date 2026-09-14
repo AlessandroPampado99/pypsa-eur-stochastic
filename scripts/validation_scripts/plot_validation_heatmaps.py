@@ -48,17 +48,17 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/cutouts_det_capexp_nols")
-OUTPUT_DIR = Path("results/cutouts_det_capexp_nols/analysis_output/validation_heatmaps")
+ROOT_DIR = Path("results/prices_and_renewables")
+OUTPUT_DIR = Path("results/prices_and_renewables/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
-DIAGONAL_FILENAME = "base_s_adm___2050.nc"
+DIAGONAL_FILENAME = "base_s_adm___2040.nc"
 
 # Diagonal stochastic expected-value solved network
-DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2050.nc"
+DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2040.nc"
 
 # Off-diagonal validation solved network
-CROSS_FILENAME_TEMPLATE = "base_s_adm___2050__cap-{cap_source}__op-{op_source}.nc"
+CROSS_FILENAME_TEMPLATE = "base_s_adm___2040__cap-{cap_source}__op-{op_source}.nc"
 
 # Output names
 OUTPUT_FIGURE = OUTPUT_DIR / "validation_heatmaps.png"
@@ -71,10 +71,10 @@ EXPECTED_NETWORKS_DIR = OUTPUT_DIR / "expected_networks"
 
 # Reuse the existing Excel tables instead of loading all solved networks again.
 # Set to False to recompute the metrics and overwrite the workbook.
-REUSE_EXISTING_EXCEL = False
+REUSE_EXISTING_EXCEL = True
 
 # Scenario selection
-EXCLUDED_SCENARIOS = ("base") # set()
+EXCLUDED_SCENARIOS = set() # ("base") # set()
 INCLUDE_STOCHASTIC_SCENARIOS = True
 
 # These scenarios, if included, use __exp on the diagonal
