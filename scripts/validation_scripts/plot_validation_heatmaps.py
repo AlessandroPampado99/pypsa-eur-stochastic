@@ -18,11 +18,13 @@ Supported files:
     base_s_adm___2050__cap-<cap_source>__op-<op_source>.nc
 
 The script creates:
-- one figure with 3 heatmaps:
+- separate heatmaps for:
     1) objective
     2) load curtailment
     3) renewable curtailment
-- one Excel file with the underlying matrices
+    4) CAPEX
+    5) OPEX
+- one Excel file with all matrices, plus separate CAPEX and OPEX workbooks
 
 Rows   = scenario providing capacities
 Columns = scenario providing operations
@@ -32,6 +34,7 @@ Columns = scenario providing operations
 from pathlib import Path
 import sys
 import math
+import re
 import warnings
 
 import numpy as np
@@ -48,17 +51,17 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-ROOT_DIR = Path("results/prices_and_renewables")
-OUTPUT_DIR = Path("results/prices_and_renewables/analysis_output/validation_heatmaps")
+ROOT_DIR = Path("results/demand_uncertainty_2035")
+OUTPUT_DIR = Path("results/demand_uncertainty_2035/analysis_output/validation_heatmaps")
 
 # Diagonal standard solved network
-DIAGONAL_FILENAME = "base_s_adm___2040.nc"
+DIAGONAL_FILENAME = "base_s_adm___2035.nc"
 
 # Diagonal stochastic expected-value solved network
-DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2040.nc"
+DIAGONAL_STOCHASTIC_FILENAME = "base_s_adm___2035.nc"
 
 # Off-diagonal validation solved network
-CROSS_FILENAME_TEMPLATE = "base_s_adm___2040__cap-{cap_source}__op-{op_source}.nc"
+CROSS_FILENAME_TEMPLATE = "base_s_adm___2035__cap-{cap_source}__op-{op_source}.nc"
 
 # Output names
 OUTPUT_FIGURE = OUTPUT_DIR / "validation_heatmaps.png"
@@ -74,44 +77,56 @@ EXPECTED_NETWORKS_DIR = OUTPUT_DIR / "expected_networks"
 REUSE_EXISTING_EXCEL = True
 
 # Scenario selection
-EXCLUDED_SCENARIOS = set() # ("base") # set()
+EXCLUDED_SCENARIOS = ("stochastic_network", "BASE_2020") # set()
 INCLUDE_STOCHASTIC_SCENARIOS = True
 
 # These scenarios, if included, use __exp on the diagonal
 STOCHASTIC_SCENARIOS = {} # {"stochastic_network"}
 
-# Optional manual order. If None, folder order is used alphabetically.
+# Optional manual order. If None, use natural numeric order (K2 before K10).
 SCENARIO_ORDER = None
 # Example:
-# SCENARIO_ORDER = [
-#    "base",
-#    "agriculture_full_electric",
-#    "agriculture_machinery_full_oil",
-#    "electricity_optimistic",
-#    "industry_h2",
-#    "land_transport_linear_ev",
-#    "shipping_full_methanol",
-#    "urban_heat_full_central",
-#    "stochastic_network",
-#]
+SCENARIO_ORDER = [
+    "BASE",
+    "ELEC_HEAT",
+    "ELEC_IND",
+    "ELEC_ROAD",
+    "OILGAS_HEAT",
+    "OILGAS_IND",
+    "OILGAS_TRANS",
+    "MEOH_AIR",
+    "MEOH_IND",
+    "MEOH_SHIP",
+    "H2_OIL",
+    "H2_IND",
+    "H2_TRANS",
+]
 
 # Optional pretty labels for plots
-#SCENARIO_LABELS = {
-#    "base": "BASE",
-#    "agriculture_full_electric": "AFE",
-#    "agriculture_machinery_full_oil": "AMFO",
-#    "electricity_optimistic": "EO",
-#    "industry_h2": "IH2",
-#    "land_transport_linear_ev": "LTLEV",
-#    "shipping_full_methanol": "SFM",
-#    "urban_heat_full_central": "UHFC",
-#    "stochastic_network": "SP",
-#}
+SCENARIO_LABELS = {
+    "BASE": "BASE",
+    "ELEC_HEAT": "E_HEAT",
+    "ELEC_IND": "E_IND",
+    "ELEC_ROAD": "E_ROAD",
+    "OILGAS_HEAT": "F_HEAT",
+    "OILGAS_IND": "F_IND",
+    "OILGAS_TRANS": "F_ROAD",
+    "MEOH_AIR": "M_AIR",
+    "MEOH_IND": "M_IND",
+    "MEOH_SHIP": "M_SHIP",
+    "H2_OIL": "H_OIL",
+    "H2_IND": "H_IND",
+    "H2_TRANS": "H_SHIP",
+
+}
 SCENARIO_LABELS = None
 
 # Metrics
 TOTAL_COST_SCALE = 1e9
 TOTAL_COST_UNIT = "bn. €/a"
+METRIC_NAMES = (
+    "total_cost", "load_curtailment", "renewable_curtailment", "capex", "opex"
+)
 
 LOAD_CURTAILMENT_SCALE = 1e6
 LOAD_CURTAILMENT_UNIT = "TWh"
@@ -210,7 +225,13 @@ def _list_scenarios(root_dir: Path) -> list[str]:
         raise FileNotFoundError(f"ROOT_DIR not found: {root_dir}")
 
     scenarios = []
-    for p in sorted(root_dir.iterdir()):
+    for p in sorted(
+        root_dir.iterdir(),
+        key=lambda p: [
+            int(part) if part.isdigit() else part
+            for part in re.split(r"(\d+)", p.name)
+        ],
+    ):
         if not p.is_dir():
             continue
         if not (p / "networks").exists():
@@ -221,7 +242,7 @@ def _list_scenarios(root_dir: Path) -> list[str]:
         scenarios = [s for s in scenarios if s not in EXCLUDED_SCENARIOS]
 
     if not INCLUDE_STOCHASTIC_SCENARIOS:
-        scenarios = [s for s in scenarios if s not in STOCHASTIC_SCENARIOS]
+        scenarios = [s for s in scenarios if not _is_stochastic_scenario(s)]
 
     if SCENARIO_ORDER is not None:
         wanted = [s for s in SCENARIO_ORDER if s in scenarios]
@@ -234,8 +255,20 @@ def _list_scenarios(root_dir: Path) -> list[str]:
     return scenarios
 
 
+def _is_stochastic_scenario(scenario: str) -> bool:
+    """Recognize configured and clustered stochastic scenarios."""
+    return (
+        scenario in STOCHASTIC_SCENARIOS
+        or re.fullmatch(r"stochastic_K\d+", scenario) is not None
+    )
+
+
 def _diagonal_network_path(root_dir: Path, scenario: str) -> Path:
     """Return the diagonal solved network path for one scenario."""
+    if re.fullmatch(r"stochastic_K\d+", scenario):
+        cluster = scenario.removeprefix("stochastic_")
+        fname = DIAGONAL_FILENAME.replace("base_s_", f"base_s_cssc_{cluster}_", 1)
+        return root_dir / scenario / "networks" / fname
     fname = (
         DIAGONAL_STOCHASTIC_FILENAME
         if scenario in STOCHASTIC_SCENARIOS
@@ -301,40 +334,22 @@ def _build_expected_network(n: pypsa.Network) -> pypsa.Network:
     return build_view(n, mode="expected", probs=probabilities, scenario=None)
 
 
-def _compute_total_cost(
-    n: pypsa.Network,
-    expected_network_export_path: Path | None = None,
-) -> float:
+def _compute_costs(n: pypsa.Network) -> dict[str, float]:
+    """Compute CAPEX + OPEX from a deterministic or prebuilt expected view.
+
+    Zero or nonfinite totals are treated as invalid solutions.
     """
-    Compute the total objective value.
-
-    Stochastic networks are first converted to an in-memory deterministic
-    expected view. CAPEX + OPEX are then computed from PyPSA statistics for
-    both stochastic and deterministic inputs.
-
-    If the resulting total cost is zero (or numerically close to zero),
-    treat the solution as invalid and return NaN.
-    """
-    if _network_is_stochastic(n):
-        evaluation_network = _build_expected_network(n)
-        if expected_network_export_path is not None:
-            expected_network_export_path.parent.mkdir(parents=True, exist_ok=True)
-            evaluation_network.export_to_netcdf(expected_network_export_path)
-            print(f"[INFO] Exported expected network: {expected_network_export_path}")
-    else:
-        evaluation_network = n
-
-    capex = float(evaluation_network.statistics.capex().sum())
-    opex = float(evaluation_network.statistics.opex().sum())
+    capex = float(n.statistics.capex().sum())
+    opex = float(n.statistics.opex().sum())
     total = capex + opex
 
     if not np.isfinite(total):
-        return np.nan
+        return dict.fromkeys(("total_cost", "capex", "opex"), np.nan)
 
     if np.isclose(total, 0.0, atol=1e-12, rtol=0.0):
-        return np.nan
+        return dict.fromkeys(("total_cost", "capex", "opex"), np.nan)
 
-    return total
+    return {"total_cost": total, "capex": capex, "opex": opex}
 
 def _compute_load_curtailment_from_generators(n: pypsa.Network) -> float:
     """
@@ -406,16 +421,20 @@ def _extract_metrics(
     n: pypsa.Network,
     expected_network_export_path: Path | None = None,
 ) -> dict[str, float]:
-    """Extract all metrics from one network."""
+    """Extract all metrics, using an expected view for stochastic networks."""
+    if _network_is_stochastic(n):
+        n = _build_expected_network(n)
+        if expected_network_export_path is not None:
+            expected_network_export_path.parent.mkdir(parents=True, exist_ok=True)
+            n.export_to_netcdf(expected_network_export_path)
     return {
-        "total_cost": _compute_total_cost(n, expected_network_export_path)
-        / TOTAL_COST_SCALE,
+        **{name: value / TOTAL_COST_SCALE for name, value in _compute_costs(n).items()},
         "load_curtailment": _compute_load_curtailment_from_generators(n) / LOAD_CURTAILMENT_SCALE,
         "renewable_curtailment": _compute_renewable_curtailment(n) / RES_CURTAILMENT_SCALE,
     }
 
 
-def _safe_load_network(path: Path) -> pypsa.Network | None:
+def _safe_load_network(path: Path, skip_time: bool = False) -> pypsa.Network | None:
     """Load a PyPSA network if the file exists."""
     if not path.exists():
         if ALLOW_MISSING_FILES:
@@ -423,7 +442,9 @@ def _safe_load_network(path: Path) -> pypsa.Network | None:
             return None
         raise FileNotFoundError(f"Missing network file: {path}")
 
-    return pypsa.Network(str(path))
+    n = pypsa.Network()
+    n.import_from_netcdf(path, skip_time=skip_time)
+    return n
 
 
 def _build_metric_matrices(
@@ -439,17 +460,17 @@ def _build_metric_matrices(
     Missing files stay as NaN in the metric matrix and False in the invalid mask.
     Existing files with invalid metrics are marked True in the invalid mask.
     """
-    metric_names = ["total_cost", "load_curtailment", "renewable_curtailment"]
+    metric_names = METRIC_NAMES
 
     matrices = {}
     invalid_masks = {}
     for m in metric_names:
-        if existing_matrices is None:
+        if existing_matrices is None or m not in existing_matrices:
             matrices[m] = pd.DataFrame(index=scenarios, columns=scenarios, dtype=float)
         else:
             matrices[m] = existing_matrices[m].reindex(index=scenarios, columns=scenarios)
 
-        if existing_invalid_masks is None:
+        if existing_invalid_masks is None or m not in existing_invalid_masks:
             invalid_masks[m] = pd.DataFrame(
                 False, index=scenarios, columns=scenarios, dtype=bool
             )
@@ -460,21 +481,29 @@ def _build_metric_matrices(
 
     for cap_source in scenarios:
         for op_source in scenarios:
-            already_computed = all(
-                pd.notna(matrices[m].loc[cap_source, op_source])
-                or invalid_masks[m].loc[cap_source, op_source]
+            missing_metrics = [
+                m
                 for m in metric_names
-            )
-            if already_computed:
+                if not (
+                    pd.notna(matrices[m].loc[cap_source, op_source])
+                    or invalid_masks[m].loc[cap_source, op_source]
+                )
+            ]
+            if not missing_metrics:
                 print(f"[INFO] Reusing {cap_source} vs {op_source} from Excel")
                 continue
 
             path = _pair_network_path(root_dir, cap_source, op_source)
             print(f"[INFO] Loading {cap_source} vs {op_source}: {path}")
 
-            n = _safe_load_network(path)
+            cached_total = matrices["total_cost"].loc[cap_source, op_source]
+            costs_only = (
+                set(missing_metrics) <= {"capex", "opex"}
+                and np.isfinite(cached_total)
+            )
+            n = _safe_load_network(path, skip_time=costs_only)
             if n is None:
-                for m in metric_names:
+                for m in missing_metrics:
                     matrices[m].loc[cap_source, op_source] = np.nan
                     invalid_masks[m].loc[cap_source, op_source] = False
                 continue
@@ -485,9 +514,19 @@ def _build_metric_matrices(
                     f"expected__cap-{cap_source}__op-{op_source}.nc"
                 )
 
-            vals = _extract_metrics(n, expected_network_export_path)
+            if costs_only:
+                # Existing totals are CAPEX + OPEX. Static tables suffice to
+                # split them without reloading the full dispatch time series.
+                if _network_is_stochastic(n):
+                    n = _build_expected_network(n)
+                capex = float(n.statistics.capex().sum()) / TOTAL_COST_SCALE
+                if not np.isfinite(capex):
+                    capex = np.nan
+                vals = {"capex": capex, "opex": cached_total - capex}
+            else:
+                vals = _extract_metrics(n, expected_network_export_path)
 
-            for m in metric_names:
+            for m in missing_metrics:
                 val = vals[m]
                 matrices[m].loc[cap_source, op_source] = val
                 invalid_masks[m].loc[cap_source, op_source] = pd.isna(val)
@@ -528,7 +567,7 @@ def _plot_single_heatmap(
 
     ax.set_title(
         f"{title} ({unit})",
-        fontsize=13,
+        fontsize=12,
         fontweight="bold",
         pad=12,
     )
@@ -540,17 +579,17 @@ def _plot_single_heatmap(
         [_scenario_display_name(c) for c in df.columns],
         rotation=45,
         ha="right",
-        fontsize=10,
+        fontsize=9,
         fontweight="bold",
     )
     ax.set_yticklabels(
         [_scenario_display_name(i) for i in df.index],
-        fontsize=10,
+        fontsize=9,
         fontweight="bold",
     )
 
-    ax.set_xlabel("Operations on", fontsize=11, fontweight="bold", labelpad=10)
-    ax.set_ylabel("Capacities from", fontsize=11, fontweight="bold", labelpad=10)
+    ax.set_xlabel("Operations on", fontsize=10, fontweight="bold", labelpad=10)
+    ax.set_ylabel("Capacities from", fontsize=10, fontweight="bold", labelpad=10)
 
     # Minor grid to mimic a table
     ax.set_xticks(np.arange(-0.5, df.shape[1], 1), minor=True)
@@ -592,14 +631,14 @@ def _plot_single_heatmap(
                 txt,
                 ha="center",
                 va="center",
-                fontsize=9,
+                fontsize=8,
                 fontweight="bold",
                 color=color,
             )
 
     cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.ax.set_ylabel(unit, rotation=90, fontsize=10, fontweight="bold")
-    cbar.ax.tick_params(labelsize=9)
+    cbar.ax.set_ylabel(unit, rotation=90, fontsize=9, fontweight="bold")
+    cbar.ax.tick_params(labelsize=8)
 
 
 def _write_excel(
@@ -620,10 +659,14 @@ def _read_excel(
     output_excel: Path,
 ) -> tuple[dict[str, pd.DataFrame], dict[str, pd.DataFrame]]:
     """Read previously computed metric matrices from Excel."""
-    metric_names = ["total_cost", "load_curtailment", "renewable_curtailment"]
+    metric_names = METRIC_NAMES
     sheets = pd.read_excel(output_excel, sheet_name=None, index_col=0)
 
-    missing_sheets = [name for name in metric_names if name not in sheets]
+    missing_sheets = [
+        name
+        for name in ("total_cost", "load_curtailment", "renewable_curtailment")
+        if name not in sheets
+    ]
     if missing_sheets:
         raise ValueError(
             f"{output_excel} is missing required sheets: "
@@ -633,6 +676,8 @@ def _read_excel(
     matrices = {}
     invalid_masks = {}
     for name in metric_names:
+        if name not in sheets:
+            continue  # Older workbooks are populated with the new metrics on the next run.
         df = sheets[name]
         df.index = df.index.map(str)
         df.columns = df.columns.map(str)
@@ -670,6 +715,20 @@ def _metric_plot_settings(metric_name: str) -> dict:
             "cmap": "Reds",
             "fmt": TOTAL_COST_FMT,
             "filename": "validation_heatmap_total_cost.png",
+        },
+        "capex": {
+            "title": "CAPEX",
+            "unit": TOTAL_COST_UNIT,
+            "cmap": "Oranges",
+            "fmt": TOTAL_COST_FMT,
+            "filename": "validation_heatmap_capex.png",
+        },
+        "opex": {
+            "title": "OPEX",
+            "unit": TOTAL_COST_UNIT,
+            "cmap": "Greens",
+            "fmt": TOTAL_COST_FMT,
+            "filename": "validation_heatmap_opex.png",
         },
         "load_curtailment": {
             "title": "Load curtailment",
@@ -739,6 +798,12 @@ def main():
     _write_excel(matrices, invalid_masks, OUTPUT_EXCEL)
 
     for metric_name, df in matrices.items():
+        if metric_name in ("capex", "opex"):
+            _write_excel(
+                {metric_name: df},
+                {metric_name: invalid_masks[metric_name]},
+                OUTPUT_DIR / f"validation_heatmap_{metric_name}.xlsx",
+            )
         _plot_metric_heatmap(
             metric_name,
             df,

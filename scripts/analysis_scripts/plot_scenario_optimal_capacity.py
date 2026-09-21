@@ -73,6 +73,7 @@ GROUP_ALIASES = {
 }
 
 SCENARIO_ORDER: list[str] | None = None
+SCENARIO_PREFIX_ALIASES: dict[str, str] = {}
 FAMILY_GROUPS: dict[str, list[str]] | None = None
 FAMILY_ORDER: list[str] | None = None
 INFER_FAMILY_FROM_NAME = True
@@ -178,6 +179,14 @@ def order_and_group_scenarios(
         key=lambda name: (family_rank[family_by_scenario[name]], scenario_rank[name])
     )
     return discovered, family_by_scenario
+
+
+def _scenario_plot_label(scenario: str) -> str:
+    """Replace a configured scenario-family prefix while retaining its suffix."""
+    for prefix, alias in SCENARIO_PREFIX_ALIASES.items():
+        if scenario == prefix or scenario.startswith(f"{prefix}_"):
+            return f"{alias}{scenario[len(prefix):]}"
+    return scenario
 
 
 def _scale_and_unit(metric: str) -> tuple[float, str]:
@@ -366,7 +375,12 @@ def plot_capacity(
             )
 
     ax.set_xticks(x)
-    ax.set_xticklabels(scenarios, rotation=45, ha="right", fontweight="bold")
+    ax.set_xticklabels(
+        [_scenario_plot_label(scenario) for scenario in scenarios],
+        rotation=45,
+        ha="right",
+        fontweight="bold",
+    )
     ax.set_ylabel(f"Optimal capacity [{unit}]", fontweight="bold")
     ax.set_xlabel("Scenario", fontweight="bold")
     ax.set_title(

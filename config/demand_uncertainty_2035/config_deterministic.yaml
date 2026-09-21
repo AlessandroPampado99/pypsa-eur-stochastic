@@ -1,9 +1,9 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_2035"
-  name: all
+  name: BASE_CO2
   scenarios:
-    enable: true
+    enable: false
     file: config/demand_uncertainty_2035/scenarios/scenarios_deterministic.yaml
   disable_progressbar: false
   shared_resources:
@@ -32,7 +32,7 @@ co2_budget:
   2020: 0.72
   2025: 0.648
   2030: 0.45
-  2035: 0.30
+  2035: 0.648
   2040: 0.1
   2045: 0.05
   2050: 0.0

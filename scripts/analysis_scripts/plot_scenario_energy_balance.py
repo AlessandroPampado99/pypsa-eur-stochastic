@@ -70,6 +70,7 @@ GRID_LOSSES_COLOR = "#d62728"
 ZERO_BALANCE_TOLERANCE = 1e-12
 
 SCENARIO_ORDER: list[str] | None = None
+SCENARIO_PREFIX_ALIASES: dict[str, str] = {}
 FAMILY_GROUPS: dict[str, list[str]] | None = None
 FAMILY_ORDER: list[str] | None = None
 INFER_FAMILY_FROM_NAME = True
@@ -213,6 +214,14 @@ def order_and_group_scenarios(
         ),
     )
     return ordered, family_by_scenario
+
+
+def _scenario_plot_label(scenario: str) -> str:
+    """Replace a configured scenario-family prefix while retaining its suffix."""
+    for prefix, alias in SCENARIO_PREFIX_ALIASES.items():
+        if scenario == prefix or scenario.startswith(f"{prefix}_"):
+            return f"{alias}{scenario[len(prefix):]}"
+    return scenario
 
 
 def _read_level_sheet(path: Path, sheet: str, sign: float) -> pd.DataFrame:
@@ -568,7 +577,12 @@ def plot_group(
 
     ax.axhline(0.0, color="black", linewidth=0.8)
     ax.set_xticks(x)
-    ax.set_xticklabels(scenarios, rotation=45, ha="right", fontweight="bold")
+    ax.set_xticklabels(
+        [_scenario_plot_label(scenario) for scenario in scenarios],
+        rotation=45,
+        ha="right",
+        fontweight="bold",
+    )
     ax.set_ylabel(f"Energy balance [{unit}]", fontweight="bold")
     ax.set_xlabel("Scenario", fontweight="bold")
     for label in ax.get_yticklabels():

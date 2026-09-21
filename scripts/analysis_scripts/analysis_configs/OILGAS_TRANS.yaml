@@ -2,7 +2,7 @@ input_dir: "results/demand_uncertainty_sensitivity"
 output_dir: "results/demand_uncertainty_sensitivity/analysis_output/OILGAS_TRANS"
 network_file: "base_s_adm___2035.nc"
 base_network_path: "results/demand_uncertainty_sensitivity/BASE/networks/base_s_adm___2035.nc"
-included_scenarios: [OILGAS_TRANS_100, OILGAS_TRANS_200, OILGAS_TRANS_300, OILGAS_TRANS_400]
+included_scenarios: [BASE_CO2, OILGAS_TRANS_200, OILGAS_TRANS_300, OILGAS_TRANS_400, OILGAS_TRANS_500, OILGAS_TRANS_600]
 model_config: "config/demand_uncertainty/config_deterministic.yaml"
 plotting_config: "config/plotting.default.yaml"
 parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 300, zero_tol: 1.0e-9}
@@ -10,23 +10,35 @@ parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 3
 scripts:
   plot_scenario_energy_balance:
     overrides:
+      SCENARIO_ORDER: [__BASE__, BASE_CO2, OILGAS_TRANS_200, OILGAS_TRANS_300, OILGAS_TRANS_400, OILGAS_TRANS_500, OILGAS_TRANS_600]
+      SCENARIO_PREFIX_ALIASES: {__BASE__: BASE, OILGAS_TRANS: F_ROAD}
+      SEGMENT_LABEL_MIN_PERCENT: 3.0
+      LEGEND_MIN_PERCENT: 0.5
       FAMILY_GROUPS:
         BASE:
           - __BASE__
-        OILGAS_TRANS:
-          - OILGAS_TRANS_100
+          - BASE_CO2
+        F_ROAD:
           - OILGAS_TRANS_200
           - OILGAS_TRANS_300
           - OILGAS_TRANS_400
-      FAMILY_ORDER: [BASE, OILGAS_TRANS]
+          - OILGAS_TRANS_500
+          - OILGAS_TRANS_600
+      FAMILY_ORDER: [BASE, F_ROAD]
   plot_scenario_optimal_capacity:
     overrides:
+      SCENARIO_ORDER: [__BASE__, BASE_CO2, OILGAS_TRANS_200, OILGAS_TRANS_300, OILGAS_TRANS_400, OILGAS_TRANS_500, OILGAS_TRANS_600]
+      SCENARIO_PREFIX_ALIASES: {__BASE__: BASE, OILGAS_TRANS: F_ROAD}
+      SEGMENT_LABEL_MIN_PERCENT: 3.0
+      LEGEND_MIN_PERCENT: 0.5
       FAMILY_GROUPS:
         BASE:
           - __BASE__
-        OILGAS_TRANS:
-          - OILGAS_TRANS_100
+          - BASE_CO2
+        F_ROAD:
           - OILGAS_TRANS_200
           - OILGAS_TRANS_300
           - OILGAS_TRANS_400
-      FAMILY_ORDER: [BASE, OILGAS_TRANS]
+          - OILGAS_TRANS_500
+          - OILGAS_TRANS_600
+      FAMILY_ORDER: [BASE, F_ROAD]

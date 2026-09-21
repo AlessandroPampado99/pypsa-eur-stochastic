@@ -2,7 +2,7 @@ input_dir: "results/demand_uncertainty_sensitivity"
 output_dir: "results/demand_uncertainty_sensitivity/analysis_output/MEOH_IND"
 network_file: "base_s_adm___2035.nc"
 base_network_path: "results/demand_uncertainty_sensitivity/BASE/networks/base_s_adm___2035.nc"
-included_scenarios: [MEOH_IND_50, MEOH_IND_100, MEOH_IND_150, MEOH_IND_200]
+included_scenarios: [BASE_CO2, MEOH_IND_50, MEOH_IND_100, MEOH_IND_150, MEOH_IND_200, MEOH_IND_250]
 model_config: "config/demand_uncertainty/config_deterministic.yaml"
 plotting_config: "config/plotting.default.yaml"
 parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 300, zero_tol: 1.0e-9}
@@ -10,23 +10,35 @@ parameters: {scenario_name_mode: folder, save_png: true, save_pdf: false, dpi: 3
 scripts:
   plot_scenario_energy_balance:
     overrides:
+      SCENARIO_ORDER: [__BASE__, BASE_CO2, MEOH_IND_50, MEOH_IND_100, MEOH_IND_150, MEOH_IND_200, MEOH_IND_250]
+      SCENARIO_PREFIX_ALIASES: {__BASE__: BASE, MEOH_IND: M_IND}
+      SEGMENT_LABEL_MIN_PERCENT: 3.0
+      LEGEND_MIN_PERCENT: 0.5
       FAMILY_GROUPS:
         BASE:
           - __BASE__
-        MEOH_IND:
+          - BASE_CO2
+        M_IND:
           - MEOH_IND_50
           - MEOH_IND_100
           - MEOH_IND_150
           - MEOH_IND_200
-      FAMILY_ORDER: [BASE, MEOH_IND]
+          - MEOH_IND_250
+      FAMILY_ORDER: [BASE, M_IND]
   plot_scenario_optimal_capacity:
     overrides:
+      SCENARIO_ORDER: [__BASE__, BASE_CO2, MEOH_IND_50, MEOH_IND_100, MEOH_IND_150, MEOH_IND_200, MEOH_IND_250]
+      SCENARIO_PREFIX_ALIASES: {__BASE__: BASE, MEOH_IND: M_IND}
+      SEGMENT_LABEL_MIN_PERCENT: 3.0
+      LEGEND_MIN_PERCENT: 0.5
       FAMILY_GROUPS:
         BASE:
           - __BASE__
-        MEOH_IND:
+          - BASE_CO2
+        M_IND:
           - MEOH_IND_50
           - MEOH_IND_100
           - MEOH_IND_150
           - MEOH_IND_200
-      FAMILY_ORDER: [BASE, MEOH_IND]
+          - MEOH_IND_250
+      FAMILY_ORDER: [BASE, M_IND]
