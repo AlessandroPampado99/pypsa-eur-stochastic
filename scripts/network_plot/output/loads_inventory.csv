@@ -1,0 +1,1055 @@
+Load,bus,carrier,sign
+AL,AL low voltage,electricity,-1.0
+AT,AT low voltage,electricity,-1.0
+BA,BA low voltage,electricity,-1.0
+BE,BE low voltage,electricity,-1.0
+BG,BG low voltage,electricity,-1.0
+CH,CH low voltage,electricity,-1.0
+CZ,CZ low voltage,electricity,-1.0
+DE,DE low voltage,electricity,-1.0
+DK,DK low voltage,electricity,-1.0
+EE,EE low voltage,electricity,-1.0
+ES,ES low voltage,electricity,-1.0
+FI,FI low voltage,electricity,-1.0
+FR,FR low voltage,electricity,-1.0
+GB,GB low voltage,electricity,-1.0
+GBI,GBI low voltage,electricity,-1.0
+GR,GR low voltage,electricity,-1.0
+HR,HR low voltage,electricity,-1.0
+HU,HU low voltage,electricity,-1.0
+IE,IE low voltage,electricity,-1.0
+IT,IT low voltage,electricity,-1.0
+LT,LT low voltage,electricity,-1.0
+LU,LU low voltage,electricity,-1.0
+LV,LV low voltage,electricity,-1.0
+ME,ME low voltage,electricity,-1.0
+MK,MK low voltage,electricity,-1.0
+NL,NL low voltage,electricity,-1.0
+NO,NO low voltage,electricity,-1.0
+PL,PL low voltage,electricity,-1.0
+PT,PT low voltage,electricity,-1.0
+RO,RO low voltage,electricity,-1.0
+RS,RS low voltage,electricity,-1.0
+SE,SE low voltage,electricity,-1.0
+SI,SI low voltage,electricity,-1.0
+SK,SK low voltage,electricity,-1.0
+XK,XK low voltage,electricity,-1.0
+AL land transport EV,AL EV battery,land transport EV,-1.0
+AT land transport EV,AT EV battery,land transport EV,-1.0
+BA land transport EV,BA EV battery,land transport EV,-1.0
+BE land transport EV,BE EV battery,land transport EV,-1.0
+BG land transport EV,BG EV battery,land transport EV,-1.0
+CH land transport EV,CH EV battery,land transport EV,-1.0
+CZ land transport EV,CZ EV battery,land transport EV,-1.0
+DE land transport EV,DE EV battery,land transport EV,-1.0
+DK land transport EV,DK EV battery,land transport EV,-1.0
+EE land transport EV,EE EV battery,land transport EV,-1.0
+ES land transport EV,ES EV battery,land transport EV,-1.0
+FI land transport EV,FI EV battery,land transport EV,-1.0
+FR land transport EV,FR EV battery,land transport EV,-1.0
+GB land transport EV,GB EV battery,land transport EV,-1.0
+GBI land transport EV,GBI EV battery,land transport EV,-1.0
+GR land transport EV,GR EV battery,land transport EV,-1.0
+HR land transport EV,HR EV battery,land transport EV,-1.0
+HU land transport EV,HU EV battery,land transport EV,-1.0
+IE land transport EV,IE EV battery,land transport EV,-1.0
+IT land transport EV,IT EV battery,land transport EV,-1.0
+LT land transport EV,LT EV battery,land transport EV,-1.0
+LU land transport EV,LU EV battery,land transport EV,-1.0
+LV land transport EV,LV EV battery,land transport EV,-1.0
+ME land transport EV,ME EV battery,land transport EV,-1.0
+MK land transport EV,MK EV battery,land transport EV,-1.0
+NL land transport EV,NL EV battery,land transport EV,-1.0
+NO land transport EV,NO EV battery,land transport EV,-1.0
+PL land transport EV,PL EV battery,land transport EV,-1.0
+PT land transport EV,PT EV battery,land transport EV,-1.0
+RO land transport EV,RO EV battery,land transport EV,-1.0
+RS land transport EV,RS EV battery,land transport EV,-1.0
+SE land transport EV,SE EV battery,land transport EV,-1.0
+SI land transport EV,SI EV battery,land transport EV,-1.0
+SK land transport EV,SK EV battery,land transport EV,-1.0
+XK land transport EV,XK EV battery,land transport EV,-1.0
+AL land transport fuel cell,AL H2,land transport fuel cell,-1.0
+AT land transport fuel cell,AT H2,land transport fuel cell,-1.0
+BA land transport fuel cell,BA H2,land transport fuel cell,-1.0
+BE land transport fuel cell,BE H2,land transport fuel cell,-1.0
+BG land transport fuel cell,BG H2,land transport fuel cell,-1.0
+CH land transport fuel cell,CH H2,land transport fuel cell,-1.0
+CZ land transport fuel cell,CZ H2,land transport fuel cell,-1.0
+DE land transport fuel cell,DE H2,land transport fuel cell,-1.0
+DK land transport fuel cell,DK H2,land transport fuel cell,-1.0
+EE land transport fuel cell,EE H2,land transport fuel cell,-1.0
+ES land transport fuel cell,ES H2,land transport fuel cell,-1.0
+FI land transport fuel cell,FI H2,land transport fuel cell,-1.0
+FR land transport fuel cell,FR H2,land transport fuel cell,-1.0
+GB land transport fuel cell,GB H2,land transport fuel cell,-1.0
+GBI land transport fuel cell,GBI H2,land transport fuel cell,-1.0
+GR land transport fuel cell,GR H2,land transport fuel cell,-1.0
+HR land transport fuel cell,HR H2,land transport fuel cell,-1.0
+HU land transport fuel cell,HU H2,land transport fuel cell,-1.0
+IE land transport fuel cell,IE H2,land transport fuel cell,-1.0
+IT land transport fuel cell,IT H2,land transport fuel cell,-1.0
+LT land transport fuel cell,LT H2,land transport fuel cell,-1.0
+LU land transport fuel cell,LU H2,land transport fuel cell,-1.0
+LV land transport fuel cell,LV H2,land transport fuel cell,-1.0
+ME land transport fuel cell,ME H2,land transport fuel cell,-1.0
+MK land transport fuel cell,MK H2,land transport fuel cell,-1.0
+NL land transport fuel cell,NL H2,land transport fuel cell,-1.0
+NO land transport fuel cell,NO H2,land transport fuel cell,-1.0
+PL land transport fuel cell,PL H2,land transport fuel cell,-1.0
+PT land transport fuel cell,PT H2,land transport fuel cell,-1.0
+RO land transport fuel cell,RO H2,land transport fuel cell,-1.0
+RS land transport fuel cell,RS H2,land transport fuel cell,-1.0
+SE land transport fuel cell,SE H2,land transport fuel cell,-1.0
+SI land transport fuel cell,SI H2,land transport fuel cell,-1.0
+SK land transport fuel cell,SK H2,land transport fuel cell,-1.0
+XK land transport fuel cell,XK H2,land transport fuel cell,-1.0
+AL land transport oil,AL land transport oil,land transport oil,-1.0
+AT land transport oil,AT land transport oil,land transport oil,-1.0
+BA land transport oil,BA land transport oil,land transport oil,-1.0
+BE land transport oil,BE land transport oil,land transport oil,-1.0
+BG land transport oil,BG land transport oil,land transport oil,-1.0
+CH land transport oil,CH land transport oil,land transport oil,-1.0
+CZ land transport oil,CZ land transport oil,land transport oil,-1.0
+DE land transport oil,DE land transport oil,land transport oil,-1.0
+DK land transport oil,DK land transport oil,land transport oil,-1.0
+EE land transport oil,EE land transport oil,land transport oil,-1.0
+ES land transport oil,ES land transport oil,land transport oil,-1.0
+FI land transport oil,FI land transport oil,land transport oil,-1.0
+FR land transport oil,FR land transport oil,land transport oil,-1.0
+GB land transport oil,GB land transport oil,land transport oil,-1.0
+GBI land transport oil,GBI land transport oil,land transport oil,-1.0
+GR land transport oil,GR land transport oil,land transport oil,-1.0
+HR land transport oil,HR land transport oil,land transport oil,-1.0
+HU land transport oil,HU land transport oil,land transport oil,-1.0
+IE land transport oil,IE land transport oil,land transport oil,-1.0
+IT land transport oil,IT land transport oil,land transport oil,-1.0
+LT land transport oil,LT land transport oil,land transport oil,-1.0
+LU land transport oil,LU land transport oil,land transport oil,-1.0
+LV land transport oil,LV land transport oil,land transport oil,-1.0
+ME land transport oil,ME land transport oil,land transport oil,-1.0
+MK land transport oil,MK land transport oil,land transport oil,-1.0
+NL land transport oil,NL land transport oil,land transport oil,-1.0
+NO land transport oil,NO land transport oil,land transport oil,-1.0
+PL land transport oil,PL land transport oil,land transport oil,-1.0
+PT land transport oil,PT land transport oil,land transport oil,-1.0
+RO land transport oil,RO land transport oil,land transport oil,-1.0
+RS land transport oil,RS land transport oil,land transport oil,-1.0
+SE land transport oil,SE land transport oil,land transport oil,-1.0
+SI land transport oil,SI land transport oil,land transport oil,-1.0
+SK land transport oil,SK land transport oil,land transport oil,-1.0
+XK land transport oil,XK land transport oil,land transport oil,-1.0
+AL urban central heat,AL urban central heat,urban central heat,-1.0
+AT urban central heat,AT urban central heat,urban central heat,-1.0
+BA urban central heat,BA urban central heat,urban central heat,-1.0
+BE urban central heat,BE urban central heat,urban central heat,-1.0
+BG urban central heat,BG urban central heat,urban central heat,-1.0
+CH urban central heat,CH urban central heat,urban central heat,-1.0
+CZ urban central heat,CZ urban central heat,urban central heat,-1.0
+DE urban central heat,DE urban central heat,urban central heat,-1.0
+DK urban central heat,DK urban central heat,urban central heat,-1.0
+EE urban central heat,EE urban central heat,urban central heat,-1.0
+ES urban central heat,ES urban central heat,urban central heat,-1.0
+FI urban central heat,FI urban central heat,urban central heat,-1.0
+FR urban central heat,FR urban central heat,urban central heat,-1.0
+GB urban central heat,GB urban central heat,urban central heat,-1.0
+GBI urban central heat,GBI urban central heat,urban central heat,-1.0
+GR urban central heat,GR urban central heat,urban central heat,-1.0
+HR urban central heat,HR urban central heat,urban central heat,-1.0
+HU urban central heat,HU urban central heat,urban central heat,-1.0
+IE urban central heat,IE urban central heat,urban central heat,-1.0
+IT urban central heat,IT urban central heat,urban central heat,-1.0
+LT urban central heat,LT urban central heat,urban central heat,-1.0
+LU urban central heat,LU urban central heat,urban central heat,-1.0
+LV urban central heat,LV urban central heat,urban central heat,-1.0
+ME urban central heat,ME urban central heat,urban central heat,-1.0
+MK urban central heat,MK urban central heat,urban central heat,-1.0
+NL urban central heat,NL urban central heat,urban central heat,-1.0
+NO urban central heat,NO urban central heat,urban central heat,-1.0
+PL urban central heat,PL urban central heat,urban central heat,-1.0
+PT urban central heat,PT urban central heat,urban central heat,-1.0
+RO urban central heat,RO urban central heat,urban central heat,-1.0
+RS urban central heat,RS urban central heat,urban central heat,-1.0
+SE urban central heat,SE urban central heat,urban central heat,-1.0
+SI urban central heat,SI urban central heat,urban central heat,-1.0
+SK urban central heat,SK urban central heat,urban central heat,-1.0
+XK urban central heat,XK urban central heat,urban central heat,-1.0
+AL gas urban central heat,AL gas urban central heat,gas urban central heat,-1.0
+AT gas urban central heat,AT gas urban central heat,gas urban central heat,-1.0
+BA gas urban central heat,BA gas urban central heat,gas urban central heat,-1.0
+BE gas urban central heat,BE gas urban central heat,gas urban central heat,-1.0
+BG gas urban central heat,BG gas urban central heat,gas urban central heat,-1.0
+CH gas urban central heat,CH gas urban central heat,gas urban central heat,-1.0
+CZ gas urban central heat,CZ gas urban central heat,gas urban central heat,-1.0
+DE gas urban central heat,DE gas urban central heat,gas urban central heat,-1.0
+DK gas urban central heat,DK gas urban central heat,gas urban central heat,-1.0
+EE gas urban central heat,EE gas urban central heat,gas urban central heat,-1.0
+ES gas urban central heat,ES gas urban central heat,gas urban central heat,-1.0
+FI gas urban central heat,FI gas urban central heat,gas urban central heat,-1.0
+FR gas urban central heat,FR gas urban central heat,gas urban central heat,-1.0
+GB gas urban central heat,GB gas urban central heat,gas urban central heat,-1.0
+GBI gas urban central heat,GBI gas urban central heat,gas urban central heat,-1.0
+GR gas urban central heat,GR gas urban central heat,gas urban central heat,-1.0
+HR gas urban central heat,HR gas urban central heat,gas urban central heat,-1.0
+HU gas urban central heat,HU gas urban central heat,gas urban central heat,-1.0
+IE gas urban central heat,IE gas urban central heat,gas urban central heat,-1.0
+IT gas urban central heat,IT gas urban central heat,gas urban central heat,-1.0
+LT gas urban central heat,LT gas urban central heat,gas urban central heat,-1.0
+LU gas urban central heat,LU gas urban central heat,gas urban central heat,-1.0
+LV gas urban central heat,LV gas urban central heat,gas urban central heat,-1.0
+ME gas urban central heat,ME gas urban central heat,gas urban central heat,-1.0
+MK gas urban central heat,MK gas urban central heat,gas urban central heat,-1.0
+NL gas urban central heat,NL gas urban central heat,gas urban central heat,-1.0
+NO gas urban central heat,NO gas urban central heat,gas urban central heat,-1.0
+PL gas urban central heat,PL gas urban central heat,gas urban central heat,-1.0
+PT gas urban central heat,PT gas urban central heat,gas urban central heat,-1.0
+RO gas urban central heat,RO gas urban central heat,gas urban central heat,-1.0
+RS gas urban central heat,RS gas urban central heat,gas urban central heat,-1.0
+SE gas urban central heat,SE gas urban central heat,gas urban central heat,-1.0
+SI gas urban central heat,SI gas urban central heat,gas urban central heat,-1.0
+SK gas urban central heat,SK gas urban central heat,gas urban central heat,-1.0
+XK gas urban central heat,XK gas urban central heat,gas urban central heat,-1.0
+AL electricity urban central heat,AL electricity urban central heat,electricity urban central heat,-1.0
+AT electricity urban central heat,AT electricity urban central heat,electricity urban central heat,-1.0
+BA electricity urban central heat,BA electricity urban central heat,electricity urban central heat,-1.0
+BE electricity urban central heat,BE electricity urban central heat,electricity urban central heat,-1.0
+BG electricity urban central heat,BG electricity urban central heat,electricity urban central heat,-1.0
+CH electricity urban central heat,CH electricity urban central heat,electricity urban central heat,-1.0
+CZ electricity urban central heat,CZ electricity urban central heat,electricity urban central heat,-1.0
+DE electricity urban central heat,DE electricity urban central heat,electricity urban central heat,-1.0
+DK electricity urban central heat,DK electricity urban central heat,electricity urban central heat,-1.0
+EE electricity urban central heat,EE electricity urban central heat,electricity urban central heat,-1.0
+ES electricity urban central heat,ES electricity urban central heat,electricity urban central heat,-1.0
+FI electricity urban central heat,FI electricity urban central heat,electricity urban central heat,-1.0
+FR electricity urban central heat,FR electricity urban central heat,electricity urban central heat,-1.0
+GB electricity urban central heat,GB electricity urban central heat,electricity urban central heat,-1.0
+GBI electricity urban central heat,GBI electricity urban central heat,electricity urban central heat,-1.0
+GR electricity urban central heat,GR electricity urban central heat,electricity urban central heat,-1.0
+HR electricity urban central heat,HR electricity urban central heat,electricity urban central heat,-1.0
+HU electricity urban central heat,HU electricity urban central heat,electricity urban central heat,-1.0
+IE electricity urban central heat,IE electricity urban central heat,electricity urban central heat,-1.0
+IT electricity urban central heat,IT electricity urban central heat,electricity urban central heat,-1.0
+LT electricity urban central heat,LT electricity urban central heat,electricity urban central heat,-1.0
+LU electricity urban central heat,LU electricity urban central heat,electricity urban central heat,-1.0
+LV electricity urban central heat,LV electricity urban central heat,electricity urban central heat,-1.0
+ME electricity urban central heat,ME electricity urban central heat,electricity urban central heat,-1.0
+MK electricity urban central heat,MK electricity urban central heat,electricity urban central heat,-1.0
+NL electricity urban central heat,NL electricity urban central heat,electricity urban central heat,-1.0
+NO electricity urban central heat,NO electricity urban central heat,electricity urban central heat,-1.0
+PL electricity urban central heat,PL electricity urban central heat,electricity urban central heat,-1.0
+PT electricity urban central heat,PT electricity urban central heat,electricity urban central heat,-1.0
+RO electricity urban central heat,RO electricity urban central heat,electricity urban central heat,-1.0
+RS electricity urban central heat,RS electricity urban central heat,electricity urban central heat,-1.0
+SE electricity urban central heat,SE electricity urban central heat,electricity urban central heat,-1.0
+SI electricity urban central heat,SI electricity urban central heat,electricity urban central heat,-1.0
+SK electricity urban central heat,SK electricity urban central heat,electricity urban central heat,-1.0
+XK electricity urban central heat,XK electricity urban central heat,electricity urban central heat,-1.0
+AL solid biomass for industry,AL solid biomass for industry,solid biomass for industry,-1.0
+AT solid biomass for industry,AT solid biomass for industry,solid biomass for industry,-1.0
+BA solid biomass for industry,BA solid biomass for industry,solid biomass for industry,-1.0
+BE solid biomass for industry,BE solid biomass for industry,solid biomass for industry,-1.0
+BG solid biomass for industry,BG solid biomass for industry,solid biomass for industry,-1.0
+CH solid biomass for industry,CH solid biomass for industry,solid biomass for industry,-1.0
+CZ solid biomass for industry,CZ solid biomass for industry,solid biomass for industry,-1.0
+DE solid biomass for industry,DE solid biomass for industry,solid biomass for industry,-1.0
+DK solid biomass for industry,DK solid biomass for industry,solid biomass for industry,-1.0
+EE solid biomass for industry,EE solid biomass for industry,solid biomass for industry,-1.0
+ES solid biomass for industry,ES solid biomass for industry,solid biomass for industry,-1.0
+FI solid biomass for industry,FI solid biomass for industry,solid biomass for industry,-1.0
+FR solid biomass for industry,FR solid biomass for industry,solid biomass for industry,-1.0
+GB solid biomass for industry,GB solid biomass for industry,solid biomass for industry,-1.0
+GBI solid biomass for industry,GBI solid biomass for industry,solid biomass for industry,-1.0
+GR solid biomass for industry,GR solid biomass for industry,solid biomass for industry,-1.0
+HR solid biomass for industry,HR solid biomass for industry,solid biomass for industry,-1.0
+HU solid biomass for industry,HU solid biomass for industry,solid biomass for industry,-1.0
+IE solid biomass for industry,IE solid biomass for industry,solid biomass for industry,-1.0
+IT solid biomass for industry,IT solid biomass for industry,solid biomass for industry,-1.0
+LT solid biomass for industry,LT solid biomass for industry,solid biomass for industry,-1.0
+LU solid biomass for industry,LU solid biomass for industry,solid biomass for industry,-1.0
+LV solid biomass for industry,LV solid biomass for industry,solid biomass for industry,-1.0
+ME solid biomass for industry,ME solid biomass for industry,solid biomass for industry,-1.0
+MK solid biomass for industry,MK solid biomass for industry,solid biomass for industry,-1.0
+NL solid biomass for industry,NL solid biomass for industry,solid biomass for industry,-1.0
+NO solid biomass for industry,NO solid biomass for industry,solid biomass for industry,-1.0
+PL solid biomass for industry,PL solid biomass for industry,solid biomass for industry,-1.0
+PT solid biomass for industry,PT solid biomass for industry,solid biomass for industry,-1.0
+RO solid biomass for industry,RO solid biomass for industry,solid biomass for industry,-1.0
+RS solid biomass for industry,RS solid biomass for industry,solid biomass for industry,-1.0
+SE solid biomass for industry,SE solid biomass for industry,solid biomass for industry,-1.0
+SI solid biomass for industry,SI solid biomass for industry,solid biomass for industry,-1.0
+SK solid biomass for industry,SK solid biomass for industry,solid biomass for industry,-1.0
+XK solid biomass for industry,XK solid biomass for industry,solid biomass for industry,-1.0
+AL gas for industry,AL gas for industry,gas for industry,-1.0
+AT gas for industry,AT gas for industry,gas for industry,-1.0
+BA gas for industry,BA gas for industry,gas for industry,-1.0
+BE gas for industry,BE gas for industry,gas for industry,-1.0
+BG gas for industry,BG gas for industry,gas for industry,-1.0
+CH gas for industry,CH gas for industry,gas for industry,-1.0
+CZ gas for industry,CZ gas for industry,gas for industry,-1.0
+DE gas for industry,DE gas for industry,gas for industry,-1.0
+DK gas for industry,DK gas for industry,gas for industry,-1.0
+EE gas for industry,EE gas for industry,gas for industry,-1.0
+ES gas for industry,ES gas for industry,gas for industry,-1.0
+FI gas for industry,FI gas for industry,gas for industry,-1.0
+FR gas for industry,FR gas for industry,gas for industry,-1.0
+GB gas for industry,GB gas for industry,gas for industry,-1.0
+GBI gas for industry,GBI gas for industry,gas for industry,-1.0
+GR gas for industry,GR gas for industry,gas for industry,-1.0
+HR gas for industry,HR gas for industry,gas for industry,-1.0
+HU gas for industry,HU gas for industry,gas for industry,-1.0
+IE gas for industry,IE gas for industry,gas for industry,-1.0
+IT gas for industry,IT gas for industry,gas for industry,-1.0
+LT gas for industry,LT gas for industry,gas for industry,-1.0
+LU gas for industry,LU gas for industry,gas for industry,-1.0
+LV gas for industry,LV gas for industry,gas for industry,-1.0
+ME gas for industry,ME gas for industry,gas for industry,-1.0
+MK gas for industry,MK gas for industry,gas for industry,-1.0
+NL gas for industry,NL gas for industry,gas for industry,-1.0
+NO gas for industry,NO gas for industry,gas for industry,-1.0
+PL gas for industry,PL gas for industry,gas for industry,-1.0
+PT gas for industry,PT gas for industry,gas for industry,-1.0
+RO gas for industry,RO gas for industry,gas for industry,-1.0
+RS gas for industry,RS gas for industry,gas for industry,-1.0
+SE gas for industry,SE gas for industry,gas for industry,-1.0
+SI gas for industry,SI gas for industry,gas for industry,-1.0
+SK gas for industry,SK gas for industry,gas for industry,-1.0
+XK gas for industry,XK gas for industry,gas for industry,-1.0
+AL H2 for industry,AL H2,H2 for industry,-1.0
+AT H2 for industry,AT H2,H2 for industry,-1.0
+BA H2 for industry,BA H2,H2 for industry,-1.0
+BE H2 for industry,BE H2,H2 for industry,-1.0
+BG H2 for industry,BG H2,H2 for industry,-1.0
+CH H2 for industry,CH H2,H2 for industry,-1.0
+CZ H2 for industry,CZ H2,H2 for industry,-1.0
+DE H2 for industry,DE H2,H2 for industry,-1.0
+DK H2 for industry,DK H2,H2 for industry,-1.0
+EE H2 for industry,EE H2,H2 for industry,-1.0
+ES H2 for industry,ES H2,H2 for industry,-1.0
+FI H2 for industry,FI H2,H2 for industry,-1.0
+FR H2 for industry,FR H2,H2 for industry,-1.0
+GB H2 for industry,GB H2,H2 for industry,-1.0
+GBI H2 for industry,GBI H2,H2 for industry,-1.0
+GR H2 for industry,GR H2,H2 for industry,-1.0
+HR H2 for industry,HR H2,H2 for industry,-1.0
+HU H2 for industry,HU H2,H2 for industry,-1.0
+IE H2 for industry,IE H2,H2 for industry,-1.0
+IT H2 for industry,IT H2,H2 for industry,-1.0
+LT H2 for industry,LT H2,H2 for industry,-1.0
+LU H2 for industry,LU H2,H2 for industry,-1.0
+LV H2 for industry,LV H2,H2 for industry,-1.0
+ME H2 for industry,ME H2,H2 for industry,-1.0
+MK H2 for industry,MK H2,H2 for industry,-1.0
+NL H2 for industry,NL H2,H2 for industry,-1.0
+NO H2 for industry,NO H2,H2 for industry,-1.0
+PL H2 for industry,PL H2,H2 for industry,-1.0
+PT H2 for industry,PT H2,H2 for industry,-1.0
+RO H2 for industry,RO H2,H2 for industry,-1.0
+RS H2 for industry,RS H2,H2 for industry,-1.0
+SE H2 for industry,SE H2,H2 for industry,-1.0
+SI H2 for industry,SI H2,H2 for industry,-1.0
+SK H2 for industry,SK H2,H2 for industry,-1.0
+XK H2 for industry,XK H2,H2 for industry,-1.0
+AL industry methanol,AL industry methanol,industry methanol,-1.0
+AT industry methanol,AT industry methanol,industry methanol,-1.0
+BA industry methanol,BA industry methanol,industry methanol,-1.0
+BE industry methanol,BE industry methanol,industry methanol,-1.0
+BG industry methanol,BG industry methanol,industry methanol,-1.0
+CH industry methanol,CH industry methanol,industry methanol,-1.0
+CZ industry methanol,CZ industry methanol,industry methanol,-1.0
+DE industry methanol,DE industry methanol,industry methanol,-1.0
+DK industry methanol,DK industry methanol,industry methanol,-1.0
+EE industry methanol,EE industry methanol,industry methanol,-1.0
+ES industry methanol,ES industry methanol,industry methanol,-1.0
+FI industry methanol,FI industry methanol,industry methanol,-1.0
+FR industry methanol,FR industry methanol,industry methanol,-1.0
+GB industry methanol,GB industry methanol,industry methanol,-1.0
+GBI industry methanol,GBI industry methanol,industry methanol,-1.0
+GR industry methanol,GR industry methanol,industry methanol,-1.0
+HR industry methanol,HR industry methanol,industry methanol,-1.0
+HU industry methanol,HU industry methanol,industry methanol,-1.0
+IE industry methanol,IE industry methanol,industry methanol,-1.0
+IT industry methanol,IT industry methanol,industry methanol,-1.0
+LT industry methanol,LT industry methanol,industry methanol,-1.0
+LU industry methanol,LU industry methanol,industry methanol,-1.0
+LV industry methanol,LV industry methanol,industry methanol,-1.0
+ME industry methanol,ME industry methanol,industry methanol,-1.0
+MK industry methanol,MK industry methanol,industry methanol,-1.0
+NL industry methanol,NL industry methanol,industry methanol,-1.0
+NO industry methanol,NO industry methanol,industry methanol,-1.0
+PL industry methanol,PL industry methanol,industry methanol,-1.0
+PT industry methanol,PT industry methanol,industry methanol,-1.0
+RO industry methanol,RO industry methanol,industry methanol,-1.0
+RS industry methanol,RS industry methanol,industry methanol,-1.0
+SE industry methanol,SE industry methanol,industry methanol,-1.0
+SI industry methanol,SI industry methanol,industry methanol,-1.0
+SK industry methanol,SK industry methanol,industry methanol,-1.0
+XK industry methanol,XK industry methanol,industry methanol,-1.0
+AL naphtha for industry,AL naphtha for industry,naphtha for industry,-1.0
+AT naphtha for industry,AT naphtha for industry,naphtha for industry,-1.0
+BA naphtha for industry,BA naphtha for industry,naphtha for industry,-1.0
+BE naphtha for industry,BE naphtha for industry,naphtha for industry,-1.0
+BG naphtha for industry,BG naphtha for industry,naphtha for industry,-1.0
+CH naphtha for industry,CH naphtha for industry,naphtha for industry,-1.0
+CZ naphtha for industry,CZ naphtha for industry,naphtha for industry,-1.0
+DE naphtha for industry,DE naphtha for industry,naphtha for industry,-1.0
+DK naphtha for industry,DK naphtha for industry,naphtha for industry,-1.0
+EE naphtha for industry,EE naphtha for industry,naphtha for industry,-1.0
+ES naphtha for industry,ES naphtha for industry,naphtha for industry,-1.0
+FI naphtha for industry,FI naphtha for industry,naphtha for industry,-1.0
+FR naphtha for industry,FR naphtha for industry,naphtha for industry,-1.0
+GB naphtha for industry,GB naphtha for industry,naphtha for industry,-1.0
+GBI naphtha for industry,GBI naphtha for industry,naphtha for industry,-1.0
+GR naphtha for industry,GR naphtha for industry,naphtha for industry,-1.0
+HR naphtha for industry,HR naphtha for industry,naphtha for industry,-1.0
+HU naphtha for industry,HU naphtha for industry,naphtha for industry,-1.0
+IE naphtha for industry,IE naphtha for industry,naphtha for industry,-1.0
+IT naphtha for industry,IT naphtha for industry,naphtha for industry,-1.0
+LT naphtha for industry,LT naphtha for industry,naphtha for industry,-1.0
+LU naphtha for industry,LU naphtha for industry,naphtha for industry,-1.0
+LV naphtha for industry,LV naphtha for industry,naphtha for industry,-1.0
+ME naphtha for industry,ME naphtha for industry,naphtha for industry,-1.0
+MK naphtha for industry,MK naphtha for industry,naphtha for industry,-1.0
+NL naphtha for industry,NL naphtha for industry,naphtha for industry,-1.0
+NO naphtha for industry,NO naphtha for industry,naphtha for industry,-1.0
+PL naphtha for industry,PL naphtha for industry,naphtha for industry,-1.0
+PT naphtha for industry,PT naphtha for industry,naphtha for industry,-1.0
+RO naphtha for industry,RO naphtha for industry,naphtha for industry,-1.0
+RS naphtha for industry,RS naphtha for industry,naphtha for industry,-1.0
+SE naphtha for industry,SE naphtha for industry,naphtha for industry,-1.0
+SI naphtha for industry,SI naphtha for industry,naphtha for industry,-1.0
+SK naphtha for industry,SK naphtha for industry,naphtha for industry,-1.0
+XK naphtha for industry,XK naphtha for industry,naphtha for industry,-1.0
+AL low-temperature heat for industry,AL urban central heat,low-temperature heat for industry,-1.0
+AT low-temperature heat for industry,AT urban central heat,low-temperature heat for industry,-1.0
+BA low-temperature heat for industry,BA urban central heat,low-temperature heat for industry,-1.0
+BE low-temperature heat for industry,BE urban central heat,low-temperature heat for industry,-1.0
+BG low-temperature heat for industry,BG urban central heat,low-temperature heat for industry,-1.0
+CH low-temperature heat for industry,CH urban central heat,low-temperature heat for industry,-1.0
+CZ low-temperature heat for industry,CZ urban central heat,low-temperature heat for industry,-1.0
+DE low-temperature heat for industry,DE urban central heat,low-temperature heat for industry,-1.0
+DK low-temperature heat for industry,DK urban central heat,low-temperature heat for industry,-1.0
+EE low-temperature heat for industry,EE urban central heat,low-temperature heat for industry,-1.0
+ES low-temperature heat for industry,ES urban central heat,low-temperature heat for industry,-1.0
+FI low-temperature heat for industry,FI urban central heat,low-temperature heat for industry,-1.0
+FR low-temperature heat for industry,FR urban central heat,low-temperature heat for industry,-1.0
+GB low-temperature heat for industry,GB urban central heat,low-temperature heat for industry,-1.0
+GBI low-temperature heat for industry,GBI urban central heat,low-temperature heat for industry,-1.0
+GR low-temperature heat for industry,GR urban central heat,low-temperature heat for industry,-1.0
+HR low-temperature heat for industry,HR urban central heat,low-temperature heat for industry,-1.0
+HU low-temperature heat for industry,HU urban central heat,low-temperature heat for industry,-1.0
+IE low-temperature heat for industry,IE urban central heat,low-temperature heat for industry,-1.0
+IT low-temperature heat for industry,IT urban central heat,low-temperature heat for industry,-1.0
+LT low-temperature heat for industry,LT urban central heat,low-temperature heat for industry,-1.0
+LU low-temperature heat for industry,LU urban central heat,low-temperature heat for industry,-1.0
+LV low-temperature heat for industry,LV urban central heat,low-temperature heat for industry,-1.0
+ME low-temperature heat for industry,ME urban central heat,low-temperature heat for industry,-1.0
+MK low-temperature heat for industry,MK urban central heat,low-temperature heat for industry,-1.0
+NL low-temperature heat for industry,NL urban central heat,low-temperature heat for industry,-1.0
+NO low-temperature heat for industry,NO urban central heat,low-temperature heat for industry,-1.0
+PL low-temperature heat for industry,PL urban central heat,low-temperature heat for industry,-1.0
+PT low-temperature heat for industry,PT urban central heat,low-temperature heat for industry,-1.0
+RO low-temperature heat for industry,RO urban central heat,low-temperature heat for industry,-1.0
+RS low-temperature heat for industry,RS urban central heat,low-temperature heat for industry,-1.0
+SE low-temperature heat for industry,SE urban central heat,low-temperature heat for industry,-1.0
+SI low-temperature heat for industry,SI urban central heat,low-temperature heat for industry,-1.0
+SK low-temperature heat for industry,SK urban central heat,low-temperature heat for industry,-1.0
+XK low-temperature heat for industry,XK urban central heat,low-temperature heat for industry,-1.0
+AL industry electricity,AL low voltage,industry electricity,-1.0
+AT industry electricity,AT low voltage,industry electricity,-1.0
+BA industry electricity,BA low voltage,industry electricity,-1.0
+BE industry electricity,BE low voltage,industry electricity,-1.0
+BG industry electricity,BG low voltage,industry electricity,-1.0
+CH industry electricity,CH low voltage,industry electricity,-1.0
+CZ industry electricity,CZ low voltage,industry electricity,-1.0
+DE industry electricity,DE low voltage,industry electricity,-1.0
+DK industry electricity,DK low voltage,industry electricity,-1.0
+EE industry electricity,EE low voltage,industry electricity,-1.0
+ES industry electricity,ES low voltage,industry electricity,-1.0
+FI industry electricity,FI low voltage,industry electricity,-1.0
+FR industry electricity,FR low voltage,industry electricity,-1.0
+GB industry electricity,GB low voltage,industry electricity,-1.0
+GBI industry electricity,GBI low voltage,industry electricity,-1.0
+GR industry electricity,GR low voltage,industry electricity,-1.0
+HR industry electricity,HR low voltage,industry electricity,-1.0
+HU industry electricity,HU low voltage,industry electricity,-1.0
+IE industry electricity,IE low voltage,industry electricity,-1.0
+IT industry electricity,IT low voltage,industry electricity,-1.0
+LT industry electricity,LT low voltage,industry electricity,-1.0
+LU industry electricity,LU low voltage,industry electricity,-1.0
+LV industry electricity,LV low voltage,industry electricity,-1.0
+ME industry electricity,ME low voltage,industry electricity,-1.0
+MK industry electricity,MK low voltage,industry electricity,-1.0
+NL industry electricity,NL low voltage,industry electricity,-1.0
+NO industry electricity,NO low voltage,industry electricity,-1.0
+PL industry electricity,PL low voltage,industry electricity,-1.0
+PT industry electricity,PT low voltage,industry electricity,-1.0
+RO industry electricity,RO low voltage,industry electricity,-1.0
+RS industry electricity,RS low voltage,industry electricity,-1.0
+SE industry electricity,SE low voltage,industry electricity,-1.0
+SI industry electricity,SI low voltage,industry electricity,-1.0
+SK industry electricity,SK low voltage,industry electricity,-1.0
+XK industry electricity,XK low voltage,industry electricity,-1.0
+AL process emissions,AL process emissions,process emissions,-1.0
+AT process emissions,AT process emissions,process emissions,-1.0
+BA process emissions,BA process emissions,process emissions,-1.0
+BE process emissions,BE process emissions,process emissions,-1.0
+BG process emissions,BG process emissions,process emissions,-1.0
+CH process emissions,CH process emissions,process emissions,-1.0
+CZ process emissions,CZ process emissions,process emissions,-1.0
+DE process emissions,DE process emissions,process emissions,-1.0
+DK process emissions,DK process emissions,process emissions,-1.0
+EE process emissions,EE process emissions,process emissions,-1.0
+ES process emissions,ES process emissions,process emissions,-1.0
+FI process emissions,FI process emissions,process emissions,-1.0
+FR process emissions,FR process emissions,process emissions,-1.0
+GB process emissions,GB process emissions,process emissions,-1.0
+GBI process emissions,GBI process emissions,process emissions,-1.0
+GR process emissions,GR process emissions,process emissions,-1.0
+HR process emissions,HR process emissions,process emissions,-1.0
+HU process emissions,HU process emissions,process emissions,-1.0
+IE process emissions,IE process emissions,process emissions,-1.0
+IT process emissions,IT process emissions,process emissions,-1.0
+LT process emissions,LT process emissions,process emissions,-1.0
+LU process emissions,LU process emissions,process emissions,-1.0
+LV process emissions,LV process emissions,process emissions,-1.0
+ME process emissions,ME process emissions,process emissions,-1.0
+MK process emissions,MK process emissions,process emissions,-1.0
+NL process emissions,NL process emissions,process emissions,-1.0
+NO process emissions,NO process emissions,process emissions,-1.0
+PL process emissions,PL process emissions,process emissions,-1.0
+PT process emissions,PT process emissions,process emissions,-1.0
+RO process emissions,RO process emissions,process emissions,-1.0
+RS process emissions,RS process emissions,process emissions,-1.0
+SE process emissions,SE process emissions,process emissions,-1.0
+SI process emissions,SI process emissions,process emissions,-1.0
+SK process emissions,SK process emissions,process emissions,-1.0
+XK process emissions,XK process emissions,process emissions,-1.0
+EU NH3,EU NH3,NH3,-1.0
+EU coal for industry,EU coal for industry,coal for industry,-1.0
+AL H2 for shipping,AL H2 liquid,H2 for shipping,-1.0
+AT H2 for shipping,AT H2 liquid,H2 for shipping,-1.0
+BA H2 for shipping,BA H2 liquid,H2 for shipping,-1.0
+BE H2 for shipping,BE H2 liquid,H2 for shipping,-1.0
+BG H2 for shipping,BG H2 liquid,H2 for shipping,-1.0
+CH H2 for shipping,CH H2 liquid,H2 for shipping,-1.0
+CZ H2 for shipping,CZ H2 liquid,H2 for shipping,-1.0
+DE H2 for shipping,DE H2 liquid,H2 for shipping,-1.0
+DK H2 for shipping,DK H2 liquid,H2 for shipping,-1.0
+EE H2 for shipping,EE H2 liquid,H2 for shipping,-1.0
+ES H2 for shipping,ES H2 liquid,H2 for shipping,-1.0
+FI H2 for shipping,FI H2 liquid,H2 for shipping,-1.0
+FR H2 for shipping,FR H2 liquid,H2 for shipping,-1.0
+GB H2 for shipping,GB H2 liquid,H2 for shipping,-1.0
+GBI H2 for shipping,GBI H2 liquid,H2 for shipping,-1.0
+GR H2 for shipping,GR H2 liquid,H2 for shipping,-1.0
+HR H2 for shipping,HR H2 liquid,H2 for shipping,-1.0
+HU H2 for shipping,HU H2 liquid,H2 for shipping,-1.0
+IE H2 for shipping,IE H2 liquid,H2 for shipping,-1.0
+IT H2 for shipping,IT H2 liquid,H2 for shipping,-1.0
+LT H2 for shipping,LT H2 liquid,H2 for shipping,-1.0
+LU H2 for shipping,LU H2 liquid,H2 for shipping,-1.0
+LV H2 for shipping,LV H2 liquid,H2 for shipping,-1.0
+ME H2 for shipping,ME H2 liquid,H2 for shipping,-1.0
+MK H2 for shipping,MK H2 liquid,H2 for shipping,-1.0
+NL H2 for shipping,NL H2 liquid,H2 for shipping,-1.0
+NO H2 for shipping,NO H2 liquid,H2 for shipping,-1.0
+PL H2 for shipping,PL H2 liquid,H2 for shipping,-1.0
+PT H2 for shipping,PT H2 liquid,H2 for shipping,-1.0
+RO H2 for shipping,RO H2 liquid,H2 for shipping,-1.0
+RS H2 for shipping,RS H2 liquid,H2 for shipping,-1.0
+SE H2 for shipping,SE H2 liquid,H2 for shipping,-1.0
+SI H2 for shipping,SI H2 liquid,H2 for shipping,-1.0
+SK H2 for shipping,SK H2 liquid,H2 for shipping,-1.0
+XK H2 for shipping,XK H2 liquid,H2 for shipping,-1.0
+AL shipping methanol,AL shipping methanol,shipping methanol,-1.0
+AT shipping methanol,AT shipping methanol,shipping methanol,-1.0
+BA shipping methanol,BA shipping methanol,shipping methanol,-1.0
+BE shipping methanol,BE shipping methanol,shipping methanol,-1.0
+BG shipping methanol,BG shipping methanol,shipping methanol,-1.0
+CH shipping methanol,CH shipping methanol,shipping methanol,-1.0
+CZ shipping methanol,CZ shipping methanol,shipping methanol,-1.0
+DE shipping methanol,DE shipping methanol,shipping methanol,-1.0
+DK shipping methanol,DK shipping methanol,shipping methanol,-1.0
+EE shipping methanol,EE shipping methanol,shipping methanol,-1.0
+ES shipping methanol,ES shipping methanol,shipping methanol,-1.0
+FI shipping methanol,FI shipping methanol,shipping methanol,-1.0
+FR shipping methanol,FR shipping methanol,shipping methanol,-1.0
+GB shipping methanol,GB shipping methanol,shipping methanol,-1.0
+GBI shipping methanol,GBI shipping methanol,shipping methanol,-1.0
+GR shipping methanol,GR shipping methanol,shipping methanol,-1.0
+HR shipping methanol,HR shipping methanol,shipping methanol,-1.0
+HU shipping methanol,HU shipping methanol,shipping methanol,-1.0
+IE shipping methanol,IE shipping methanol,shipping methanol,-1.0
+IT shipping methanol,IT shipping methanol,shipping methanol,-1.0
+LT shipping methanol,LT shipping methanol,shipping methanol,-1.0
+LU shipping methanol,LU shipping methanol,shipping methanol,-1.0
+LV shipping methanol,LV shipping methanol,shipping methanol,-1.0
+ME shipping methanol,ME shipping methanol,shipping methanol,-1.0
+MK shipping methanol,MK shipping methanol,shipping methanol,-1.0
+NL shipping methanol,NL shipping methanol,shipping methanol,-1.0
+NO shipping methanol,NO shipping methanol,shipping methanol,-1.0
+PL shipping methanol,PL shipping methanol,shipping methanol,-1.0
+PT shipping methanol,PT shipping methanol,shipping methanol,-1.0
+RO shipping methanol,RO shipping methanol,shipping methanol,-1.0
+RS shipping methanol,RS shipping methanol,shipping methanol,-1.0
+SE shipping methanol,SE shipping methanol,shipping methanol,-1.0
+SI shipping methanol,SI shipping methanol,shipping methanol,-1.0
+SK shipping methanol,SK shipping methanol,shipping methanol,-1.0
+XK shipping methanol,XK shipping methanol,shipping methanol,-1.0
+AL shipping oil,AL shipping oil,shipping oil,-1.0
+AT shipping oil,AT shipping oil,shipping oil,-1.0
+BA shipping oil,BA shipping oil,shipping oil,-1.0
+BE shipping oil,BE shipping oil,shipping oil,-1.0
+BG shipping oil,BG shipping oil,shipping oil,-1.0
+CH shipping oil,CH shipping oil,shipping oil,-1.0
+CZ shipping oil,CZ shipping oil,shipping oil,-1.0
+DE shipping oil,DE shipping oil,shipping oil,-1.0
+DK shipping oil,DK shipping oil,shipping oil,-1.0
+EE shipping oil,EE shipping oil,shipping oil,-1.0
+ES shipping oil,ES shipping oil,shipping oil,-1.0
+FI shipping oil,FI shipping oil,shipping oil,-1.0
+FR shipping oil,FR shipping oil,shipping oil,-1.0
+GB shipping oil,GB shipping oil,shipping oil,-1.0
+GBI shipping oil,GBI shipping oil,shipping oil,-1.0
+GR shipping oil,GR shipping oil,shipping oil,-1.0
+HR shipping oil,HR shipping oil,shipping oil,-1.0
+HU shipping oil,HU shipping oil,shipping oil,-1.0
+IE shipping oil,IE shipping oil,shipping oil,-1.0
+IT shipping oil,IT shipping oil,shipping oil,-1.0
+LT shipping oil,LT shipping oil,shipping oil,-1.0
+LU shipping oil,LU shipping oil,shipping oil,-1.0
+LV shipping oil,LV shipping oil,shipping oil,-1.0
+ME shipping oil,ME shipping oil,shipping oil,-1.0
+MK shipping oil,MK shipping oil,shipping oil,-1.0
+NL shipping oil,NL shipping oil,shipping oil,-1.0
+NO shipping oil,NO shipping oil,shipping oil,-1.0
+PL shipping oil,PL shipping oil,shipping oil,-1.0
+PT shipping oil,PT shipping oil,shipping oil,-1.0
+RO shipping oil,RO shipping oil,shipping oil,-1.0
+RS shipping oil,RS shipping oil,shipping oil,-1.0
+SE shipping oil,SE shipping oil,shipping oil,-1.0
+SI shipping oil,SI shipping oil,shipping oil,-1.0
+SK shipping oil,SK shipping oil,shipping oil,-1.0
+XK shipping oil,XK shipping oil,shipping oil,-1.0
+AL kerosene for aviation,AL kerosene for aviation,kerosene for aviation,-1.0
+AT kerosene for aviation,AT kerosene for aviation,kerosene for aviation,-1.0
+BA kerosene for aviation,BA kerosene for aviation,kerosene for aviation,-1.0
+BE kerosene for aviation,BE kerosene for aviation,kerosene for aviation,-1.0
+BG kerosene for aviation,BG kerosene for aviation,kerosene for aviation,-1.0
+CH kerosene for aviation,CH kerosene for aviation,kerosene for aviation,-1.0
+CZ kerosene for aviation,CZ kerosene for aviation,kerosene for aviation,-1.0
+DE kerosene for aviation,DE kerosene for aviation,kerosene for aviation,-1.0
+DK kerosene for aviation,DK kerosene for aviation,kerosene for aviation,-1.0
+EE kerosene for aviation,EE kerosene for aviation,kerosene for aviation,-1.0
+ES kerosene for aviation,ES kerosene for aviation,kerosene for aviation,-1.0
+FI kerosene for aviation,FI kerosene for aviation,kerosene for aviation,-1.0
+FR kerosene for aviation,FR kerosene for aviation,kerosene for aviation,-1.0
+GB kerosene for aviation,GB kerosene for aviation,kerosene for aviation,-1.0
+GBI kerosene for aviation,GBI kerosene for aviation,kerosene for aviation,-1.0
+GR kerosene for aviation,GR kerosene for aviation,kerosene for aviation,-1.0
+HR kerosene for aviation,HR kerosene for aviation,kerosene for aviation,-1.0
+HU kerosene for aviation,HU kerosene for aviation,kerosene for aviation,-1.0
+IE kerosene for aviation,IE kerosene for aviation,kerosene for aviation,-1.0
+IT kerosene for aviation,IT kerosene for aviation,kerosene for aviation,-1.0
+LT kerosene for aviation,LT kerosene for aviation,kerosene for aviation,-1.0
+LU kerosene for aviation,LU kerosene for aviation,kerosene for aviation,-1.0
+LV kerosene for aviation,LV kerosene for aviation,kerosene for aviation,-1.0
+ME kerosene for aviation,ME kerosene for aviation,kerosene for aviation,-1.0
+MK kerosene for aviation,MK kerosene for aviation,kerosene for aviation,-1.0
+NL kerosene for aviation,NL kerosene for aviation,kerosene for aviation,-1.0
+NO kerosene for aviation,NO kerosene for aviation,kerosene for aviation,-1.0
+PL kerosene for aviation,PL kerosene for aviation,kerosene for aviation,-1.0
+PT kerosene for aviation,PT kerosene for aviation,kerosene for aviation,-1.0
+RO kerosene for aviation,RO kerosene for aviation,kerosene for aviation,-1.0
+RS kerosene for aviation,RS kerosene for aviation,kerosene for aviation,-1.0
+SE kerosene for aviation,SE kerosene for aviation,kerosene for aviation,-1.0
+SI kerosene for aviation,SI kerosene for aviation,kerosene for aviation,-1.0
+SK kerosene for aviation,SK kerosene for aviation,kerosene for aviation,-1.0
+XK kerosene for aviation,XK kerosene for aviation,kerosene for aviation,-1.0
+AL methanol kerosene for aviation,AL methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+AT methanol kerosene for aviation,AT methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+BA methanol kerosene for aviation,BA methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+BE methanol kerosene for aviation,BE methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+BG methanol kerosene for aviation,BG methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+CH methanol kerosene for aviation,CH methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+CZ methanol kerosene for aviation,CZ methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+DE methanol kerosene for aviation,DE methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+DK methanol kerosene for aviation,DK methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+EE methanol kerosene for aviation,EE methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+ES methanol kerosene for aviation,ES methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+FI methanol kerosene for aviation,FI methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+FR methanol kerosene for aviation,FR methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+GB methanol kerosene for aviation,GB methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+GBI methanol kerosene for aviation,GBI methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+GR methanol kerosene for aviation,GR methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+HR methanol kerosene for aviation,HR methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+HU methanol kerosene for aviation,HU methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+IE methanol kerosene for aviation,IE methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+IT methanol kerosene for aviation,IT methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+LT methanol kerosene for aviation,LT methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+LU methanol kerosene for aviation,LU methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+LV methanol kerosene for aviation,LV methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+ME methanol kerosene for aviation,ME methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+MK methanol kerosene for aviation,MK methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+NL methanol kerosene for aviation,NL methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+NO methanol kerosene for aviation,NO methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+PL methanol kerosene for aviation,PL methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+PT methanol kerosene for aviation,PT methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+RO methanol kerosene for aviation,RO methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+RS methanol kerosene for aviation,RS methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+SE methanol kerosene for aviation,SE methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+SI methanol kerosene for aviation,SI methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+SK methanol kerosene for aviation,SK methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+XK methanol kerosene for aviation,XK methanol kerosene for aviation,methanol kerosene for aviation,-1.0
+AL agriculture electricity,AL low voltage,agriculture electricity,-1.0
+AT agriculture electricity,AT low voltage,agriculture electricity,-1.0
+BA agriculture electricity,BA low voltage,agriculture electricity,-1.0
+BE agriculture electricity,BE low voltage,agriculture electricity,-1.0
+BG agriculture electricity,BG low voltage,agriculture electricity,-1.0
+CH agriculture electricity,CH low voltage,agriculture electricity,-1.0
+CZ agriculture electricity,CZ low voltage,agriculture electricity,-1.0
+DE agriculture electricity,DE low voltage,agriculture electricity,-1.0
+DK agriculture electricity,DK low voltage,agriculture electricity,-1.0
+EE agriculture electricity,EE low voltage,agriculture electricity,-1.0
+ES agriculture electricity,ES low voltage,agriculture electricity,-1.0
+FI agriculture electricity,FI low voltage,agriculture electricity,-1.0
+FR agriculture electricity,FR low voltage,agriculture electricity,-1.0
+GB agriculture electricity,GB low voltage,agriculture electricity,-1.0
+GBI agriculture electricity,GBI low voltage,agriculture electricity,-1.0
+GR agriculture electricity,GR low voltage,agriculture electricity,-1.0
+HR agriculture electricity,HR low voltage,agriculture electricity,-1.0
+HU agriculture electricity,HU low voltage,agriculture electricity,-1.0
+IE agriculture electricity,IE low voltage,agriculture electricity,-1.0
+IT agriculture electricity,IT low voltage,agriculture electricity,-1.0
+LT agriculture electricity,LT low voltage,agriculture electricity,-1.0
+LU agriculture electricity,LU low voltage,agriculture electricity,-1.0
+LV agriculture electricity,LV low voltage,agriculture electricity,-1.0
+ME agriculture electricity,ME low voltage,agriculture electricity,-1.0
+MK agriculture electricity,MK low voltage,agriculture electricity,-1.0
+NL agriculture electricity,NL low voltage,agriculture electricity,-1.0
+NO agriculture electricity,NO low voltage,agriculture electricity,-1.0
+PL agriculture electricity,PL low voltage,agriculture electricity,-1.0
+PT agriculture electricity,PT low voltage,agriculture electricity,-1.0
+RO agriculture electricity,RO low voltage,agriculture electricity,-1.0
+RS agriculture electricity,RS low voltage,agriculture electricity,-1.0
+SE agriculture electricity,SE low voltage,agriculture electricity,-1.0
+SI agriculture electricity,SI low voltage,agriculture electricity,-1.0
+SK agriculture electricity,SK low voltage,agriculture electricity,-1.0
+XK agriculture electricity,XK low voltage,agriculture electricity,-1.0
+AL agriculture heat,AL rural heat,agriculture heat,-1.0
+AT agriculture heat,AT rural heat,agriculture heat,-1.0
+BA agriculture heat,BA rural heat,agriculture heat,-1.0
+BE agriculture heat,BE rural heat,agriculture heat,-1.0
+BG agriculture heat,BG rural heat,agriculture heat,-1.0
+CH agriculture heat,CH rural heat,agriculture heat,-1.0
+CZ agriculture heat,CZ rural heat,agriculture heat,-1.0
+DE agriculture heat,DE rural heat,agriculture heat,-1.0
+DK agriculture heat,DK rural heat,agriculture heat,-1.0
+EE agriculture heat,EE rural heat,agriculture heat,-1.0
+ES agriculture heat,ES rural heat,agriculture heat,-1.0
+FI agriculture heat,FI rural heat,agriculture heat,-1.0
+FR agriculture heat,FR rural heat,agriculture heat,-1.0
+GB agriculture heat,GB rural heat,agriculture heat,-1.0
+GBI agriculture heat,GBI rural heat,agriculture heat,-1.0
+GR agriculture heat,GR rural heat,agriculture heat,-1.0
+HR agriculture heat,HR rural heat,agriculture heat,-1.0
+HU agriculture heat,HU rural heat,agriculture heat,-1.0
+IE agriculture heat,IE rural heat,agriculture heat,-1.0
+IT agriculture heat,IT rural heat,agriculture heat,-1.0
+LT agriculture heat,LT rural heat,agriculture heat,-1.0
+LU agriculture heat,LU rural heat,agriculture heat,-1.0
+LV agriculture heat,LV rural heat,agriculture heat,-1.0
+ME agriculture heat,ME rural heat,agriculture heat,-1.0
+MK agriculture heat,MK rural heat,agriculture heat,-1.0
+NL agriculture heat,NL rural heat,agriculture heat,-1.0
+NO agriculture heat,NO rural heat,agriculture heat,-1.0
+PL agriculture heat,PL rural heat,agriculture heat,-1.0
+PT agriculture heat,PT rural heat,agriculture heat,-1.0
+RO agriculture heat,RO rural heat,agriculture heat,-1.0
+RS agriculture heat,RS rural heat,agriculture heat,-1.0
+SE agriculture heat,SE rural heat,agriculture heat,-1.0
+SI agriculture heat,SI rural heat,agriculture heat,-1.0
+SK agriculture heat,SK rural heat,agriculture heat,-1.0
+XK agriculture heat,XK rural heat,agriculture heat,-1.0
+AL agriculture machinery electric,AL low voltage,agriculture machinery electric,-1.0
+AT agriculture machinery electric,AT low voltage,agriculture machinery electric,-1.0
+BA agriculture machinery electric,BA low voltage,agriculture machinery electric,-1.0
+BE agriculture machinery electric,BE low voltage,agriculture machinery electric,-1.0
+BG agriculture machinery electric,BG low voltage,agriculture machinery electric,-1.0
+CH agriculture machinery electric,CH low voltage,agriculture machinery electric,-1.0
+CZ agriculture machinery electric,CZ low voltage,agriculture machinery electric,-1.0
+DE agriculture machinery electric,DE low voltage,agriculture machinery electric,-1.0
+DK agriculture machinery electric,DK low voltage,agriculture machinery electric,-1.0
+EE agriculture machinery electric,EE low voltage,agriculture machinery electric,-1.0
+ES agriculture machinery electric,ES low voltage,agriculture machinery electric,-1.0
+FI agriculture machinery electric,FI low voltage,agriculture machinery electric,-1.0
+FR agriculture machinery electric,FR low voltage,agriculture machinery electric,-1.0
+GB agriculture machinery electric,GB low voltage,agriculture machinery electric,-1.0
+GBI agriculture machinery electric,GBI low voltage,agriculture machinery electric,-1.0
+GR agriculture machinery electric,GR low voltage,agriculture machinery electric,-1.0
+HR agriculture machinery electric,HR low voltage,agriculture machinery electric,-1.0
+HU agriculture machinery electric,HU low voltage,agriculture machinery electric,-1.0
+IE agriculture machinery electric,IE low voltage,agriculture machinery electric,-1.0
+IT agriculture machinery electric,IT low voltage,agriculture machinery electric,-1.0
+LT agriculture machinery electric,LT low voltage,agriculture machinery electric,-1.0
+LU agriculture machinery electric,LU low voltage,agriculture machinery electric,-1.0
+LV agriculture machinery electric,LV low voltage,agriculture machinery electric,-1.0
+ME agriculture machinery electric,ME low voltage,agriculture machinery electric,-1.0
+MK agriculture machinery electric,MK low voltage,agriculture machinery electric,-1.0
+NL agriculture machinery electric,NL low voltage,agriculture machinery electric,-1.0
+NO agriculture machinery electric,NO low voltage,agriculture machinery electric,-1.0
+PL agriculture machinery electric,PL low voltage,agriculture machinery electric,-1.0
+PT agriculture machinery electric,PT low voltage,agriculture machinery electric,-1.0
+RO agriculture machinery electric,RO low voltage,agriculture machinery electric,-1.0
+RS agriculture machinery electric,RS low voltage,agriculture machinery electric,-1.0
+SE agriculture machinery electric,SE low voltage,agriculture machinery electric,-1.0
+SI agriculture machinery electric,SI low voltage,agriculture machinery electric,-1.0
+SK agriculture machinery electric,SK low voltage,agriculture machinery electric,-1.0
+XK agriculture machinery electric,XK low voltage,agriculture machinery electric,-1.0
+AL agriculture machinery oil,AL agriculture machinery oil,agriculture machinery oil,-1.0
+AT agriculture machinery oil,AT agriculture machinery oil,agriculture machinery oil,-1.0
+BA agriculture machinery oil,BA agriculture machinery oil,agriculture machinery oil,-1.0
+BE agriculture machinery oil,BE agriculture machinery oil,agriculture machinery oil,-1.0
+BG agriculture machinery oil,BG agriculture machinery oil,agriculture machinery oil,-1.0
+CH agriculture machinery oil,CH agriculture machinery oil,agriculture machinery oil,-1.0
+CZ agriculture machinery oil,CZ agriculture machinery oil,agriculture machinery oil,-1.0
+DE agriculture machinery oil,DE agriculture machinery oil,agriculture machinery oil,-1.0
+DK agriculture machinery oil,DK agriculture machinery oil,agriculture machinery oil,-1.0
+EE agriculture machinery oil,EE agriculture machinery oil,agriculture machinery oil,-1.0
+ES agriculture machinery oil,ES agriculture machinery oil,agriculture machinery oil,-1.0
+FI agriculture machinery oil,FI agriculture machinery oil,agriculture machinery oil,-1.0
+FR agriculture machinery oil,FR agriculture machinery oil,agriculture machinery oil,-1.0
+GB agriculture machinery oil,GB agriculture machinery oil,agriculture machinery oil,-1.0
+GBI agriculture machinery oil,GBI agriculture machinery oil,agriculture machinery oil,-1.0
+GR agriculture machinery oil,GR agriculture machinery oil,agriculture machinery oil,-1.0
+HR agriculture machinery oil,HR agriculture machinery oil,agriculture machinery oil,-1.0
+HU agriculture machinery oil,HU agriculture machinery oil,agriculture machinery oil,-1.0
+IE agriculture machinery oil,IE agriculture machinery oil,agriculture machinery oil,-1.0
+IT agriculture machinery oil,IT agriculture machinery oil,agriculture machinery oil,-1.0
+LT agriculture machinery oil,LT agriculture machinery oil,agriculture machinery oil,-1.0
+LU agriculture machinery oil,LU agriculture machinery oil,agriculture machinery oil,-1.0
+LV agriculture machinery oil,LV agriculture machinery oil,agriculture machinery oil,-1.0
+ME agriculture machinery oil,ME agriculture machinery oil,agriculture machinery oil,-1.0
+MK agriculture machinery oil,MK agriculture machinery oil,agriculture machinery oil,-1.0
+NL agriculture machinery oil,NL agriculture machinery oil,agriculture machinery oil,-1.0
+NO agriculture machinery oil,NO agriculture machinery oil,agriculture machinery oil,-1.0
+PL agriculture machinery oil,PL agriculture machinery oil,agriculture machinery oil,-1.0
+PT agriculture machinery oil,PT agriculture machinery oil,agriculture machinery oil,-1.0
+RO agriculture machinery oil,RO agriculture machinery oil,agriculture machinery oil,-1.0
+RS agriculture machinery oil,RS agriculture machinery oil,agriculture machinery oil,-1.0
+SE agriculture machinery oil,SE agriculture machinery oil,agriculture machinery oil,-1.0
+SI agriculture machinery oil,SI agriculture machinery oil,agriculture machinery oil,-1.0
+SK agriculture machinery oil,SK agriculture machinery oil,agriculture machinery oil,-1.0
+XK agriculture machinery oil,XK agriculture machinery oil,agriculture machinery oil,-1.0
+EU oil from H2,EU oil from H2,oil from H2,-1.0
+oil from H2 emissions,co2 atmosphere,oil from H2 emissions,-1.0
+AL electricity rural heat,AL electricity rural heat,electricity rural heat,-1.0
+AL electricity urban decentral heat,AL electricity urban decentral heat,electricity urban decentral heat,-1.0
+AL gas rural heat,AL gas rural heat,gas rural heat,-1.0
+AL gas urban decentral heat,AL gas urban decentral heat,gas urban decentral heat,-1.0
+AL rural heat,AL rural heat,rural heat,-1.0
+AL urban decentral heat,AL urban decentral heat,urban decentral heat,-1.0
+AT electricity rural heat,AT electricity rural heat,electricity rural heat,-1.0
+AT electricity urban decentral heat,AT electricity urban decentral heat,electricity urban decentral heat,-1.0
+AT gas rural heat,AT gas rural heat,gas rural heat,-1.0
+AT gas urban decentral heat,AT gas urban decentral heat,gas urban decentral heat,-1.0
+AT rural heat,AT rural heat,rural heat,-1.0
+AT urban decentral heat,AT urban decentral heat,urban decentral heat,-1.0
+BA electricity rural heat,BA electricity rural heat,electricity rural heat,-1.0
+BA electricity urban decentral heat,BA electricity urban decentral heat,electricity urban decentral heat,-1.0
+BA gas rural heat,BA gas rural heat,gas rural heat,-1.0
+BA gas urban decentral heat,BA gas urban decentral heat,gas urban decentral heat,-1.0
+BA rural heat,BA rural heat,rural heat,-1.0
+BA urban decentral heat,BA urban decentral heat,urban decentral heat,-1.0
+BE electricity rural heat,BE electricity rural heat,electricity rural heat,-1.0
+BE electricity urban decentral heat,BE electricity urban decentral heat,electricity urban decentral heat,-1.0
+BE gas rural heat,BE gas rural heat,gas rural heat,-1.0
+BE gas urban decentral heat,BE gas urban decentral heat,gas urban decentral heat,-1.0
+BE rural heat,BE rural heat,rural heat,-1.0
+BE urban decentral heat,BE urban decentral heat,urban decentral heat,-1.0
+BG electricity rural heat,BG electricity rural heat,electricity rural heat,-1.0
+BG electricity urban decentral heat,BG electricity urban decentral heat,electricity urban decentral heat,-1.0
+BG gas rural heat,BG gas rural heat,gas rural heat,-1.0
+BG gas urban decentral heat,BG gas urban decentral heat,gas urban decentral heat,-1.0
+BG rural heat,BG rural heat,rural heat,-1.0
+BG urban decentral heat,BG urban decentral heat,urban decentral heat,-1.0
+CH electricity rural heat,CH electricity rural heat,electricity rural heat,-1.0
+CH electricity urban decentral heat,CH electricity urban decentral heat,electricity urban decentral heat,-1.0
+CH gas rural heat,CH gas rural heat,gas rural heat,-1.0
+CH gas urban decentral heat,CH gas urban decentral heat,gas urban decentral heat,-1.0
+CH rural heat,CH rural heat,rural heat,-1.0
+CH urban decentral heat,CH urban decentral heat,urban decentral heat,-1.0
+CZ electricity rural heat,CZ electricity rural heat,electricity rural heat,-1.0
+CZ electricity urban decentral heat,CZ electricity urban decentral heat,electricity urban decentral heat,-1.0
+CZ gas rural heat,CZ gas rural heat,gas rural heat,-1.0
+CZ gas urban decentral heat,CZ gas urban decentral heat,gas urban decentral heat,-1.0
+CZ rural heat,CZ rural heat,rural heat,-1.0
+CZ urban decentral heat,CZ urban decentral heat,urban decentral heat,-1.0
+DE electricity rural heat,DE electricity rural heat,electricity rural heat,-1.0
+DE electricity urban decentral heat,DE electricity urban decentral heat,electricity urban decentral heat,-1.0
+DE gas rural heat,DE gas rural heat,gas rural heat,-1.0
+DE gas urban decentral heat,DE gas urban decentral heat,gas urban decentral heat,-1.0
+DE rural heat,DE rural heat,rural heat,-1.0
+DE urban decentral heat,DE urban decentral heat,urban decentral heat,-1.0
+DK electricity rural heat,DK electricity rural heat,electricity rural heat,-1.0
+DK electricity urban decentral heat,DK electricity urban decentral heat,electricity urban decentral heat,-1.0
+DK gas rural heat,DK gas rural heat,gas rural heat,-1.0
+DK gas urban decentral heat,DK gas urban decentral heat,gas urban decentral heat,-1.0
+DK rural heat,DK rural heat,rural heat,-1.0
+DK urban decentral heat,DK urban decentral heat,urban decentral heat,-1.0
+EE electricity rural heat,EE electricity rural heat,electricity rural heat,-1.0
+EE electricity urban decentral heat,EE electricity urban decentral heat,electricity urban decentral heat,-1.0
+EE gas rural heat,EE gas rural heat,gas rural heat,-1.0
+EE gas urban decentral heat,EE gas urban decentral heat,gas urban decentral heat,-1.0
+EE rural heat,EE rural heat,rural heat,-1.0
+EE urban decentral heat,EE urban decentral heat,urban decentral heat,-1.0
+ES electricity rural heat,ES electricity rural heat,electricity rural heat,-1.0
+ES electricity urban decentral heat,ES electricity urban decentral heat,electricity urban decentral heat,-1.0
+ES gas rural heat,ES gas rural heat,gas rural heat,-1.0
+ES gas urban decentral heat,ES gas urban decentral heat,gas urban decentral heat,-1.0
+ES rural heat,ES rural heat,rural heat,-1.0
+ES urban decentral heat,ES urban decentral heat,urban decentral heat,-1.0
+FI electricity rural heat,FI electricity rural heat,electricity rural heat,-1.0
+FI electricity urban decentral heat,FI electricity urban decentral heat,electricity urban decentral heat,-1.0
+FI gas rural heat,FI gas rural heat,gas rural heat,-1.0
+FI gas urban decentral heat,FI gas urban decentral heat,gas urban decentral heat,-1.0
+FI rural heat,FI rural heat,rural heat,-1.0
+FI urban decentral heat,FI urban decentral heat,urban decentral heat,-1.0
+FR electricity rural heat,FR electricity rural heat,electricity rural heat,-1.0
+FR electricity urban decentral heat,FR electricity urban decentral heat,electricity urban decentral heat,-1.0
+FR gas rural heat,FR gas rural heat,gas rural heat,-1.0
+FR gas urban decentral heat,FR gas urban decentral heat,gas urban decentral heat,-1.0
+FR rural heat,FR rural heat,rural heat,-1.0
+FR urban decentral heat,FR urban decentral heat,urban decentral heat,-1.0
+GB electricity rural heat,GB electricity rural heat,electricity rural heat,-1.0
+GB electricity urban decentral heat,GB electricity urban decentral heat,electricity urban decentral heat,-1.0
+GB gas rural heat,GB gas rural heat,gas rural heat,-1.0
+GB gas urban decentral heat,GB gas urban decentral heat,gas urban decentral heat,-1.0
+GB rural heat,GB rural heat,rural heat,-1.0
+GB urban decentral heat,GB urban decentral heat,urban decentral heat,-1.0
+GBI electricity rural heat,GBI electricity rural heat,electricity rural heat,-1.0
+GBI electricity urban decentral heat,GBI electricity urban decentral heat,electricity urban decentral heat,-1.0
+GBI gas rural heat,GBI gas rural heat,gas rural heat,-1.0
+GBI gas urban decentral heat,GBI gas urban decentral heat,gas urban decentral heat,-1.0
+GBI rural heat,GBI rural heat,rural heat,-1.0
+GBI urban decentral heat,GBI urban decentral heat,urban decentral heat,-1.0
+GR electricity rural heat,GR electricity rural heat,electricity rural heat,-1.0
+GR electricity urban decentral heat,GR electricity urban decentral heat,electricity urban decentral heat,-1.0
+GR gas rural heat,GR gas rural heat,gas rural heat,-1.0
+GR gas urban decentral heat,GR gas urban decentral heat,gas urban decentral heat,-1.0
+GR rural heat,GR rural heat,rural heat,-1.0
+GR urban decentral heat,GR urban decentral heat,urban decentral heat,-1.0
+HR electricity rural heat,HR electricity rural heat,electricity rural heat,-1.0
+HR electricity urban decentral heat,HR electricity urban decentral heat,electricity urban decentral heat,-1.0
+HR gas rural heat,HR gas rural heat,gas rural heat,-1.0
+HR gas urban decentral heat,HR gas urban decentral heat,gas urban decentral heat,-1.0
+HR rural heat,HR rural heat,rural heat,-1.0
+HR urban decentral heat,HR urban decentral heat,urban decentral heat,-1.0
+HU electricity rural heat,HU electricity rural heat,electricity rural heat,-1.0
+HU electricity urban decentral heat,HU electricity urban decentral heat,electricity urban decentral heat,-1.0
+HU gas rural heat,HU gas rural heat,gas rural heat,-1.0
+HU gas urban decentral heat,HU gas urban decentral heat,gas urban decentral heat,-1.0
+HU rural heat,HU rural heat,rural heat,-1.0
+HU urban decentral heat,HU urban decentral heat,urban decentral heat,-1.0
+IE electricity rural heat,IE electricity rural heat,electricity rural heat,-1.0
+IE electricity urban decentral heat,IE electricity urban decentral heat,electricity urban decentral heat,-1.0
+IE gas rural heat,IE gas rural heat,gas rural heat,-1.0
+IE gas urban decentral heat,IE gas urban decentral heat,gas urban decentral heat,-1.0
+IE rural heat,IE rural heat,rural heat,-1.0
+IE urban decentral heat,IE urban decentral heat,urban decentral heat,-1.0
+IT electricity rural heat,IT electricity rural heat,electricity rural heat,-1.0
+IT electricity urban decentral heat,IT electricity urban decentral heat,electricity urban decentral heat,-1.0
+IT gas rural heat,IT gas rural heat,gas rural heat,-1.0
+IT gas urban decentral heat,IT gas urban decentral heat,gas urban decentral heat,-1.0
+IT rural heat,IT rural heat,rural heat,-1.0
+IT urban decentral heat,IT urban decentral heat,urban decentral heat,-1.0
+LT electricity rural heat,LT electricity rural heat,electricity rural heat,-1.0
+LT electricity urban decentral heat,LT electricity urban decentral heat,electricity urban decentral heat,-1.0
+LT gas rural heat,LT gas rural heat,gas rural heat,-1.0
+LT gas urban decentral heat,LT gas urban decentral heat,gas urban decentral heat,-1.0
+LT rural heat,LT rural heat,rural heat,-1.0
+LT urban decentral heat,LT urban decentral heat,urban decentral heat,-1.0
+LU electricity rural heat,LU electricity rural heat,electricity rural heat,-1.0
+LU electricity urban decentral heat,LU electricity urban decentral heat,electricity urban decentral heat,-1.0
+LU gas rural heat,LU gas rural heat,gas rural heat,-1.0
+LU gas urban decentral heat,LU gas urban decentral heat,gas urban decentral heat,-1.0
+LU rural heat,LU rural heat,rural heat,-1.0
+LU urban decentral heat,LU urban decentral heat,urban decentral heat,-1.0
+LV electricity rural heat,LV electricity rural heat,electricity rural heat,-1.0
+LV electricity urban decentral heat,LV electricity urban decentral heat,electricity urban decentral heat,-1.0
+LV gas rural heat,LV gas rural heat,gas rural heat,-1.0
+LV gas urban decentral heat,LV gas urban decentral heat,gas urban decentral heat,-1.0
+LV rural heat,LV rural heat,rural heat,-1.0
+LV urban decentral heat,LV urban decentral heat,urban decentral heat,-1.0
+ME electricity rural heat,ME electricity rural heat,electricity rural heat,-1.0
+ME electricity urban decentral heat,ME electricity urban decentral heat,electricity urban decentral heat,-1.0
+ME gas rural heat,ME gas rural heat,gas rural heat,-1.0
+ME gas urban decentral heat,ME gas urban decentral heat,gas urban decentral heat,-1.0
+ME rural heat,ME rural heat,rural heat,-1.0
+ME urban decentral heat,ME urban decentral heat,urban decentral heat,-1.0
+MK electricity rural heat,MK electricity rural heat,electricity rural heat,-1.0
+MK electricity urban decentral heat,MK electricity urban decentral heat,electricity urban decentral heat,-1.0
+MK gas rural heat,MK gas rural heat,gas rural heat,-1.0
+MK gas urban decentral heat,MK gas urban decentral heat,gas urban decentral heat,-1.0
+MK rural heat,MK rural heat,rural heat,-1.0
+MK urban decentral heat,MK urban decentral heat,urban decentral heat,-1.0
+NL electricity rural heat,NL electricity rural heat,electricity rural heat,-1.0
+NL electricity urban decentral heat,NL electricity urban decentral heat,electricity urban decentral heat,-1.0
+NL gas rural heat,NL gas rural heat,gas rural heat,-1.0
+NL gas urban decentral heat,NL gas urban decentral heat,gas urban decentral heat,-1.0
+NL rural heat,NL rural heat,rural heat,-1.0
+NL urban decentral heat,NL urban decentral heat,urban decentral heat,-1.0
+NO electricity rural heat,NO electricity rural heat,electricity rural heat,-1.0
+NO electricity urban decentral heat,NO electricity urban decentral heat,electricity urban decentral heat,-1.0
+NO gas rural heat,NO gas rural heat,gas rural heat,-1.0
+NO gas urban decentral heat,NO gas urban decentral heat,gas urban decentral heat,-1.0
+NO rural heat,NO rural heat,rural heat,-1.0
+NO urban decentral heat,NO urban decentral heat,urban decentral heat,-1.0
+PL electricity rural heat,PL electricity rural heat,electricity rural heat,-1.0
+PL electricity urban decentral heat,PL electricity urban decentral heat,electricity urban decentral heat,-1.0
+PL gas rural heat,PL gas rural heat,gas rural heat,-1.0
+PL gas urban decentral heat,PL gas urban decentral heat,gas urban decentral heat,-1.0
+PL rural heat,PL rural heat,rural heat,-1.0
+PL urban decentral heat,PL urban decentral heat,urban decentral heat,-1.0
+PT electricity rural heat,PT electricity rural heat,electricity rural heat,-1.0
+PT electricity urban decentral heat,PT electricity urban decentral heat,electricity urban decentral heat,-1.0
+PT gas rural heat,PT gas rural heat,gas rural heat,-1.0
+PT gas urban decentral heat,PT gas urban decentral heat,gas urban decentral heat,-1.0
+PT rural heat,PT rural heat,rural heat,-1.0
+PT urban decentral heat,PT urban decentral heat,urban decentral heat,-1.0
+RO electricity rural heat,RO electricity rural heat,electricity rural heat,-1.0
+RO electricity urban decentral heat,RO electricity urban decentral heat,electricity urban decentral heat,-1.0
+RO gas rural heat,RO gas rural heat,gas rural heat,-1.0
+RO gas urban decentral heat,RO gas urban decentral heat,gas urban decentral heat,-1.0
+RO rural heat,RO rural heat,rural heat,-1.0
+RO urban decentral heat,RO urban decentral heat,urban decentral heat,-1.0
+RS electricity rural heat,RS electricity rural heat,electricity rural heat,-1.0
+RS electricity urban decentral heat,RS electricity urban decentral heat,electricity urban decentral heat,-1.0
+RS gas rural heat,RS gas rural heat,gas rural heat,-1.0
+RS gas urban decentral heat,RS gas urban decentral heat,gas urban decentral heat,-1.0
+RS rural heat,RS rural heat,rural heat,-1.0
+RS urban decentral heat,RS urban decentral heat,urban decentral heat,-1.0
+SE electricity rural heat,SE electricity rural heat,electricity rural heat,-1.0
+SE electricity urban decentral heat,SE electricity urban decentral heat,electricity urban decentral heat,-1.0
+SE gas rural heat,SE gas rural heat,gas rural heat,-1.0
+SE gas urban decentral heat,SE gas urban decentral heat,gas urban decentral heat,-1.0
+SE rural heat,SE rural heat,rural heat,-1.0
+SE urban decentral heat,SE urban decentral heat,urban decentral heat,-1.0
+SI electricity rural heat,SI electricity rural heat,electricity rural heat,-1.0
+SI electricity urban decentral heat,SI electricity urban decentral heat,electricity urban decentral heat,-1.0
+SI gas rural heat,SI gas rural heat,gas rural heat,-1.0
+SI gas urban decentral heat,SI gas urban decentral heat,gas urban decentral heat,-1.0
+SI rural heat,SI rural heat,rural heat,-1.0
+SI urban decentral heat,SI urban decentral heat,urban decentral heat,-1.0
+SK electricity rural heat,SK electricity rural heat,electricity rural heat,-1.0
+SK electricity urban decentral heat,SK electricity urban decentral heat,electricity urban decentral heat,-1.0
+SK gas rural heat,SK gas rural heat,gas rural heat,-1.0
+SK gas urban decentral heat,SK gas urban decentral heat,gas urban decentral heat,-1.0
+SK rural heat,SK rural heat,rural heat,-1.0
+SK urban decentral heat,SK urban decentral heat,urban decentral heat,-1.0
+XK electricity rural heat,XK electricity rural heat,electricity rural heat,-1.0
+XK electricity urban decentral heat,XK electricity urban decentral heat,electricity urban decentral heat,-1.0
+XK gas rural heat,XK gas rural heat,gas rural heat,-1.0
+XK gas urban decentral heat,XK gas urban decentral heat,gas urban decentral heat,-1.0
+XK rural heat,XK rural heat,rural heat,-1.0
+XK urban decentral heat,XK urban decentral heat,urban decentral heat,-1.0

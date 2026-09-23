@@ -1,0 +1,11 @@
+{
+  "network": "/home/pampado/stochastic/pypsa-eur/results/demand_uncertainty_2035/BASE/networks/base_s_adm___2035.nc",
+  "sha256": "91fec5485bc6aea0e022af467735fdcd579e1caffe0d1fe86cbd06d543be4304",
+  "repository_head": "1887287f9800eb2d87ba47d4c424639c3a19795a",
+  "pypsa_runtime": "0.34.1",
+  "model_version_in_network": "v2025.07.0",
+  "scenario_catalogue": "/home/pampado/stochastic/pypsa-eur/config/demand_uncertainty_2035/scenarios/scenarios_determinstic_definition.yaml",
+  "catalogue_sha256": "6efc3ea4d24256fbafeb1b0d367ce1d2a284146519d05abd00d937197e238c23",
+  "links_inspected": 3508,
+  "port_signatures": 92
+}

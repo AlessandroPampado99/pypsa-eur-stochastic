@@ -1,0 +1,53 @@
+# Presentation mapping; component membership is checked against the input network.
+carriers:
+  E: {label: Electricity, color: '#e5be35', detail: 'AC/DC grids; distribution\nBatteries, EV storage; pumped hydro', buses: [AC, low voltage]}
+  Q: {label: Heat, color: '#db7867', detail: 'District / local heat; water tanks\nCentral heat also has pit storage', buses: [urban central heat, urban decentral heat, rural heat]}
+  H: {label: Hydrogen, color: '#a469b2', detail: 'Regional buses and pipelines\nUnderground / tank storage', buses: [H2]}
+  M: {label: Methanol, color: '#39a995', detail: 'One EU supply bus and store\nRegional end-use demand buses', buses: [methanol]}
+  G: {label: Methane, color: '#bd9664', detail: 'Regional gas grid and stores', buses: [gas]}
+  L: {label: Liquid hydrocarbons, color: '#7893ac', detail: 'EU oil pool and store; separate\nH2-derived oil and aviation pools', buses: [oil, oil from H2, methanol kerosene for aviation]}
+  B: {label: Biomass / biogas, color: '#91a96c', detail: 'Regional resources; no biomass grid', buses: [solid biomass, biogas]}
+  N: {label: Ammonia / coal, color: '#929aaa', detail: 'Separate EU buses and stores', buses: [NH3, coal]}
+sources:
+  - {label: 'Wind / solar PV\nHydro / nuclear', target: E, evidence: [onwind, solar, ror, nuclear], component: generators, process: generation}
+  - {label: Solar thermal, target: Q, evidence: [urban central solar thermal], component: generators, process: heat}
+  - {label: Natural gas, target: G, evidence: [gas], component: generators, process: supply}
+  - {label: Crude oil, target: L, evidence: [oil primary], component: generators, process: refining}
+  - {label: 'Solid biomass / biogas\nBioliquids', target: B, evidence: [solid biomass, biogas, unsustainable bioliquids], component: generators, process: supply}
+  - {label: Coal, target: N, evidence: [coal], component: generators, process: supply}
+demands:
+  - label: Buildings / services
+    rows:
+      - {text: 'E: baseline electricity', loads: [electricity], keys: [E]}
+      - {text: 'Q: gas / electric heat shares', loads: [gas urban central heat, electricity urban central heat, gas urban decentral heat, electricity urban decentral heat, gas rural heat, electricity rural heat], keys: [Q]}
+      - {text: 'Q: residual heat', loads: [urban central heat, urban decentral heat, rural heat], keys: [Q]}
+  - label: Industry / feedstocks
+    rows:
+      - {text: 'E, H, M, G, B; L: naphtha', loads: [industry electricity, H2 for industry, industry methanol, gas for industry, solid biomass for industry, naphtha for industry], keys: [E, H, M, G, B, L]}
+      - {text: 'Q; ammonia; coal', loads: [low-temperature heat for industry, NH3, coal for industry], keys: [Q, N]}
+  - label: Land transport
+    rows:
+      - {text: 'E: EVs; H: fuel cells; L: oil', loads: [land transport EV, land transport fuel cell, land transport oil], keys: [E, H, L]}
+  - label: Shipping
+    rows:
+      - {text: 'H: liquefied; M; L: oil', loads: [H2 for shipping, shipping methanol, shipping oil], keys: [H, M, L]}
+  - label: Aviation
+    rows:
+      - {text: 'L: kerosene / methanol route', loads: [kerosene for aviation, methanol kerosene for aviation], keys: [L]}
+  - label: Agriculture
+    rows:
+      - {text: 'E, L: machinery', loads: [agriculture machinery electric, agriculture machinery oil], keys: [E, L]}
+      - {text: 'E, Q: other demand', loads: [agriculture electricity, agriculture heat], keys: [E, Q]}
+processes:
+  - {label: Electrolysis, carrier: H2 Electrolysis}
+  - {label: Methanol synthesis, carrier: methanolisation}
+  - {label: 'Fuel cell / H2 turbine', carrier: H2 Fuel Cell, extra: [H2 turbine]}
+  - {label: 'Methanol reforming (+ capture option)', carrier: Methanol steam reforming, extra: [Methanol steam reforming CC]}
+  - {label: 'Gas reforming (+ capture option)', carrier: SMR, extra: [SMR CC]}
+  - {label: Methanol-to-kerosene, carrier: methanol-to-kerosene}
+  - {label: Methanation, carrier: Sabatier}
+  - {label: Methanol-to-power, carrier: OCGT methanol}
+  - {label: Fischer–Tropsch, carrier: Fischer-Tropsch}
+  - {label: Biomass-to-methanol, carrier: biomass-to-methanol}
+  - {label: Electrobiofuels, carrier: electrobiofuels}
+  - {label: 'Ammonia synthesis / cracking', carrier: Haber-Bosch, extra: [ammonia cracker]}

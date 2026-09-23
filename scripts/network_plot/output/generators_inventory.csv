@@ -1,0 +1,837 @@
+Generator,bus,p_nom_extendable,sign,carrier
+BE nuclear,BE,True,1.0,nuclear
+BG nuclear,BG,True,1.0,nuclear
+CH nuclear,CH,True,1.0,nuclear
+CZ nuclear,CZ,True,1.0,nuclear
+ES nuclear,ES,True,1.0,nuclear
+FI nuclear,FI,True,1.0,nuclear
+FR nuclear,FR,True,1.0,nuclear
+GB nuclear,GB,True,1.0,nuclear
+HU nuclear,HU,True,1.0,nuclear
+NL nuclear,NL,True,1.0,nuclear
+RO nuclear,RO,True,1.0,nuclear
+SE nuclear,SE,True,1.0,nuclear
+SI nuclear,SI,True,1.0,nuclear
+SK nuclear,SK,True,1.0,nuclear
+AL 0 onwind,AL,True,1.0,onwind
+AT 0 onwind,AT,True,1.0,onwind
+BA 0 onwind,BA,True,1.0,onwind
+BE 0 onwind,BE,True,1.0,onwind
+BG 0 onwind,BG,True,1.0,onwind
+CH 0 onwind,CH,True,1.0,onwind
+CZ 0 onwind,CZ,True,1.0,onwind
+DE 0 onwind,DE,True,1.0,onwind
+DK 0 onwind,DK,True,1.0,onwind
+EE 0 onwind,EE,True,1.0,onwind
+ES 0 onwind,ES,True,1.0,onwind
+FI 0 onwind,FI,True,1.0,onwind
+FR 0 onwind,FR,True,1.0,onwind
+GB 0 onwind,GB,True,1.0,onwind
+GBI 0 onwind,GBI,True,1.0,onwind
+GR 0 onwind,GR,True,1.0,onwind
+HR 0 onwind,HR,True,1.0,onwind
+HU 0 onwind,HU,True,1.0,onwind
+IE 0 onwind,IE,True,1.0,onwind
+IT 0 onwind,IT,True,1.0,onwind
+LT 0 onwind,LT,True,1.0,onwind
+LU 0 onwind,LU,True,1.0,onwind
+LV 0 onwind,LV,True,1.0,onwind
+ME 0 onwind,ME,True,1.0,onwind
+MK 0 onwind,MK,True,1.0,onwind
+NL 0 onwind,NL,True,1.0,onwind
+NO 0 onwind,NO,True,1.0,onwind
+PL 0 onwind,PL,True,1.0,onwind
+PT 0 onwind,PT,True,1.0,onwind
+RO 0 onwind,RO,True,1.0,onwind
+RS 0 onwind,RS,True,1.0,onwind
+SE 0 onwind,SE,True,1.0,onwind
+SI 0 onwind,SI,True,1.0,onwind
+SK 0 onwind,SK,True,1.0,onwind
+XK 0 onwind,XK,True,1.0,onwind
+AL 0 solar-hsat,AL,True,1.0,solar-hsat
+AT 0 solar-hsat,AT,True,1.0,solar-hsat
+BA 0 solar-hsat,BA,True,1.0,solar-hsat
+BE 0 solar-hsat,BE,True,1.0,solar-hsat
+BG 0 solar-hsat,BG,True,1.0,solar-hsat
+CH 0 solar-hsat,CH,True,1.0,solar-hsat
+CZ 0 solar-hsat,CZ,True,1.0,solar-hsat
+DE 0 solar-hsat,DE,True,1.0,solar-hsat
+DK 0 solar-hsat,DK,True,1.0,solar-hsat
+EE 0 solar-hsat,EE,True,1.0,solar-hsat
+ES 0 solar-hsat,ES,True,1.0,solar-hsat
+FI 0 solar-hsat,FI,True,1.0,solar-hsat
+FR 0 solar-hsat,FR,True,1.0,solar-hsat
+GB 0 solar-hsat,GB,True,1.0,solar-hsat
+GBI 0 solar-hsat,GBI,True,1.0,solar-hsat
+GR 0 solar-hsat,GR,True,1.0,solar-hsat
+HR 0 solar-hsat,HR,True,1.0,solar-hsat
+HU 0 solar-hsat,HU,True,1.0,solar-hsat
+IE 0 solar-hsat,IE,True,1.0,solar-hsat
+IT 0 solar-hsat,IT,True,1.0,solar-hsat
+LT 0 solar-hsat,LT,True,1.0,solar-hsat
+LU 0 solar-hsat,LU,True,1.0,solar-hsat
+LV 0 solar-hsat,LV,True,1.0,solar-hsat
+ME 0 solar-hsat,ME,True,1.0,solar-hsat
+MK 0 solar-hsat,MK,True,1.0,solar-hsat
+NL 0 solar-hsat,NL,True,1.0,solar-hsat
+NO 0 solar-hsat,NO,True,1.0,solar-hsat
+PL 0 solar-hsat,PL,True,1.0,solar-hsat
+PT 0 solar-hsat,PT,True,1.0,solar-hsat
+RO 0 solar-hsat,RO,True,1.0,solar-hsat
+RS 0 solar-hsat,RS,True,1.0,solar-hsat
+SE 0 solar-hsat,SE,True,1.0,solar-hsat
+SI 0 solar-hsat,SI,True,1.0,solar-hsat
+SK 0 solar-hsat,SK,True,1.0,solar-hsat
+XK 0 solar-hsat,XK,True,1.0,solar-hsat
+AL 0 offwind-ac,AL,True,1.0,offwind-ac
+BA 0 offwind-ac,BA,True,1.0,offwind-ac
+BE 0 offwind-ac,BE,True,1.0,offwind-ac
+BG 0 offwind-ac,BG,True,1.0,offwind-ac
+DE 0 offwind-ac,DE,True,1.0,offwind-ac
+DK 0 offwind-ac,DK,True,1.0,offwind-ac
+EE 0 offwind-ac,EE,True,1.0,offwind-ac
+ES 0 offwind-ac,ES,True,1.0,offwind-ac
+FI 0 offwind-ac,FI,True,1.0,offwind-ac
+FR 0 offwind-ac,FR,True,1.0,offwind-ac
+GB 0 offwind-ac,GB,True,1.0,offwind-ac
+GR 0 offwind-ac,GR,True,1.0,offwind-ac
+HR 0 offwind-ac,HR,True,1.0,offwind-ac
+IE 0 offwind-ac,IE,True,1.0,offwind-ac
+IT 0 offwind-ac,IT,True,1.0,offwind-ac
+LT 0 offwind-ac,LT,True,1.0,offwind-ac
+LV 0 offwind-ac,LV,True,1.0,offwind-ac
+ME 0 offwind-ac,ME,True,1.0,offwind-ac
+NL 0 offwind-ac,NL,True,1.0,offwind-ac
+NO 0 offwind-ac,NO,True,1.0,offwind-ac
+PL 0 offwind-ac,PL,True,1.0,offwind-ac
+PT 0 offwind-ac,PT,True,1.0,offwind-ac
+RO 0 offwind-ac,RO,True,1.0,offwind-ac
+SE 0 offwind-ac,SE,True,1.0,offwind-ac
+SI 0 offwind-ac,SI,True,1.0,offwind-ac
+DE 0 offwind-dc,DE,True,1.0,offwind-dc
+DK 0 offwind-dc,DK,True,1.0,offwind-dc
+EE 0 offwind-dc,EE,True,1.0,offwind-dc
+FI 0 offwind-dc,FI,True,1.0,offwind-dc
+FR 0 offwind-dc,FR,True,1.0,offwind-dc
+GB 0 offwind-dc,GB,True,1.0,offwind-dc
+GR 0 offwind-dc,GR,True,1.0,offwind-dc
+HR 0 offwind-dc,HR,True,1.0,offwind-dc
+IE 0 offwind-dc,IE,True,1.0,offwind-dc
+IT 0 offwind-dc,IT,True,1.0,offwind-dc
+LT 0 offwind-dc,LT,True,1.0,offwind-dc
+LV 0 offwind-dc,LV,True,1.0,offwind-dc
+NL 0 offwind-dc,NL,True,1.0,offwind-dc
+NO 0 offwind-dc,NO,True,1.0,offwind-dc
+RO 0 offwind-dc,RO,True,1.0,offwind-dc
+SE 0 offwind-dc,SE,True,1.0,offwind-dc
+AL 0 solar,AL,True,1.0,solar
+AT 0 solar,AT,True,1.0,solar
+BA 0 solar,BA,True,1.0,solar
+BE 0 solar,BE,True,1.0,solar
+BG 0 solar,BG,True,1.0,solar
+CH 0 solar,CH,True,1.0,solar
+CZ 0 solar,CZ,True,1.0,solar
+DE 0 solar,DE,True,1.0,solar
+DK 0 solar,DK,True,1.0,solar
+EE 0 solar,EE,True,1.0,solar
+ES 0 solar,ES,True,1.0,solar
+FI 0 solar,FI,True,1.0,solar
+FR 0 solar,FR,True,1.0,solar
+GB 0 solar,GB,True,1.0,solar
+GBI 0 solar,GBI,True,1.0,solar
+GR 0 solar,GR,True,1.0,solar
+HR 0 solar,HR,True,1.0,solar
+HU 0 solar,HU,True,1.0,solar
+IE 0 solar,IE,True,1.0,solar
+IT 0 solar,IT,True,1.0,solar
+LT 0 solar,LT,True,1.0,solar
+LU 0 solar,LU,True,1.0,solar
+LV 0 solar,LV,True,1.0,solar
+ME 0 solar,ME,True,1.0,solar
+MK 0 solar,MK,True,1.0,solar
+NL 0 solar,NL,True,1.0,solar
+NO 0 solar,NO,True,1.0,solar
+PL 0 solar,PL,True,1.0,solar
+PT 0 solar,PT,True,1.0,solar
+RO 0 solar,RO,True,1.0,solar
+RS 0 solar,RS,True,1.0,solar
+SE 0 solar,SE,True,1.0,solar
+SI 0 solar,SI,True,1.0,solar
+SK 0 solar,SK,True,1.0,solar
+XK 0 solar,XK,True,1.0,solar
+AL 0 offwind-float,AL,True,1.0,offwind-float
+BA 0 offwind-float,BA,True,1.0,offwind-float
+BE 0 offwind-float,BE,True,1.0,offwind-float
+BG 0 offwind-float,BG,True,1.0,offwind-float
+DE 0 offwind-float,DE,True,1.0,offwind-float
+DK 0 offwind-float,DK,True,1.0,offwind-float
+EE 0 offwind-float,EE,True,1.0,offwind-float
+ES 0 offwind-float,ES,True,1.0,offwind-float
+FI 0 offwind-float,FI,True,1.0,offwind-float
+FR 0 offwind-float,FR,True,1.0,offwind-float
+GB 0 offwind-float,GB,True,1.0,offwind-float
+GR 0 offwind-float,GR,True,1.0,offwind-float
+HR 0 offwind-float,HR,True,1.0,offwind-float
+IE 0 offwind-float,IE,True,1.0,offwind-float
+IT 0 offwind-float,IT,True,1.0,offwind-float
+LT 0 offwind-float,LT,True,1.0,offwind-float
+LV 0 offwind-float,LV,True,1.0,offwind-float
+ME 0 offwind-float,ME,True,1.0,offwind-float
+NL 0 offwind-float,NL,True,1.0,offwind-float
+NO 0 offwind-float,NO,True,1.0,offwind-float
+PL 0 offwind-float,PL,True,1.0,offwind-float
+PT 0 offwind-float,PT,True,1.0,offwind-float
+RO 0 offwind-float,RO,True,1.0,offwind-float
+SE 0 offwind-float,SE,True,1.0,offwind-float
+SI 0 offwind-float,SI,True,1.0,offwind-float
+AL ror,AL,False,1.0,ror
+AT ror,AT,False,1.0,ror
+BA ror,BA,False,1.0,ror
+BE ror,BE,False,1.0,ror
+BG ror,BG,False,1.0,ror
+CH ror,CH,False,1.0,ror
+CZ ror,CZ,False,1.0,ror
+DE ror,DE,False,1.0,ror
+ES ror,ES,False,1.0,ror
+FI ror,FI,False,1.0,ror
+FR ror,FR,False,1.0,ror
+GB ror,GB,False,1.0,ror
+GR ror,GR,False,1.0,ror
+HR ror,HR,False,1.0,ror
+HU ror,HU,False,1.0,ror
+IE ror,IE,False,1.0,ror
+IT ror,IT,False,1.0,ror
+LV ror,LV,False,1.0,ror
+ME ror,ME,False,1.0,ror
+MK ror,MK,False,1.0,ror
+NO ror,NO,False,1.0,ror
+PL ror,PL,False,1.0,ror
+PT ror,PT,False,1.0,ror
+RO ror,RO,False,1.0,ror
+RS ror,RS,False,1.0,ror
+SE ror,SE,False,1.0,ror
+SI ror,SI,False,1.0,ror
+SK ror,SK,False,1.0,ror
+XK ror,XK,False,1.0,ror
+AT gas,AT gas,False,1.0,gas
+BE gas,BE gas,False,1.0,gas
+BG gas,BG gas,False,1.0,gas
+CZ gas,CZ gas,False,1.0,gas
+DE gas,DE gas,False,1.0,gas
+DK gas,DK gas,False,1.0,gas
+ES gas,ES gas,False,1.0,gas
+FI gas,FI gas,False,1.0,gas
+FR gas,FR gas,False,1.0,gas
+GB gas,GB gas,False,1.0,gas
+GR gas,GR gas,False,1.0,gas
+HR gas,HR gas,False,1.0,gas
+HU gas,HU gas,False,1.0,gas
+IE gas,IE gas,False,1.0,gas
+IT gas,IT gas,False,1.0,gas
+LT gas,LT gas,False,1.0,gas
+LV gas,LV gas,False,1.0,gas
+NL gas,NL gas,False,1.0,gas
+NO gas,NO gas,False,1.0,gas
+PL gas,PL gas,False,1.0,gas
+PT gas,PT gas,False,1.0,gas
+RO gas,RO gas,False,1.0,gas
+RS gas,RS gas,False,1.0,gas
+SE gas,SE gas,False,1.0,gas
+SK gas,SK gas,False,1.0,gas
+EU oil primary,EU oil primary,True,1.0,oil primary
+AL urban central heat vent,AL urban central heat,True,1.0,urban central heat vent
+AT urban central heat vent,AT urban central heat,True,1.0,urban central heat vent
+BA urban central heat vent,BA urban central heat,True,1.0,urban central heat vent
+BE urban central heat vent,BE urban central heat,True,1.0,urban central heat vent
+BG urban central heat vent,BG urban central heat,True,1.0,urban central heat vent
+CH urban central heat vent,CH urban central heat,True,1.0,urban central heat vent
+CZ urban central heat vent,CZ urban central heat,True,1.0,urban central heat vent
+DE urban central heat vent,DE urban central heat,True,1.0,urban central heat vent
+DK urban central heat vent,DK urban central heat,True,1.0,urban central heat vent
+EE urban central heat vent,EE urban central heat,True,1.0,urban central heat vent
+ES urban central heat vent,ES urban central heat,True,1.0,urban central heat vent
+FI urban central heat vent,FI urban central heat,True,1.0,urban central heat vent
+FR urban central heat vent,FR urban central heat,True,1.0,urban central heat vent
+GB urban central heat vent,GB urban central heat,True,1.0,urban central heat vent
+GBI urban central heat vent,GBI urban central heat,True,1.0,urban central heat vent
+GR urban central heat vent,GR urban central heat,True,1.0,urban central heat vent
+HR urban central heat vent,HR urban central heat,True,1.0,urban central heat vent
+HU urban central heat vent,HU urban central heat,True,1.0,urban central heat vent
+IE urban central heat vent,IE urban central heat,True,1.0,urban central heat vent
+IT urban central heat vent,IT urban central heat,True,1.0,urban central heat vent
+LT urban central heat vent,LT urban central heat,True,1.0,urban central heat vent
+LU urban central heat vent,LU urban central heat,True,1.0,urban central heat vent
+LV urban central heat vent,LV urban central heat,True,1.0,urban central heat vent
+ME urban central heat vent,ME urban central heat,True,1.0,urban central heat vent
+MK urban central heat vent,MK urban central heat,True,1.0,urban central heat vent
+NL urban central heat vent,NL urban central heat,True,1.0,urban central heat vent
+NO urban central heat vent,NO urban central heat,True,1.0,urban central heat vent
+PL urban central heat vent,PL urban central heat,True,1.0,urban central heat vent
+PT urban central heat vent,PT urban central heat,True,1.0,urban central heat vent
+RO urban central heat vent,RO urban central heat,True,1.0,urban central heat vent
+RS urban central heat vent,RS urban central heat,True,1.0,urban central heat vent
+SE urban central heat vent,SE urban central heat,True,1.0,urban central heat vent
+SI urban central heat vent,SI urban central heat,True,1.0,urban central heat vent
+SK urban central heat vent,SK urban central heat,True,1.0,urban central heat vent
+XK urban central heat vent,XK urban central heat,True,1.0,urban central heat vent
+AL urban central solar thermal collector,AL urban central heat,True,1.0,urban central solar thermal
+AT urban central solar thermal collector,AT urban central heat,True,1.0,urban central solar thermal
+BA urban central solar thermal collector,BA urban central heat,True,1.0,urban central solar thermal
+BE urban central solar thermal collector,BE urban central heat,True,1.0,urban central solar thermal
+BG urban central solar thermal collector,BG urban central heat,True,1.0,urban central solar thermal
+CH urban central solar thermal collector,CH urban central heat,True,1.0,urban central solar thermal
+CZ urban central solar thermal collector,CZ urban central heat,True,1.0,urban central solar thermal
+DE urban central solar thermal collector,DE urban central heat,True,1.0,urban central solar thermal
+DK urban central solar thermal collector,DK urban central heat,True,1.0,urban central solar thermal
+EE urban central solar thermal collector,EE urban central heat,True,1.0,urban central solar thermal
+ES urban central solar thermal collector,ES urban central heat,True,1.0,urban central solar thermal
+FI urban central solar thermal collector,FI urban central heat,True,1.0,urban central solar thermal
+FR urban central solar thermal collector,FR urban central heat,True,1.0,urban central solar thermal
+GB urban central solar thermal collector,GB urban central heat,True,1.0,urban central solar thermal
+GBI urban central solar thermal collector,GBI urban central heat,True,1.0,urban central solar thermal
+GR urban central solar thermal collector,GR urban central heat,True,1.0,urban central solar thermal
+HR urban central solar thermal collector,HR urban central heat,True,1.0,urban central solar thermal
+HU urban central solar thermal collector,HU urban central heat,True,1.0,urban central solar thermal
+IE urban central solar thermal collector,IE urban central heat,True,1.0,urban central solar thermal
+IT urban central solar thermal collector,IT urban central heat,True,1.0,urban central solar thermal
+LT urban central solar thermal collector,LT urban central heat,True,1.0,urban central solar thermal
+LU urban central solar thermal collector,LU urban central heat,True,1.0,urban central solar thermal
+LV urban central solar thermal collector,LV urban central heat,True,1.0,urban central solar thermal
+ME urban central solar thermal collector,ME urban central heat,True,1.0,urban central solar thermal
+MK urban central solar thermal collector,MK urban central heat,True,1.0,urban central solar thermal
+NL urban central solar thermal collector,NL urban central heat,True,1.0,urban central solar thermal
+NO urban central solar thermal collector,NO urban central heat,True,1.0,urban central solar thermal
+PL urban central solar thermal collector,PL urban central heat,True,1.0,urban central solar thermal
+PT urban central solar thermal collector,PT urban central heat,True,1.0,urban central solar thermal
+RO urban central solar thermal collector,RO urban central heat,True,1.0,urban central solar thermal
+RS urban central solar thermal collector,RS urban central heat,True,1.0,urban central solar thermal
+SE urban central solar thermal collector,SE urban central heat,True,1.0,urban central solar thermal
+SI urban central solar thermal collector,SI urban central heat,True,1.0,urban central solar thermal
+SK urban central solar thermal collector,SK urban central heat,True,1.0,urban central solar thermal
+XK urban central solar thermal collector,XK urban central heat,True,1.0,urban central solar thermal
+AL urban central solar thermal collector electricity-only,AL electricity urban central heat,True,1.0,urban central solar thermal
+AT urban central solar thermal collector electricity-only,AT electricity urban central heat,True,1.0,urban central solar thermal
+BA urban central solar thermal collector electricity-only,BA electricity urban central heat,True,1.0,urban central solar thermal
+BE urban central solar thermal collector electricity-only,BE electricity urban central heat,True,1.0,urban central solar thermal
+BG urban central solar thermal collector electricity-only,BG electricity urban central heat,True,1.0,urban central solar thermal
+CH urban central solar thermal collector electricity-only,CH electricity urban central heat,True,1.0,urban central solar thermal
+CZ urban central solar thermal collector electricity-only,CZ electricity urban central heat,True,1.0,urban central solar thermal
+DE urban central solar thermal collector electricity-only,DE electricity urban central heat,True,1.0,urban central solar thermal
+DK urban central solar thermal collector electricity-only,DK electricity urban central heat,True,1.0,urban central solar thermal
+EE urban central solar thermal collector electricity-only,EE electricity urban central heat,True,1.0,urban central solar thermal
+ES urban central solar thermal collector electricity-only,ES electricity urban central heat,True,1.0,urban central solar thermal
+FI urban central solar thermal collector electricity-only,FI electricity urban central heat,True,1.0,urban central solar thermal
+FR urban central solar thermal collector electricity-only,FR electricity urban central heat,True,1.0,urban central solar thermal
+GB urban central solar thermal collector electricity-only,GB electricity urban central heat,True,1.0,urban central solar thermal
+GBI urban central solar thermal collector electricity-only,GBI electricity urban central heat,True,1.0,urban central solar thermal
+GR urban central solar thermal collector electricity-only,GR electricity urban central heat,True,1.0,urban central solar thermal
+HR urban central solar thermal collector electricity-only,HR electricity urban central heat,True,1.0,urban central solar thermal
+HU urban central solar thermal collector electricity-only,HU electricity urban central heat,True,1.0,urban central solar thermal
+IE urban central solar thermal collector electricity-only,IE electricity urban central heat,True,1.0,urban central solar thermal
+IT urban central solar thermal collector electricity-only,IT electricity urban central heat,True,1.0,urban central solar thermal
+LT urban central solar thermal collector electricity-only,LT electricity urban central heat,True,1.0,urban central solar thermal
+LU urban central solar thermal collector electricity-only,LU electricity urban central heat,True,1.0,urban central solar thermal
+LV urban central solar thermal collector electricity-only,LV electricity urban central heat,True,1.0,urban central solar thermal
+ME urban central solar thermal collector electricity-only,ME electricity urban central heat,True,1.0,urban central solar thermal
+MK urban central solar thermal collector electricity-only,MK electricity urban central heat,True,1.0,urban central solar thermal
+NL urban central solar thermal collector electricity-only,NL electricity urban central heat,True,1.0,urban central solar thermal
+NO urban central solar thermal collector electricity-only,NO electricity urban central heat,True,1.0,urban central solar thermal
+PL urban central solar thermal collector electricity-only,PL electricity urban central heat,True,1.0,urban central solar thermal
+PT urban central solar thermal collector electricity-only,PT electricity urban central heat,True,1.0,urban central solar thermal
+RO urban central solar thermal collector electricity-only,RO electricity urban central heat,True,1.0,urban central solar thermal
+RS urban central solar thermal collector electricity-only,RS electricity urban central heat,True,1.0,urban central solar thermal
+SE urban central solar thermal collector electricity-only,SE electricity urban central heat,True,1.0,urban central solar thermal
+SI urban central solar thermal collector electricity-only,SI electricity urban central heat,True,1.0,urban central solar thermal
+SK urban central solar thermal collector electricity-only,SK electricity urban central heat,True,1.0,urban central solar thermal
+XK urban central solar thermal collector electricity-only,XK electricity urban central heat,True,1.0,urban central solar thermal
+AL biogas,AL biogas,False,1.0,biogas
+AT biogas,AT biogas,False,1.0,biogas
+BA biogas,BA biogas,False,1.0,biogas
+BE biogas,BE biogas,False,1.0,biogas
+BG biogas,BG biogas,False,1.0,biogas
+CH biogas,CH biogas,False,1.0,biogas
+CZ biogas,CZ biogas,False,1.0,biogas
+DE biogas,DE biogas,False,1.0,biogas
+DK biogas,DK biogas,False,1.0,biogas
+EE biogas,EE biogas,False,1.0,biogas
+ES biogas,ES biogas,False,1.0,biogas
+FI biogas,FI biogas,False,1.0,biogas
+FR biogas,FR biogas,False,1.0,biogas
+GB biogas,GB biogas,False,1.0,biogas
+GBI biogas,GBI biogas,False,1.0,biogas
+GR biogas,GR biogas,False,1.0,biogas
+HR biogas,HR biogas,False,1.0,biogas
+HU biogas,HU biogas,False,1.0,biogas
+IE biogas,IE biogas,False,1.0,biogas
+IT biogas,IT biogas,False,1.0,biogas
+LT biogas,LT biogas,False,1.0,biogas
+LU biogas,LU biogas,False,1.0,biogas
+LV biogas,LV biogas,False,1.0,biogas
+ME biogas,ME biogas,False,1.0,biogas
+MK biogas,MK biogas,False,1.0,biogas
+NL biogas,NL biogas,False,1.0,biogas
+NO biogas,NO biogas,False,1.0,biogas
+PL biogas,PL biogas,False,1.0,biogas
+PT biogas,PT biogas,False,1.0,biogas
+RO biogas,RO biogas,False,1.0,biogas
+RS biogas,RS biogas,False,1.0,biogas
+SE biogas,SE biogas,False,1.0,biogas
+SI biogas,SI biogas,False,1.0,biogas
+SK biogas,SK biogas,False,1.0,biogas
+XK biogas,XK biogas,False,1.0,biogas
+AL solid biomass,AL solid biomass,False,1.0,solid biomass
+AT solid biomass,AT solid biomass,False,1.0,solid biomass
+BA solid biomass,BA solid biomass,False,1.0,solid biomass
+BE solid biomass,BE solid biomass,False,1.0,solid biomass
+BG solid biomass,BG solid biomass,False,1.0,solid biomass
+CH solid biomass,CH solid biomass,False,1.0,solid biomass
+CZ solid biomass,CZ solid biomass,False,1.0,solid biomass
+DE solid biomass,DE solid biomass,False,1.0,solid biomass
+DK solid biomass,DK solid biomass,False,1.0,solid biomass
+EE solid biomass,EE solid biomass,False,1.0,solid biomass
+ES solid biomass,ES solid biomass,False,1.0,solid biomass
+FI solid biomass,FI solid biomass,False,1.0,solid biomass
+FR solid biomass,FR solid biomass,False,1.0,solid biomass
+GB solid biomass,GB solid biomass,False,1.0,solid biomass
+GBI solid biomass,GBI solid biomass,False,1.0,solid biomass
+GR solid biomass,GR solid biomass,False,1.0,solid biomass
+HR solid biomass,HR solid biomass,False,1.0,solid biomass
+HU solid biomass,HU solid biomass,False,1.0,solid biomass
+IE solid biomass,IE solid biomass,False,1.0,solid biomass
+IT solid biomass,IT solid biomass,False,1.0,solid biomass
+LT solid biomass,LT solid biomass,False,1.0,solid biomass
+LU solid biomass,LU solid biomass,False,1.0,solid biomass
+LV solid biomass,LV solid biomass,False,1.0,solid biomass
+ME solid biomass,ME solid biomass,False,1.0,solid biomass
+MK solid biomass,MK solid biomass,False,1.0,solid biomass
+NL solid biomass,NL solid biomass,False,1.0,solid biomass
+NO solid biomass,NO solid biomass,False,1.0,solid biomass
+PL solid biomass,PL solid biomass,False,1.0,solid biomass
+PT solid biomass,PT solid biomass,False,1.0,solid biomass
+RO solid biomass,RO solid biomass,False,1.0,solid biomass
+RS solid biomass,RS solid biomass,False,1.0,solid biomass
+SE solid biomass,SE solid biomass,False,1.0,solid biomass
+SI solid biomass,SI solid biomass,False,1.0,solid biomass
+SK solid biomass,SK solid biomass,False,1.0,solid biomass
+XK solid biomass,XK solid biomass,False,1.0,solid biomass
+AL biogas unsustainable,AL biogas,False,1.0,unsustainable biogas
+AT biogas unsustainable,AT biogas,False,1.0,unsustainable biogas
+BA biogas unsustainable,BA biogas,False,1.0,unsustainable biogas
+BE biogas unsustainable,BE biogas,False,1.0,unsustainable biogas
+BG biogas unsustainable,BG biogas,False,1.0,unsustainable biogas
+CH biogas unsustainable,CH biogas,False,1.0,unsustainable biogas
+CZ biogas unsustainable,CZ biogas,False,1.0,unsustainable biogas
+DE biogas unsustainable,DE biogas,False,1.0,unsustainable biogas
+DK biogas unsustainable,DK biogas,False,1.0,unsustainable biogas
+EE biogas unsustainable,EE biogas,False,1.0,unsustainable biogas
+ES biogas unsustainable,ES biogas,False,1.0,unsustainable biogas
+FI biogas unsustainable,FI biogas,False,1.0,unsustainable biogas
+FR biogas unsustainable,FR biogas,False,1.0,unsustainable biogas
+GB biogas unsustainable,GB biogas,False,1.0,unsustainable biogas
+GBI biogas unsustainable,GBI biogas,False,1.0,unsustainable biogas
+GR biogas unsustainable,GR biogas,False,1.0,unsustainable biogas
+HR biogas unsustainable,HR biogas,False,1.0,unsustainable biogas
+HU biogas unsustainable,HU biogas,False,1.0,unsustainable biogas
+IE biogas unsustainable,IE biogas,False,1.0,unsustainable biogas
+IT biogas unsustainable,IT biogas,False,1.0,unsustainable biogas
+LT biogas unsustainable,LT biogas,False,1.0,unsustainable biogas
+LU biogas unsustainable,LU biogas,False,1.0,unsustainable biogas
+LV biogas unsustainable,LV biogas,False,1.0,unsustainable biogas
+ME biogas unsustainable,ME biogas,False,1.0,unsustainable biogas
+MK biogas unsustainable,MK biogas,False,1.0,unsustainable biogas
+NL biogas unsustainable,NL biogas,False,1.0,unsustainable biogas
+NO biogas unsustainable,NO biogas,False,1.0,unsustainable biogas
+PL biogas unsustainable,PL biogas,False,1.0,unsustainable biogas
+PT biogas unsustainable,PT biogas,False,1.0,unsustainable biogas
+RO biogas unsustainable,RO biogas,False,1.0,unsustainable biogas
+RS biogas unsustainable,RS biogas,False,1.0,unsustainable biogas
+SE biogas unsustainable,SE biogas,False,1.0,unsustainable biogas
+SI biogas unsustainable,SI biogas,False,1.0,unsustainable biogas
+SK biogas unsustainable,SK biogas,False,1.0,unsustainable biogas
+XK biogas unsustainable,XK biogas,False,1.0,unsustainable biogas
+AL unsustainable solid biomass,AL solid biomass,False,1.0,unsustainable solid biomass
+AT unsustainable solid biomass,AT solid biomass,False,1.0,unsustainable solid biomass
+BA unsustainable solid biomass,BA solid biomass,False,1.0,unsustainable solid biomass
+BE unsustainable solid biomass,BE solid biomass,False,1.0,unsustainable solid biomass
+BG unsustainable solid biomass,BG solid biomass,False,1.0,unsustainable solid biomass
+CH unsustainable solid biomass,CH solid biomass,False,1.0,unsustainable solid biomass
+CZ unsustainable solid biomass,CZ solid biomass,False,1.0,unsustainable solid biomass
+DE unsustainable solid biomass,DE solid biomass,False,1.0,unsustainable solid biomass
+DK unsustainable solid biomass,DK solid biomass,False,1.0,unsustainable solid biomass
+EE unsustainable solid biomass,EE solid biomass,False,1.0,unsustainable solid biomass
+ES unsustainable solid biomass,ES solid biomass,False,1.0,unsustainable solid biomass
+FI unsustainable solid biomass,FI solid biomass,False,1.0,unsustainable solid biomass
+FR unsustainable solid biomass,FR solid biomass,False,1.0,unsustainable solid biomass
+GB unsustainable solid biomass,GB solid biomass,False,1.0,unsustainable solid biomass
+GBI unsustainable solid biomass,GBI solid biomass,False,1.0,unsustainable solid biomass
+GR unsustainable solid biomass,GR solid biomass,False,1.0,unsustainable solid biomass
+HR unsustainable solid biomass,HR solid biomass,False,1.0,unsustainable solid biomass
+HU unsustainable solid biomass,HU solid biomass,False,1.0,unsustainable solid biomass
+IE unsustainable solid biomass,IE solid biomass,False,1.0,unsustainable solid biomass
+IT unsustainable solid biomass,IT solid biomass,False,1.0,unsustainable solid biomass
+LT unsustainable solid biomass,LT solid biomass,False,1.0,unsustainable solid biomass
+LU unsustainable solid biomass,LU solid biomass,False,1.0,unsustainable solid biomass
+LV unsustainable solid biomass,LV solid biomass,False,1.0,unsustainable solid biomass
+ME unsustainable solid biomass,ME solid biomass,False,1.0,unsustainable solid biomass
+MK unsustainable solid biomass,MK solid biomass,False,1.0,unsustainable solid biomass
+NL unsustainable solid biomass,NL solid biomass,False,1.0,unsustainable solid biomass
+NO unsustainable solid biomass,NO solid biomass,False,1.0,unsustainable solid biomass
+PL unsustainable solid biomass,PL solid biomass,False,1.0,unsustainable solid biomass
+PT unsustainable solid biomass,PT solid biomass,False,1.0,unsustainable solid biomass
+RO unsustainable solid biomass,RO solid biomass,False,1.0,unsustainable solid biomass
+RS unsustainable solid biomass,RS solid biomass,False,1.0,unsustainable solid biomass
+SE unsustainable solid biomass,SE solid biomass,False,1.0,unsustainable solid biomass
+SI unsustainable solid biomass,SI solid biomass,False,1.0,unsustainable solid biomass
+SK unsustainable solid biomass,SK solid biomass,False,1.0,unsustainable solid biomass
+XK unsustainable solid biomass,XK solid biomass,False,1.0,unsustainable solid biomass
+AL unsustainable bioliquids,AL unsustainable bioliquids,False,1.0,unsustainable bioliquids
+AT unsustainable bioliquids,AT unsustainable bioliquids,False,1.0,unsustainable bioliquids
+BA unsustainable bioliquids,BA unsustainable bioliquids,False,1.0,unsustainable bioliquids
+BE unsustainable bioliquids,BE unsustainable bioliquids,False,1.0,unsustainable bioliquids
+BG unsustainable bioliquids,BG unsustainable bioliquids,False,1.0,unsustainable bioliquids
+CH unsustainable bioliquids,CH unsustainable bioliquids,False,1.0,unsustainable bioliquids
+CZ unsustainable bioliquids,CZ unsustainable bioliquids,False,1.0,unsustainable bioliquids
+DE unsustainable bioliquids,DE unsustainable bioliquids,False,1.0,unsustainable bioliquids
+DK unsustainable bioliquids,DK unsustainable bioliquids,False,1.0,unsustainable bioliquids
+EE unsustainable bioliquids,EE unsustainable bioliquids,False,1.0,unsustainable bioliquids
+ES unsustainable bioliquids,ES unsustainable bioliquids,False,1.0,unsustainable bioliquids
+FI unsustainable bioliquids,FI unsustainable bioliquids,False,1.0,unsustainable bioliquids
+FR unsustainable bioliquids,FR unsustainable bioliquids,False,1.0,unsustainable bioliquids
+GB unsustainable bioliquids,GB unsustainable bioliquids,False,1.0,unsustainable bioliquids
+GBI unsustainable bioliquids,GBI unsustainable bioliquids,False,1.0,unsustainable bioliquids
+GR unsustainable bioliquids,GR unsustainable bioliquids,False,1.0,unsustainable bioliquids
+HR unsustainable bioliquids,HR unsustainable bioliquids,False,1.0,unsustainable bioliquids
+HU unsustainable bioliquids,HU unsustainable bioliquids,False,1.0,unsustainable bioliquids
+IE unsustainable bioliquids,IE unsustainable bioliquids,False,1.0,unsustainable bioliquids
+IT unsustainable bioliquids,IT unsustainable bioliquids,False,1.0,unsustainable bioliquids
+LT unsustainable bioliquids,LT unsustainable bioliquids,False,1.0,unsustainable bioliquids
+LU unsustainable bioliquids,LU unsustainable bioliquids,False,1.0,unsustainable bioliquids
+LV unsustainable bioliquids,LV unsustainable bioliquids,False,1.0,unsustainable bioliquids
+ME unsustainable bioliquids,ME unsustainable bioliquids,False,1.0,unsustainable bioliquids
+MK unsustainable bioliquids,MK unsustainable bioliquids,False,1.0,unsustainable bioliquids
+NL unsustainable bioliquids,NL unsustainable bioliquids,False,1.0,unsustainable bioliquids
+NO unsustainable bioliquids,NO unsustainable bioliquids,False,1.0,unsustainable bioliquids
+PL unsustainable bioliquids,PL unsustainable bioliquids,False,1.0,unsustainable bioliquids
+PT unsustainable bioliquids,PT unsustainable bioliquids,False,1.0,unsustainable bioliquids
+RO unsustainable bioliquids,RO unsustainable bioliquids,False,1.0,unsustainable bioliquids
+RS unsustainable bioliquids,RS unsustainable bioliquids,False,1.0,unsustainable bioliquids
+SE unsustainable bioliquids,SE unsustainable bioliquids,False,1.0,unsustainable bioliquids
+SI unsustainable bioliquids,SI unsustainable bioliquids,False,1.0,unsustainable bioliquids
+SK unsustainable bioliquids,SK unsustainable bioliquids,False,1.0,unsustainable bioliquids
+XK unsustainable bioliquids,XK unsustainable bioliquids,False,1.0,unsustainable bioliquids
+AL solid biomass transported,AL solid biomass,False,1.0,solid biomass
+AT solid biomass transported,AT solid biomass,False,1.0,solid biomass
+BA solid biomass transported,BA solid biomass,False,1.0,solid biomass
+BE solid biomass transported,BE solid biomass,False,1.0,solid biomass
+BG solid biomass transported,BG solid biomass,False,1.0,solid biomass
+CH solid biomass transported,CH solid biomass,False,1.0,solid biomass
+CZ solid biomass transported,CZ solid biomass,False,1.0,solid biomass
+DE solid biomass transported,DE solid biomass,False,1.0,solid biomass
+DK solid biomass transported,DK solid biomass,False,1.0,solid biomass
+EE solid biomass transported,EE solid biomass,False,1.0,solid biomass
+ES solid biomass transported,ES solid biomass,False,1.0,solid biomass
+FI solid biomass transported,FI solid biomass,False,1.0,solid biomass
+FR solid biomass transported,FR solid biomass,False,1.0,solid biomass
+GB solid biomass transported,GB solid biomass,False,1.0,solid biomass
+GBI solid biomass transported,GBI solid biomass,False,1.0,solid biomass
+GR solid biomass transported,GR solid biomass,False,1.0,solid biomass
+HR solid biomass transported,HR solid biomass,False,1.0,solid biomass
+HU solid biomass transported,HU solid biomass,False,1.0,solid biomass
+IE solid biomass transported,IE solid biomass,False,1.0,solid biomass
+IT solid biomass transported,IT solid biomass,False,1.0,solid biomass
+LT solid biomass transported,LT solid biomass,False,1.0,solid biomass
+LU solid biomass transported,LU solid biomass,False,1.0,solid biomass
+LV solid biomass transported,LV solid biomass,False,1.0,solid biomass
+ME solid biomass transported,ME solid biomass,False,1.0,solid biomass
+MK solid biomass transported,MK solid biomass,False,1.0,solid biomass
+NL solid biomass transported,NL solid biomass,False,1.0,solid biomass
+NO solid biomass transported,NO solid biomass,False,1.0,solid biomass
+PL solid biomass transported,PL solid biomass,False,1.0,solid biomass
+PT solid biomass transported,PT solid biomass,False,1.0,solid biomass
+RO solid biomass transported,RO solid biomass,False,1.0,solid biomass
+RS solid biomass transported,RS solid biomass,False,1.0,solid biomass
+SE solid biomass transported,SE solid biomass,False,1.0,solid biomass
+SI solid biomass transported,SI solid biomass,False,1.0,solid biomass
+SK solid biomass transported,SK solid biomass,False,1.0,solid biomass
+XK solid biomass transported,XK solid biomass,False,1.0,solid biomass
+AL unsustainable solid biomass transported,AL solid biomass,False,1.0,unsustainable solid biomass
+AT unsustainable solid biomass transported,AT solid biomass,False,1.0,unsustainable solid biomass
+BA unsustainable solid biomass transported,BA solid biomass,False,1.0,unsustainable solid biomass
+BE unsustainable solid biomass transported,BE solid biomass,False,1.0,unsustainable solid biomass
+BG unsustainable solid biomass transported,BG solid biomass,False,1.0,unsustainable solid biomass
+CH unsustainable solid biomass transported,CH solid biomass,False,1.0,unsustainable solid biomass
+CZ unsustainable solid biomass transported,CZ solid biomass,False,1.0,unsustainable solid biomass
+DE unsustainable solid biomass transported,DE solid biomass,False,1.0,unsustainable solid biomass
+DK unsustainable solid biomass transported,DK solid biomass,False,1.0,unsustainable solid biomass
+EE unsustainable solid biomass transported,EE solid biomass,False,1.0,unsustainable solid biomass
+ES unsustainable solid biomass transported,ES solid biomass,False,1.0,unsustainable solid biomass
+FI unsustainable solid biomass transported,FI solid biomass,False,1.0,unsustainable solid biomass
+FR unsustainable solid biomass transported,FR solid biomass,False,1.0,unsustainable solid biomass
+GB unsustainable solid biomass transported,GB solid biomass,False,1.0,unsustainable solid biomass
+GBI unsustainable solid biomass transported,GBI solid biomass,False,1.0,unsustainable solid biomass
+GR unsustainable solid biomass transported,GR solid biomass,False,1.0,unsustainable solid biomass
+HR unsustainable solid biomass transported,HR solid biomass,False,1.0,unsustainable solid biomass
+HU unsustainable solid biomass transported,HU solid biomass,False,1.0,unsustainable solid biomass
+IE unsustainable solid biomass transported,IE solid biomass,False,1.0,unsustainable solid biomass
+IT unsustainable solid biomass transported,IT solid biomass,False,1.0,unsustainable solid biomass
+LT unsustainable solid biomass transported,LT solid biomass,False,1.0,unsustainable solid biomass
+LU unsustainable solid biomass transported,LU solid biomass,False,1.0,unsustainable solid biomass
+LV unsustainable solid biomass transported,LV solid biomass,False,1.0,unsustainable solid biomass
+ME unsustainable solid biomass transported,ME solid biomass,False,1.0,unsustainable solid biomass
+MK unsustainable solid biomass transported,MK solid biomass,False,1.0,unsustainable solid biomass
+NL unsustainable solid biomass transported,NL solid biomass,False,1.0,unsustainable solid biomass
+NO unsustainable solid biomass transported,NO solid biomass,False,1.0,unsustainable solid biomass
+PL unsustainable solid biomass transported,PL solid biomass,False,1.0,unsustainable solid biomass
+PT unsustainable solid biomass transported,PT solid biomass,False,1.0,unsustainable solid biomass
+RO unsustainable solid biomass transported,RO solid biomass,False,1.0,unsustainable solid biomass
+RS unsustainable solid biomass transported,RS solid biomass,False,1.0,unsustainable solid biomass
+SE unsustainable solid biomass transported,SE solid biomass,False,1.0,unsustainable solid biomass
+SI unsustainable solid biomass transported,SI solid biomass,False,1.0,unsustainable solid biomass
+SK unsustainable solid biomass transported,SK solid biomass,False,1.0,unsustainable solid biomass
+XK unsustainable solid biomass transported,XK solid biomass,False,1.0,unsustainable solid biomass
+EU coal,EU coal,True,1.0,coal
+AL 0 solar rooftop,AL low voltage,True,1.0,solar rooftop
+AT 0 solar rooftop,AT low voltage,True,1.0,solar rooftop
+BA 0 solar rooftop,BA low voltage,True,1.0,solar rooftop
+BE 0 solar rooftop,BE low voltage,True,1.0,solar rooftop
+BG 0 solar rooftop,BG low voltage,True,1.0,solar rooftop
+CH 0 solar rooftop,CH low voltage,True,1.0,solar rooftop
+CZ 0 solar rooftop,CZ low voltage,True,1.0,solar rooftop
+DE 0 solar rooftop,DE low voltage,True,1.0,solar rooftop
+DK 0 solar rooftop,DK low voltage,True,1.0,solar rooftop
+EE 0 solar rooftop,EE low voltage,True,1.0,solar rooftop
+ES 0 solar rooftop,ES low voltage,True,1.0,solar rooftop
+FI 0 solar rooftop,FI low voltage,True,1.0,solar rooftop
+FR 0 solar rooftop,FR low voltage,True,1.0,solar rooftop
+GB 0 solar rooftop,GB low voltage,True,1.0,solar rooftop
+GBI 0 solar rooftop,GBI low voltage,True,1.0,solar rooftop
+GR 0 solar rooftop,GR low voltage,True,1.0,solar rooftop
+HR 0 solar rooftop,HR low voltage,True,1.0,solar rooftop
+HU 0 solar rooftop,HU low voltage,True,1.0,solar rooftop
+IE 0 solar rooftop,IE low voltage,True,1.0,solar rooftop
+IT 0 solar rooftop,IT low voltage,True,1.0,solar rooftop
+LT 0 solar rooftop,LT low voltage,True,1.0,solar rooftop
+LU 0 solar rooftop,LU low voltage,True,1.0,solar rooftop
+LV 0 solar rooftop,LV low voltage,True,1.0,solar rooftop
+ME 0 solar rooftop,ME low voltage,True,1.0,solar rooftop
+MK 0 solar rooftop,MK low voltage,True,1.0,solar rooftop
+NL 0 solar rooftop,NL low voltage,True,1.0,solar rooftop
+NO 0 solar rooftop,NO low voltage,True,1.0,solar rooftop
+PL 0 solar rooftop,PL low voltage,True,1.0,solar rooftop
+PT 0 solar rooftop,PT low voltage,True,1.0,solar rooftop
+RO 0 solar rooftop,RO low voltage,True,1.0,solar rooftop
+RS 0 solar rooftop,RS low voltage,True,1.0,solar rooftop
+SE 0 solar rooftop,SE low voltage,True,1.0,solar rooftop
+SI 0 solar rooftop,SI low voltage,True,1.0,solar rooftop
+SK 0 solar rooftop,SK low voltage,True,1.0,solar rooftop
+XK 0 solar rooftop,XK low voltage,True,1.0,solar rooftop
+AL rural heat vent,AL rural heat,True,1.0,rural heat vent
+AL rural solar thermal collector,AL rural heat,True,1.0,rural solar thermal
+AL rural solar thermal collector electricity-only,AL electricity rural heat,True,1.0,rural solar thermal
+AL urban decentral heat vent,AL urban decentral heat,True,1.0,urban decentral heat vent
+AL urban decentral solar thermal collector,AL urban decentral heat,True,1.0,urban decentral solar thermal
+AL urban decentral solar thermal collector electricity-only,AL electricity urban decentral heat,True,1.0,urban decentral solar thermal
+AT rural heat vent,AT rural heat,True,1.0,rural heat vent
+AT rural solar thermal collector,AT rural heat,True,1.0,rural solar thermal
+AT rural solar thermal collector electricity-only,AT electricity rural heat,True,1.0,rural solar thermal
+AT urban decentral heat vent,AT urban decentral heat,True,1.0,urban decentral heat vent
+AT urban decentral solar thermal collector,AT urban decentral heat,True,1.0,urban decentral solar thermal
+AT urban decentral solar thermal collector electricity-only,AT electricity urban decentral heat,True,1.0,urban decentral solar thermal
+BA rural heat vent,BA rural heat,True,1.0,rural heat vent
+BA rural solar thermal collector,BA rural heat,True,1.0,rural solar thermal
+BA rural solar thermal collector electricity-only,BA electricity rural heat,True,1.0,rural solar thermal
+BA urban decentral heat vent,BA urban decentral heat,True,1.0,urban decentral heat vent
+BA urban decentral solar thermal collector,BA urban decentral heat,True,1.0,urban decentral solar thermal
+BA urban decentral solar thermal collector electricity-only,BA electricity urban decentral heat,True,1.0,urban decentral solar thermal
+BE rural heat vent,BE rural heat,True,1.0,rural heat vent
+BE rural solar thermal collector,BE rural heat,True,1.0,rural solar thermal
+BE rural solar thermal collector electricity-only,BE electricity rural heat,True,1.0,rural solar thermal
+BE urban decentral heat vent,BE urban decentral heat,True,1.0,urban decentral heat vent
+BE urban decentral solar thermal collector,BE urban decentral heat,True,1.0,urban decentral solar thermal
+BE urban decentral solar thermal collector electricity-only,BE electricity urban decentral heat,True,1.0,urban decentral solar thermal
+BG rural heat vent,BG rural heat,True,1.0,rural heat vent
+BG rural solar thermal collector,BG rural heat,True,1.0,rural solar thermal
+BG rural solar thermal collector electricity-only,BG electricity rural heat,True,1.0,rural solar thermal
+BG urban decentral heat vent,BG urban decentral heat,True,1.0,urban decentral heat vent
+BG urban decentral solar thermal collector,BG urban decentral heat,True,1.0,urban decentral solar thermal
+BG urban decentral solar thermal collector electricity-only,BG electricity urban decentral heat,True,1.0,urban decentral solar thermal
+CH rural heat vent,CH rural heat,True,1.0,rural heat vent
+CH rural solar thermal collector,CH rural heat,True,1.0,rural solar thermal
+CH rural solar thermal collector electricity-only,CH electricity rural heat,True,1.0,rural solar thermal
+CH urban decentral heat vent,CH urban decentral heat,True,1.0,urban decentral heat vent
+CH urban decentral solar thermal collector,CH urban decentral heat,True,1.0,urban decentral solar thermal
+CH urban decentral solar thermal collector electricity-only,CH electricity urban decentral heat,True,1.0,urban decentral solar thermal
+CZ rural heat vent,CZ rural heat,True,1.0,rural heat vent
+CZ rural solar thermal collector,CZ rural heat,True,1.0,rural solar thermal
+CZ rural solar thermal collector electricity-only,CZ electricity rural heat,True,1.0,rural solar thermal
+CZ urban decentral heat vent,CZ urban decentral heat,True,1.0,urban decentral heat vent
+CZ urban decentral solar thermal collector,CZ urban decentral heat,True,1.0,urban decentral solar thermal
+CZ urban decentral solar thermal collector electricity-only,CZ electricity urban decentral heat,True,1.0,urban decentral solar thermal
+DE rural heat vent,DE rural heat,True,1.0,rural heat vent
+DE rural solar thermal collector,DE rural heat,True,1.0,rural solar thermal
+DE rural solar thermal collector electricity-only,DE electricity rural heat,True,1.0,rural solar thermal
+DE urban decentral heat vent,DE urban decentral heat,True,1.0,urban decentral heat vent
+DE urban decentral solar thermal collector,DE urban decentral heat,True,1.0,urban decentral solar thermal
+DE urban decentral solar thermal collector electricity-only,DE electricity urban decentral heat,True,1.0,urban decentral solar thermal
+DK rural heat vent,DK rural heat,True,1.0,rural heat vent
+DK rural solar thermal collector,DK rural heat,True,1.0,rural solar thermal
+DK rural solar thermal collector electricity-only,DK electricity rural heat,True,1.0,rural solar thermal
+DK urban decentral heat vent,DK urban decentral heat,True,1.0,urban decentral heat vent
+DK urban decentral solar thermal collector,DK urban decentral heat,True,1.0,urban decentral solar thermal
+DK urban decentral solar thermal collector electricity-only,DK electricity urban decentral heat,True,1.0,urban decentral solar thermal
+EE rural heat vent,EE rural heat,True,1.0,rural heat vent
+EE rural solar thermal collector,EE rural heat,True,1.0,rural solar thermal
+EE rural solar thermal collector electricity-only,EE electricity rural heat,True,1.0,rural solar thermal
+EE urban decentral heat vent,EE urban decentral heat,True,1.0,urban decentral heat vent
+EE urban decentral solar thermal collector,EE urban decentral heat,True,1.0,urban decentral solar thermal
+EE urban decentral solar thermal collector electricity-only,EE electricity urban decentral heat,True,1.0,urban decentral solar thermal
+ES rural heat vent,ES rural heat,True,1.0,rural heat vent
+ES rural solar thermal collector,ES rural heat,True,1.0,rural solar thermal
+ES rural solar thermal collector electricity-only,ES electricity rural heat,True,1.0,rural solar thermal
+ES urban decentral heat vent,ES urban decentral heat,True,1.0,urban decentral heat vent
+ES urban decentral solar thermal collector,ES urban decentral heat,True,1.0,urban decentral solar thermal
+ES urban decentral solar thermal collector electricity-only,ES electricity urban decentral heat,True,1.0,urban decentral solar thermal
+FI rural heat vent,FI rural heat,True,1.0,rural heat vent
+FI rural solar thermal collector,FI rural heat,True,1.0,rural solar thermal
+FI rural solar thermal collector electricity-only,FI electricity rural heat,True,1.0,rural solar thermal
+FI urban decentral heat vent,FI urban decentral heat,True,1.0,urban decentral heat vent
+FI urban decentral solar thermal collector,FI urban decentral heat,True,1.0,urban decentral solar thermal
+FI urban decentral solar thermal collector electricity-only,FI electricity urban decentral heat,True,1.0,urban decentral solar thermal
+FR rural heat vent,FR rural heat,True,1.0,rural heat vent
+FR rural solar thermal collector,FR rural heat,True,1.0,rural solar thermal
+FR rural solar thermal collector electricity-only,FR electricity rural heat,True,1.0,rural solar thermal
+FR urban decentral heat vent,FR urban decentral heat,True,1.0,urban decentral heat vent
+FR urban decentral solar thermal collector,FR urban decentral heat,True,1.0,urban decentral solar thermal
+FR urban decentral solar thermal collector electricity-only,FR electricity urban decentral heat,True,1.0,urban decentral solar thermal
+GB rural heat vent,GB rural heat,True,1.0,rural heat vent
+GB rural solar thermal collector,GB rural heat,True,1.0,rural solar thermal
+GB rural solar thermal collector electricity-only,GB electricity rural heat,True,1.0,rural solar thermal
+GB urban decentral heat vent,GB urban decentral heat,True,1.0,urban decentral heat vent
+GB urban decentral solar thermal collector,GB urban decentral heat,True,1.0,urban decentral solar thermal
+GB urban decentral solar thermal collector electricity-only,GB electricity urban decentral heat,True,1.0,urban decentral solar thermal
+GBI rural heat vent,GBI rural heat,True,1.0,rural heat vent
+GBI rural solar thermal collector,GBI rural heat,True,1.0,rural solar thermal
+GBI rural solar thermal collector electricity-only,GBI electricity rural heat,True,1.0,rural solar thermal
+GBI urban decentral heat vent,GBI urban decentral heat,True,1.0,urban decentral heat vent
+GBI urban decentral solar thermal collector,GBI urban decentral heat,True,1.0,urban decentral solar thermal
+GBI urban decentral solar thermal collector electricity-only,GBI electricity urban decentral heat,True,1.0,urban decentral solar thermal
+GR rural heat vent,GR rural heat,True,1.0,rural heat vent
+GR rural solar thermal collector,GR rural heat,True,1.0,rural solar thermal
+GR rural solar thermal collector electricity-only,GR electricity rural heat,True,1.0,rural solar thermal
+GR urban decentral heat vent,GR urban decentral heat,True,1.0,urban decentral heat vent
+GR urban decentral solar thermal collector,GR urban decentral heat,True,1.0,urban decentral solar thermal
+GR urban decentral solar thermal collector electricity-only,GR electricity urban decentral heat,True,1.0,urban decentral solar thermal
+HR rural heat vent,HR rural heat,True,1.0,rural heat vent
+HR rural solar thermal collector,HR rural heat,True,1.0,rural solar thermal
+HR rural solar thermal collector electricity-only,HR electricity rural heat,True,1.0,rural solar thermal
+HR urban decentral heat vent,HR urban decentral heat,True,1.0,urban decentral heat vent
+HR urban decentral solar thermal collector,HR urban decentral heat,True,1.0,urban decentral solar thermal
+HR urban decentral solar thermal collector electricity-only,HR electricity urban decentral heat,True,1.0,urban decentral solar thermal
+HU rural heat vent,HU rural heat,True,1.0,rural heat vent
+HU rural solar thermal collector,HU rural heat,True,1.0,rural solar thermal
+HU rural solar thermal collector electricity-only,HU electricity rural heat,True,1.0,rural solar thermal
+HU urban decentral heat vent,HU urban decentral heat,True,1.0,urban decentral heat vent
+HU urban decentral solar thermal collector,HU urban decentral heat,True,1.0,urban decentral solar thermal
+HU urban decentral solar thermal collector electricity-only,HU electricity urban decentral heat,True,1.0,urban decentral solar thermal
+IE rural heat vent,IE rural heat,True,1.0,rural heat vent
+IE rural solar thermal collector,IE rural heat,True,1.0,rural solar thermal
+IE rural solar thermal collector electricity-only,IE electricity rural heat,True,1.0,rural solar thermal
+IE urban decentral heat vent,IE urban decentral heat,True,1.0,urban decentral heat vent
+IE urban decentral solar thermal collector,IE urban decentral heat,True,1.0,urban decentral solar thermal
+IE urban decentral solar thermal collector electricity-only,IE electricity urban decentral heat,True,1.0,urban decentral solar thermal
+IT rural heat vent,IT rural heat,True,1.0,rural heat vent
+IT rural solar thermal collector,IT rural heat,True,1.0,rural solar thermal
+IT rural solar thermal collector electricity-only,IT electricity rural heat,True,1.0,rural solar thermal
+IT urban decentral heat vent,IT urban decentral heat,True,1.0,urban decentral heat vent
+IT urban decentral solar thermal collector,IT urban decentral heat,True,1.0,urban decentral solar thermal
+IT urban decentral solar thermal collector electricity-only,IT electricity urban decentral heat,True,1.0,urban decentral solar thermal
+LT rural heat vent,LT rural heat,True,1.0,rural heat vent
+LT rural solar thermal collector,LT rural heat,True,1.0,rural solar thermal
+LT rural solar thermal collector electricity-only,LT electricity rural heat,True,1.0,rural solar thermal
+LT urban decentral heat vent,LT urban decentral heat,True,1.0,urban decentral heat vent
+LT urban decentral solar thermal collector,LT urban decentral heat,True,1.0,urban decentral solar thermal
+LT urban decentral solar thermal collector electricity-only,LT electricity urban decentral heat,True,1.0,urban decentral solar thermal
+LU rural heat vent,LU rural heat,True,1.0,rural heat vent
+LU rural solar thermal collector,LU rural heat,True,1.0,rural solar thermal
+LU rural solar thermal collector electricity-only,LU electricity rural heat,True,1.0,rural solar thermal
+LU urban decentral heat vent,LU urban decentral heat,True,1.0,urban decentral heat vent
+LU urban decentral solar thermal collector,LU urban decentral heat,True,1.0,urban decentral solar thermal
+LU urban decentral solar thermal collector electricity-only,LU electricity urban decentral heat,True,1.0,urban decentral solar thermal
+LV rural heat vent,LV rural heat,True,1.0,rural heat vent
+LV rural solar thermal collector,LV rural heat,True,1.0,rural solar thermal
+LV rural solar thermal collector electricity-only,LV electricity rural heat,True,1.0,rural solar thermal
+LV urban decentral heat vent,LV urban decentral heat,True,1.0,urban decentral heat vent
+LV urban decentral solar thermal collector,LV urban decentral heat,True,1.0,urban decentral solar thermal
+LV urban decentral solar thermal collector electricity-only,LV electricity urban decentral heat,True,1.0,urban decentral solar thermal
+ME rural heat vent,ME rural heat,True,1.0,rural heat vent
+ME rural solar thermal collector,ME rural heat,True,1.0,rural solar thermal
+ME rural solar thermal collector electricity-only,ME electricity rural heat,True,1.0,rural solar thermal
+ME urban decentral heat vent,ME urban decentral heat,True,1.0,urban decentral heat vent
+ME urban decentral solar thermal collector,ME urban decentral heat,True,1.0,urban decentral solar thermal
+ME urban decentral solar thermal collector electricity-only,ME electricity urban decentral heat,True,1.0,urban decentral solar thermal
+MK rural heat vent,MK rural heat,True,1.0,rural heat vent
+MK rural solar thermal collector,MK rural heat,True,1.0,rural solar thermal
+MK rural solar thermal collector electricity-only,MK electricity rural heat,True,1.0,rural solar thermal
+MK urban decentral heat vent,MK urban decentral heat,True,1.0,urban decentral heat vent
+MK urban decentral solar thermal collector,MK urban decentral heat,True,1.0,urban decentral solar thermal
+MK urban decentral solar thermal collector electricity-only,MK electricity urban decentral heat,True,1.0,urban decentral solar thermal
+NL rural heat vent,NL rural heat,True,1.0,rural heat vent
+NL rural solar thermal collector,NL rural heat,True,1.0,rural solar thermal
+NL rural solar thermal collector electricity-only,NL electricity rural heat,True,1.0,rural solar thermal
+NL urban decentral heat vent,NL urban decentral heat,True,1.0,urban decentral heat vent
+NL urban decentral solar thermal collector,NL urban decentral heat,True,1.0,urban decentral solar thermal
+NL urban decentral solar thermal collector electricity-only,NL electricity urban decentral heat,True,1.0,urban decentral solar thermal
+NO rural heat vent,NO rural heat,True,1.0,rural heat vent
+NO rural solar thermal collector,NO rural heat,True,1.0,rural solar thermal
+NO rural solar thermal collector electricity-only,NO electricity rural heat,True,1.0,rural solar thermal
+NO urban decentral heat vent,NO urban decentral heat,True,1.0,urban decentral heat vent
+NO urban decentral solar thermal collector,NO urban decentral heat,True,1.0,urban decentral solar thermal
+NO urban decentral solar thermal collector electricity-only,NO electricity urban decentral heat,True,1.0,urban decentral solar thermal
+PL rural heat vent,PL rural heat,True,1.0,rural heat vent
+PL rural solar thermal collector,PL rural heat,True,1.0,rural solar thermal
+PL rural solar thermal collector electricity-only,PL electricity rural heat,True,1.0,rural solar thermal
+PL urban decentral heat vent,PL urban decentral heat,True,1.0,urban decentral heat vent
+PL urban decentral solar thermal collector,PL urban decentral heat,True,1.0,urban decentral solar thermal
+PL urban decentral solar thermal collector electricity-only,PL electricity urban decentral heat,True,1.0,urban decentral solar thermal
+PT rural heat vent,PT rural heat,True,1.0,rural heat vent
+PT rural solar thermal collector,PT rural heat,True,1.0,rural solar thermal
+PT rural solar thermal collector electricity-only,PT electricity rural heat,True,1.0,rural solar thermal
+PT urban decentral heat vent,PT urban decentral heat,True,1.0,urban decentral heat vent
+PT urban decentral solar thermal collector,PT urban decentral heat,True,1.0,urban decentral solar thermal
+PT urban decentral solar thermal collector electricity-only,PT electricity urban decentral heat,True,1.0,urban decentral solar thermal
+RO rural heat vent,RO rural heat,True,1.0,rural heat vent
+RO rural solar thermal collector,RO rural heat,True,1.0,rural solar thermal
+RO rural solar thermal collector electricity-only,RO electricity rural heat,True,1.0,rural solar thermal
+RO urban decentral heat vent,RO urban decentral heat,True,1.0,urban decentral heat vent
+RO urban decentral solar thermal collector,RO urban decentral heat,True,1.0,urban decentral solar thermal
+RO urban decentral solar thermal collector electricity-only,RO electricity urban decentral heat,True,1.0,urban decentral solar thermal
+RS rural heat vent,RS rural heat,True,1.0,rural heat vent
+RS rural solar thermal collector,RS rural heat,True,1.0,rural solar thermal
+RS rural solar thermal collector electricity-only,RS electricity rural heat,True,1.0,rural solar thermal
+RS urban decentral heat vent,RS urban decentral heat,True,1.0,urban decentral heat vent
+RS urban decentral solar thermal collector,RS urban decentral heat,True,1.0,urban decentral solar thermal
+RS urban decentral solar thermal collector electricity-only,RS electricity urban decentral heat,True,1.0,urban decentral solar thermal
+SE rural heat vent,SE rural heat,True,1.0,rural heat vent
+SE rural solar thermal collector,SE rural heat,True,1.0,rural solar thermal
+SE rural solar thermal collector electricity-only,SE electricity rural heat,True,1.0,rural solar thermal
+SE urban decentral heat vent,SE urban decentral heat,True,1.0,urban decentral heat vent
+SE urban decentral solar thermal collector,SE urban decentral heat,True,1.0,urban decentral solar thermal
+SE urban decentral solar thermal collector electricity-only,SE electricity urban decentral heat,True,1.0,urban decentral solar thermal
+SI rural heat vent,SI rural heat,True,1.0,rural heat vent
+SI rural solar thermal collector,SI rural heat,True,1.0,rural solar thermal
+SI rural solar thermal collector electricity-only,SI electricity rural heat,True,1.0,rural solar thermal
+SI urban decentral heat vent,SI urban decentral heat,True,1.0,urban decentral heat vent
+SI urban decentral solar thermal collector,SI urban decentral heat,True,1.0,urban decentral solar thermal
+SI urban decentral solar thermal collector electricity-only,SI electricity urban decentral heat,True,1.0,urban decentral solar thermal
+SK rural heat vent,SK rural heat,True,1.0,rural heat vent
+SK rural solar thermal collector,SK rural heat,True,1.0,rural solar thermal
+SK rural solar thermal collector electricity-only,SK electricity rural heat,True,1.0,rural solar thermal
+SK urban decentral heat vent,SK urban decentral heat,True,1.0,urban decentral heat vent
+SK urban decentral solar thermal collector,SK urban decentral heat,True,1.0,urban decentral solar thermal
+SK urban decentral solar thermal collector electricity-only,SK electricity urban decentral heat,True,1.0,urban decentral solar thermal
+XK rural heat vent,XK rural heat,True,1.0,rural heat vent
+XK rural solar thermal collector,XK rural heat,True,1.0,rural solar thermal
+XK rural solar thermal collector electricity-only,XK electricity rural heat,True,1.0,rural solar thermal
+XK urban decentral heat vent,XK urban decentral heat,True,1.0,urban decentral heat vent
+XK urban decentral solar thermal collector,XK urban decentral heat,True,1.0,urban decentral solar thermal
+XK urban decentral solar thermal collector electricity-only,XK electricity urban decentral heat,True,1.0,urban decentral solar thermal

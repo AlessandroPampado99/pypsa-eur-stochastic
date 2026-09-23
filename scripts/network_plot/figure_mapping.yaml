@@ -1,0 +1,167 @@
+carriers:
+  Electricity:
+    color: '#b28600'
+    fill: '#fff1b8'
+  Heat:
+    color: '#c85539'
+    fill: '#fce1d8'
+  Hydrogen:
+    color: '#8846a2'
+    fill: '#ead7f0'
+  Methanol:
+    color: '#008872'
+    fill: '#d2eee6'
+  Methane:
+    color: '#9c6837'
+    fill: '#efdfce'
+  Liquid hydrocarbons:
+    color: '#386fa8'
+    fill: '#dce8f5'
+  Biomass:
+    color: '#617f33'
+    fill: '#e8efd9'
+  Coal:
+    color: '#454b52'
+    fill: '#e6e8eb'
+  Ammonia:
+    color: '#467d87'
+    fill: '#dcecef'
+sectors:
+  Buildings and services:
+    loads:
+    - electricity
+    - gas urban central heat
+    - electricity urban central heat
+    - gas urban decentral heat
+    - electricity urban decentral heat
+    - gas rural heat
+    - electricity rural heat
+    - urban central heat
+    - urban decentral heat
+    - rural heat
+  Industry and feedstocks:
+    loads:
+    - industry electricity
+    - H2 for industry
+    - industry methanol
+    - gas for industry
+    - solid biomass for industry
+    - naphtha for industry
+    - low-temperature heat for industry
+    - NH3
+    - coal for industry
+  Land transport:
+    loads:
+    - land transport EV
+    - land transport fuel cell
+    - land transport oil
+  Shipping:
+    loads:
+    - H2 for shipping
+    - shipping methanol
+    - shipping oil
+  Aviation:
+    loads:
+    - kerosene for aviation
+    - methanol kerosene for aviation
+  Agriculture:
+    loads:
+    - agriculture machinery electric
+    - agriculture machinery oil
+    - agriculture electricity
+    - agriculture heat
+delivery:
+- carrier: Electricity
+  sector: Buildings and services
+  loads:
+  - electricity
+- carrier: Heat
+  sector: Buildings and services
+  loads:
+  - gas urban central heat
+  - electricity urban central heat
+  - gas urban decentral heat
+  - electricity urban decentral heat
+  - gas rural heat
+  - electricity rural heat
+  - urban central heat
+  - urban decentral heat
+  - rural heat
+- carrier: Electricity
+  sector: Industry and feedstocks
+  loads:
+  - industry electricity
+- carrier: Hydrogen
+  sector: Industry and feedstocks
+  loads:
+  - H2 for industry
+- carrier: Methanol
+  sector: Industry and feedstocks
+  loads:
+  - industry methanol
+- carrier: Methane
+  sector: Industry and feedstocks
+  loads:
+  - gas for industry
+- carrier: Biomass
+  sector: Industry and feedstocks
+  loads:
+  - solid biomass for industry
+- carrier: Liquid hydrocarbons
+  sector: Industry and feedstocks
+  loads:
+  - naphtha for industry
+- carrier: Heat
+  sector: Industry and feedstocks
+  loads:
+  - low-temperature heat for industry
+- carrier: Coal
+  sector: Industry and feedstocks
+  loads:
+  - coal for industry
+- carrier: Ammonia
+  sector: Industry and feedstocks
+  loads:
+  - NH3
+- carrier: Electricity
+  sector: Land transport
+  loads:
+  - land transport EV
+- carrier: Hydrogen
+  sector: Land transport
+  loads:
+  - land transport fuel cell
+- carrier: Liquid hydrocarbons
+  sector: Land transport
+  loads:
+  - land transport oil
+- carrier: Hydrogen
+  sector: Shipping
+  loads:
+  - H2 for shipping
+- carrier: Methanol
+  sector: Shipping
+  loads:
+  - shipping methanol
+- carrier: Liquid hydrocarbons
+  sector: Shipping
+  loads:
+  - shipping oil
+- carrier: Liquid hydrocarbons
+  sector: Aviation
+  loads:
+  - kerosene for aviation
+  - methanol kerosene for aviation
+- carrier: Electricity
+  sector: Agriculture
+  loads:
+  - agriculture electricity
+  - agriculture machinery electric
+- carrier: Liquid hydrocarbons
+  sector: Agriculture
+  loads:
+  - agriculture machinery oil
+- carrier: Heat
+  sector: Agriculture
+  loads:
+  - agriculture heat

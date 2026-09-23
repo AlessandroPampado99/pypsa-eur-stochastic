@@ -1,0 +1,2995 @@
+[
+  {
+    "carrier": "DC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.9437250967311341,
+        "injection_max": 0.9733130186121157
+      }
+    ],
+    "examples": [
+      "relation/10377412-320-DC",
+      "relation/13295785-515-DC"
+    ],
+    "count": 88,
+    "candidate_count": 88
+  },
+  {
+    "carrier": "co2 sequestered",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "co2 sequestered",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL co2 sequestered",
+      "AT co2 sequestered"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "OCGT",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL OCGT",
+      "AT OCGT"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "CCGT",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.58,
+        "injection_max": 0.58
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL CCGT",
+      "AT CCGT"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "H2 Electrolysis",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.6217,
+        "injection_max": 0.6217
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.054574999999999985,
+        "injection_max": 0.054574999999999985
+      }
+    ],
+    "examples": [
+      "AL H2 Electrolysis",
+      "AT H2 Electrolysis"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "H2 Fuel Cell",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.5,
+        "injection_max": 0.5
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.44999999999999996,
+        "injection_max": 0.44999999999999996
+      }
+    ],
+    "examples": [
+      "AL H2 Fuel Cell",
+      "AT H2 Fuel Cell"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "H2 turbine",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      }
+    ],
+    "examples": [
+      "AL H2 turbine",
+      "AT H2 turbine"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "gas pipeline",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -0.02910913728233837,
+        "injection_max": -0.0019543525170642928
+      }
+    ],
+    "examples": [
+      "gas pipeline AL -> IT",
+      "gas pipeline AT -> DE"
+    ],
+    "count": 178,
+    "candidate_count": 0
+  },
+  {
+    "carrier": "gas pipeline new",
+    "reverse_only": false,
+    "bidirectional": true,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "gas pipeline new AL <-> MK",
+      "gas pipeline new AL <-> GR"
+    ],
+    "count": 23,
+    "candidate_count": 23
+  },
+  {
+    "carrier": "H2 pipeline",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -0.05239644710820906,
+        "injection_max": -0.0022489764877928692
+      }
+    ],
+    "examples": [
+      "H2 pipeline AL -> GR",
+      "H2 pipeline AL -> IT"
+    ],
+    "count": 164,
+    "candidate_count": 164
+  },
+  {
+    "carrier": "Sabatier",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas",
+        "role": "output",
+        "injection_min": 0.8,
+        "injection_max": 0.8
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -0.1584,
+        "injection_max": -0.1584
+      },
+      {
+        "port": "bus3",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.03749999999999998,
+        "injection_max": 0.03749999999999998
+      }
+    ],
+    "examples": [
+      "AL Sabatier",
+      "AT Sabatier"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "SMR CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.69,
+        "injection_max": 0.69
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.019799999999999998,
+        "injection_max": 0.019799999999999998
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.17820000000000003,
+        "injection_max": 0.17820000000000003
+      }
+    ],
+    "examples": [
+      "AL SMR CC",
+      "AT SMR CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "SMR",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.76,
+        "injection_max": 0.76
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL SMR",
+      "AT SMR"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "battery charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "battery",
+        "role": "output",
+        "injection_min": 0.9797958971132712,
+        "injection_max": 0.9797958971132712
+      }
+    ],
+    "examples": [
+      "AL battery charger",
+      "AT battery charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "battery discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "battery",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.9797958971132712,
+        "injection_max": 0.9797958971132712
+      }
+    ],
+    "examples": [
+      "AL battery discharger",
+      "AT battery discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "BEV charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "EV battery",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL BEV charger",
+      "AT BEV charger"
+    ],
+    "count": 35,
+    "candidate_count": 0
+  },
+  {
+    "carrier": "V2G",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "EV battery",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL V2G",
+      "AT V2G"
+    ],
+    "count": 35,
+    "candidate_count": 0
+  },
+  {
+    "carrier": "oil refining",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil primary",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil",
+        "role": "output",
+        "injection_min": 0.9494360171139634,
+        "injection_max": 0.9494360171139634
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.013,
+        "injection_max": 0.013
+      }
+    ],
+    "examples": [
+      "EU oil refining"
+    ],
+    "count": 1,
+    "candidate_count": 0
+  },
+  {
+    "carrier": "land transport oil",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "land transport oil",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.2571,
+        "injection_max": 0.2571
+      }
+    ],
+    "examples": [
+      "AL land transport oil",
+      "AT land transport oil"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central water tanks charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban central heat",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central water tanks",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban central water tanks charger",
+      "AT urban central water tanks charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central water tanks discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban central water tanks",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban central water tanks discharger",
+      "AT urban central water tanks discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central water pits charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban central heat",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central water pits",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban central water pits charger",
+      "AT urban central water pits charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central water pits discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban central water pits",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban central water pits discharger",
+      "AT urban central water pits discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.5190060670880504,
+        "injection_max": -0.1655023433399455
+      }
+    ],
+    "examples": [
+      "AL urban central air heat pump",
+      "AT urban central air heat pump"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.99,
+        "injection_max": 0.99
+      }
+    ],
+    "examples": [
+      "AL urban central resistive heater",
+      "AT urban central resistive heater"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 1.04,
+        "injection_max": 1.04
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban central gas boiler",
+      "AT urban central gas boiler"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas CHP",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban central gas CHP",
+      "AT urban central gas CHP"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas CHP CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.38821999999999995,
+        "injection_max": 0.38821999999999995
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.43772,
+        "injection_max": 0.43772
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.019799999999999998,
+        "injection_max": 0.019799999999999998
+      },
+      {
+        "port": "bus4",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.17820000000000003,
+        "injection_max": 0.17820000000000003
+      }
+    ],
+    "examples": [
+      "AL urban central gas CHP CC",
+      "AT urban central gas CHP CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas urban central heat",
+        "role": "output",
+        "injection_min": 1.04,
+        "injection_max": 1.04
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban central gas boiler gas-only",
+      "AT urban central gas boiler gas-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas CHP",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus2",
+        "carrier": "gas urban central heat",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban central gas CHP gas-only",
+      "AT urban central gas CHP gas-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central gas CHP CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.38821999999999995,
+        "injection_max": 0.38821999999999995
+      },
+      {
+        "port": "bus2",
+        "carrier": "gas urban central heat",
+        "role": "output",
+        "injection_min": 0.43772,
+        "injection_max": 0.43772
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.019799999999999998,
+        "injection_max": 0.019799999999999998
+      },
+      {
+        "port": "bus4",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.17820000000000003,
+        "injection_max": 0.17820000000000003
+      }
+    ],
+    "examples": [
+      "AL urban central gas CHP CC gas-only",
+      "AT urban central gas CHP CC gas-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "electricity urban central heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.5190060670880504,
+        "injection_max": -0.1655023433399455
+      }
+    ],
+    "examples": [
+      "AL urban central air heat pump electricity-only",
+      "AT urban central air heat pump electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "electricity urban central heat",
+        "role": "output",
+        "injection_min": 0.99,
+        "injection_max": 0.99
+      }
+    ],
+    "examples": [
+      "AL urban central resistive heater electricity-only",
+      "AT urban central resistive heater electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "unsustainable bioliquids",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "unsustainable bioliquids",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.2571,
+        "injection_max": -0.2571
+      }
+    ],
+    "examples": [
+      "AL unsustainable bioliquids",
+      "AT unsustainable bioliquids"
+    ],
+    "count": 35,
+    "candidate_count": 0
+  },
+  {
+    "carrier": "biogas to gas",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "biogas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.198,
+        "injection_max": -0.198
+      }
+    ],
+    "examples": [
+      "AL biogas to gas",
+      "AT biogas to gas"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central solid biomass CHP",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.2699,
+        "injection_max": 0.2699
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.8245,
+        "injection_max": 0.8245
+      }
+    ],
+    "examples": [
+      "AL urban central solid biomass CHP",
+      "AT urban central solid biomass CHP"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban central solid biomass CHP CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.22956299999999996,
+        "injection_max": 0.22956299999999996
+      },
+      {
+        "port": "bus2",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.8245,
+        "injection_max": 0.8245
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.33003000000000005,
+        "injection_max": -0.33003000000000005
+      },
+      {
+        "port": "bus4",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.33003000000000005,
+        "injection_max": 0.33003000000000005
+      }
+    ],
+    "examples": [
+      "AL urban central solid biomass CHP CC",
+      "AT urban central solid biomass CHP CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "biomass to liquid",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil",
+        "role": "output",
+        "injection_min": 0.6,
+        "injection_max": 0.6
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.09860000000000002,
+        "injection_max": -0.09860000000000002
+      }
+    ],
+    "examples": [
+      "AL solid biomass biomass to liquid",
+      "AT solid biomass biomass to liquid"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "electrobiofuels",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil",
+        "role": "output",
+        "injection_min": 1.3217,
+        "injection_max": 1.3217
+      },
+      {
+        "port": "bus2",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.235926687862353,
+        "injection_max": -1.235926687862353
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.33989,
+        "injection_max": -0.33989
+      }
+    ],
+    "examples": [
+      "AL solid biomass AL electrobiofuels",
+      "AT solid biomass AT electrobiofuels"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "Haber-Bosch",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "NH3",
+        "role": "output",
+        "injection_min": 4.043671653861707,
+        "injection_max": 4.043671653861707
+      },
+      {
+        "port": "bus2",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -4.643752527294784,
+        "injection_max": -4.643752527294784
+      },
+      {
+        "port": "bus3",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.9367114840274969,
+        "injection_max": 0.9367114840274969
+      }
+    ],
+    "examples": [
+      "AL Haber-Bosch",
+      "AT Haber-Bosch"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "ammonia cracker",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "NH3",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.684931506849315,
+        "injection_max": 0.684931506849315
+      }
+    ],
+    "examples": [
+      "AL ammonia cracker",
+      "AT ammonia cracker"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "biomass-to-methanol",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "methanol",
+        "role": "output",
+        "injection_min": 0.61,
+        "injection_max": 0.61
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.15140000000000003,
+        "injection_max": -0.15140000000000003
+      }
+    ],
+    "examples": [
+      "AL solid biomass biomass-to-methanol",
+      "AT solid biomass biomass-to-methanol"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "OCGT methanol",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.41,
+        "injection_max": 0.41
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.248,
+        "injection_max": 0.248
+      }
+    ],
+    "examples": [
+      "AL OCGT methanol",
+      "AT OCGT methanol"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "Methanol steam reforming",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.832639467110741,
+        "injection_max": 0.832639467110741
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.248,
+        "injection_max": 0.248
+      }
+    ],
+    "examples": [
+      "AL Methanol steam reforming",
+      "AT Methanol steam reforming"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "Methanol steam reforming CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2",
+        "role": "output",
+        "injection_min": 0.832639467110741,
+        "injection_max": 0.832639467110741
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.024799999999999996,
+        "injection_max": 0.024799999999999996
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.2232,
+        "injection_max": 0.2232
+      }
+    ],
+    "examples": [
+      "AL Methanol steam reforming CC",
+      "AT Methanol steam reforming CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "solid biomass for industry",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "solid biomass for industry",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL solid biomass for industry",
+      "AT solid biomass for industry"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "solid biomass for industry CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "solid biomass for industry",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.33003000000000005,
+        "injection_max": -0.33003000000000005
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.33003000000000005,
+        "injection_max": 0.33003000000000005
+      }
+    ],
+    "examples": [
+      "AL solid biomass for industry CC",
+      "AT solid biomass for industry CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "gas for industry",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas for industry",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL gas for industry",
+      "AT gas for industry"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "gas for industry CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas for industry",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.019799999999999998,
+        "injection_max": 0.019799999999999998
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.17820000000000003,
+        "injection_max": 0.17820000000000003
+      }
+    ],
+    "examples": [
+      "AL gas for industry CC",
+      "AT gas for industry CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "industry methanol",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "industry methanol",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.248,
+        "injection_max": 0.248
+      }
+    ],
+    "examples": [
+      "AL industry methanol",
+      "AT industry methanol"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "methanolisation",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "methanol",
+        "role": "output",
+        "injection_min": 0.8787346221441126,
+        "injection_max": 0.8787346221441126
+      },
+      {
+        "port": "bus2",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -0.2381370826010545,
+        "injection_max": -0.2381370826010545
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -0.2179261862917399,
+        "injection_max": -0.2179261862917399
+      },
+      {
+        "port": "bus4",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.021968365553602816,
+        "injection_max": 0.021968365553602816
+      }
+    ],
+    "examples": [
+      "AL methanolisation",
+      "AT methanolisation"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "Fischer-Tropsch",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil",
+        "role": "output",
+        "injection_min": 0.704,
+        "injection_max": 0.704
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -0.18099839999999998,
+        "injection_max": -0.18099839999999998
+      },
+      {
+        "port": "bus3",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.0615,
+        "injection_max": 0.0615
+      }
+    ],
+    "examples": [
+      "AL Fischer-Tropsch",
+      "AT Fischer-Tropsch"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "naphtha for industry",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "naphtha for industry",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "process emissions",
+        "role": "output",
+        "injection_min": 0.02563979372858012,
+        "injection_max": 0.02563979372858012
+      }
+    ],
+    "examples": [
+      "AL naphtha for industry",
+      "AT naphtha for industry"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "HVC to air",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "non-sequestered HVC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.2571,
+        "injection_max": 0.2571
+      }
+    ],
+    "examples": [
+      "AL HVC to air",
+      "AT HVC to air"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "process emissions",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "process emissions",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL process emissions",
+      "AT process emissions"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "process emissions CC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "process emissions",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.09999999999999998,
+        "injection_max": 0.09999999999999998
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL process emissions CC",
+      "AT process emissions CC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "coal for industry",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "coal",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "coal for industry",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.3361,
+        "injection_max": 0.3361
+      }
+    ],
+    "examples": [
+      "EU coal for industry"
+    ],
+    "count": 1,
+    "candidate_count": 1
+  },
+  {
+    "carrier": "H2 liquefaction",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "H2 liquid",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL H2 liquefaction",
+      "AT H2 liquefaction"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "shipping methanol",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "shipping methanol",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.248,
+        "injection_max": 0.248
+      }
+    ],
+    "examples": [
+      "AL shipping methanol",
+      "AT shipping methanol"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "shipping oil",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "shipping oil",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.2571,
+        "injection_max": 0.2571
+      }
+    ],
+    "examples": [
+      "AL shipping oil",
+      "AT shipping oil"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "kerosene for aviation",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "kerosene for aviation",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.2571,
+        "injection_max": 0.2571
+      }
+    ],
+    "examples": [
+      "AL kerosene for aviation",
+      "AT kerosene for aviation"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "methanol-to-kerosene",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "methanol",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "methanol kerosene for aviation",
+        "role": "output",
+        "injection_min": 0.929022668153103,
+        "injection_max": 0.929022668153103
+      },
+      {
+        "port": "bus2",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -0.025919732441471572,
+        "injection_max": -0.025919732441471572
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.23885172798216275,
+        "injection_max": 0.23885172798216275
+      }
+    ],
+    "examples": [
+      "AL methanol-to-kerosene",
+      "AT methanol-to-kerosene"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "agriculture machinery oil",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "oil",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "agriculture machinery oil",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.2571,
+        "injection_max": 0.2571
+      }
+    ],
+    "examples": [
+      "AL agriculture machinery oil",
+      "AT agriculture machinery oil"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "DAC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban central heat",
+        "role": "input",
+        "injection_min": -2.5454545454545454,
+        "injection_max": -2.5454545454545454
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -1.8181818181818181,
+        "injection_max": -1.8181818181818181
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 1.8181818181818181,
+        "injection_max": 1.8181818181818181
+      }
+    ],
+    "examples": [
+      "AL urban central DAC",
+      "AT urban central DAC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "electrobiofuels",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil from H2",
+        "role": "output",
+        "injection_min": 1.3217,
+        "injection_max": 1.3217
+      },
+      {
+        "port": "bus2",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.235926687862353,
+        "injection_max": -1.235926687862353
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -0.33989,
+        "injection_max": -0.33989
+      }
+    ],
+    "examples": [
+      "AL solid biomass AL electrobiofuels oil-from-H2-only",
+      "AT solid biomass AT electrobiofuels oil-from-H2-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "Fischer-Tropsch",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "H2",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "oil from H2",
+        "role": "output",
+        "injection_min": 0.704,
+        "injection_max": 0.704
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -0.18099839999999998,
+        "injection_max": -0.18099839999999998
+      },
+      {
+        "port": "bus3",
+        "carrier": "urban central heat",
+        "role": "output",
+        "injection_min": 0.0615,
+        "injection_max": 0.0615
+      }
+    ],
+    "examples": [
+      "AL Fischer-Tropsch oil-from-H2-only",
+      "AT Fischer-Tropsch oil-from-H2-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "CO2 pipeline",
+    "reverse_only": false,
+    "bidirectional": true,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "co2 stored",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "CO2 pipeline AL -> GR",
+      "CO2 pipeline AL -> ME"
+    ],
+    "count": 78,
+    "candidate_count": 78
+  },
+  {
+    "carrier": "electricity distribution grid",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "output",
+        "injection_min": 0.97,
+        "injection_max": 0.97
+      }
+    ],
+    "examples": [
+      "AL electricity distribution grid",
+      "AT electricity distribution grid"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "home battery charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "home battery",
+        "role": "output",
+        "injection_min": 0.9797958971132712,
+        "injection_max": 0.9797958971132712
+      }
+    ],
+    "examples": [
+      "AL home battery charger",
+      "AT home battery charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "home battery discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "home battery",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "output",
+        "injection_min": 0.9797958971132712,
+        "injection_max": 0.9797958971132712
+      }
+    ],
+    "examples": [
+      "AL home battery discharger",
+      "AT home battery discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "electricity distribution grid",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "AC",
+        "role": "output",
+        "injection_min": 0.97,
+        "injection_max": 0.97
+      }
+    ],
+    "examples": [
+      "AL electricity distribution grid-reversed",
+      "AT electricity distribution grid-reversed"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.8011445989595672,
+        "injection_max": -0.2061747921907728
+      }
+    ],
+    "examples": [
+      "AL rural air heat pump",
+      "AT rural air heat pump"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "electricity rural heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.8011445989595672,
+        "injection_max": -0.2061747921907728
+      }
+    ],
+    "examples": [
+      "AL rural air heat pump electricity-only",
+      "AT rural air heat pump electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural biomass boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 0.86,
+        "injection_max": 0.86
+      }
+    ],
+    "examples": [
+      "AL rural biomass boiler",
+      "AT rural biomass boiler"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 0.98,
+        "injection_max": 0.98
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL rural gas boiler",
+      "AT rural gas boiler"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas rural heat",
+        "role": "output",
+        "injection_min": 0.98,
+        "injection_max": 0.98
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL rural gas boiler gas-only",
+      "AT rural gas boiler gas-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural ground heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.3632703895127552,
+        "injection_max": -0.21358289408742992
+      }
+    ],
+    "examples": [
+      "AL rural ground heat pump",
+      "AT rural ground heat pump"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural ground heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "electricity rural heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.3632703895127552,
+        "injection_max": -0.21358289408742992
+      }
+    ],
+    "examples": [
+      "AL rural ground heat pump electricity-only",
+      "AT rural ground heat pump electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL rural resistive heater",
+      "AT rural resistive heater"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "electricity rural heat",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL rural resistive heater electricity-only",
+      "AT rural resistive heater electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural water tanks charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "rural heat",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "rural water tanks",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL rural water tanks charger",
+      "AT rural water tanks charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "rural water tanks discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "rural water tanks",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "rural heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL rural water tanks discharger",
+      "AT rural water tanks discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "DAC",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "AC",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral heat",
+        "role": "input",
+        "injection_min": -2.5454545454545454,
+        "injection_max": -2.5454545454545454
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "input",
+        "injection_min": -1.8181818181818181,
+        "injection_max": -1.8181818181818181
+      },
+      {
+        "port": "bus3",
+        "carrier": "co2 stored",
+        "role": "output",
+        "injection_min": 1.8181818181818181,
+        "injection_max": 1.8181818181818181
+      }
+    ],
+    "examples": [
+      "AL urban decentral DAC",
+      "AT urban decentral DAC"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban decentral heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.8011445989595672,
+        "injection_max": -0.2061747921907728
+      }
+    ],
+    "examples": [
+      "AL urban decentral air heat pump",
+      "AT urban decentral air heat pump"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral air heat pump",
+    "reverse_only": true,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "electricity urban decentral heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -0.8011445989595672,
+        "injection_max": -0.2061747921907728
+      }
+    ],
+    "examples": [
+      "AL urban decentral air heat pump electricity-only",
+      "AT urban decentral air heat pump electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral biomass boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "solid biomass",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral heat",
+        "role": "output",
+        "injection_min": 0.86,
+        "injection_max": 0.86
+      }
+    ],
+    "examples": [
+      "AL urban decentral biomass boiler",
+      "AT urban decentral biomass boiler"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral heat",
+        "role": "output",
+        "injection_min": 0.98,
+        "injection_max": 0.98
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban decentral gas boiler",
+      "AT urban decentral gas boiler"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral gas boiler",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "gas",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "gas urban decentral heat",
+        "role": "output",
+        "injection_min": 0.98,
+        "injection_max": 0.98
+      },
+      {
+        "port": "bus2",
+        "carrier": "co2",
+        "role": "output",
+        "injection_min": 0.198,
+        "injection_max": 0.198
+      }
+    ],
+    "examples": [
+      "AL urban decentral gas boiler gas-only",
+      "AT urban decentral gas boiler gas-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral heat",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL urban decentral resistive heater",
+      "AT urban decentral resistive heater"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral resistive heater",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "low voltage",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "electricity urban decentral heat",
+        "role": "output",
+        "injection_min": 0.9,
+        "injection_max": 0.9
+      }
+    ],
+    "examples": [
+      "AL urban decentral resistive heater electricity-only",
+      "AT urban decentral resistive heater electricity-only"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral water tanks charger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban decentral heat",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral water tanks",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban decentral water tanks charger",
+      "AT urban decentral water tanks charger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  },
+  {
+    "carrier": "urban decentral water tanks discharger",
+    "reverse_only": false,
+    "bidirectional": false,
+    "ports": [
+      {
+        "port": "bus0",
+        "carrier": "urban decentral water tanks",
+        "role": "input",
+        "injection_min": -1.0,
+        "injection_max": -1.0
+      },
+      {
+        "port": "bus1",
+        "carrier": "urban decentral heat",
+        "role": "output",
+        "injection_min": 1.0,
+        "injection_max": 1.0
+      }
+    ],
+    "examples": [
+      "AL urban decentral water tanks discharger",
+      "AT urban decentral water tanks discharger"
+    ],
+    "count": 35,
+    "candidate_count": 35
+  }
+]

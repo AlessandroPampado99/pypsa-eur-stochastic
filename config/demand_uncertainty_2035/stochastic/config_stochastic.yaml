@@ -1,7 +1,7 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   prefix: "demand_uncertainty_2035"
-  name: BASE
+  name: stochastic_network
   scenarios:
     enable: false
     file: config/demand_uncertainty_2035/scenarios/scenarios_deterministic.yaml
@@ -12,9 +12,9 @@ run:
   use_shadow_directory: false
 
 stochastic_scenarios:
-  enable: false
-  file: config/demand_uncertainty/scenarios/scenarios_determinstic_definition.yaml
-  active_scenario:    # change this label to run one scenario at a time
+  enable: true
+  file: config/demand_uncertainty_2035/stochastic/scenarios_stochastic.yaml
+  active_scenario: null
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#scenario
 scenario:

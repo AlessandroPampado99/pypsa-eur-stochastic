@@ -1,0 +1,80 @@
+graph 1 21.028 9.1854
+node Electricity 6.1736 5.3104 0.875 0.5 Electricity filled box black #fff1b8
+node Heat 13.542 7.3937 0.75 0.5 Heat filled box black #fce1d8
+node Hydrogen 8.7917 4.5743 0.86111 0.5 Hydrogen filled box black #ead7f0
+node Methanol 13.542 2.6576 0.83333 0.5 Methanol filled box black #d2eee6
+node Methane 1.8958 8.1993 0.79167 0.5 Methane filled box black #efdfce
+node "Liquid hydrocarbons" 17.896 3.7131 1.5694 0.5 "Liquid hydrocarbons" filled box black #dce8f5
+node Biomass 1.8958 6.0604 0.79167 0.5 Biomass filled box black #e8efd9
+node Coal 17.896 6.9493 0.75 0.5 Coal filled box black #e6e8eb
+node Ammonia 17.896 6.2687 0.86111 0.5 Ammonia filled box black #dcecef
+node "Buildings and services" 20.111 8.7826 1.7222 0.5 "Buildings and services" filled box black #fff0df
+node "Industry and feedstocks" 20.111 6.2687 1.8333 0.5 "Industry and feedstocks" filled box black #fff0df
+node "Land transport" 20.111 1.3798 1.1806 0.5 "Land transport" filled box black #fff0df
+node Shipping 20.111 3.6159 0.79167 0.5 Shipping filled box black #fff0df
+node Aviation 20.111 4.2965 0.75 0.5 Aviation filled box black #fff0df
+node Agriculture 20.111 2.9215 0.94444 0.5 Agriculture filled box black #fff0df
+node "Renewables / nuclear" 3.6319 5.3104 1.6528 0.5 "Renewables / nuclear" filled box black lightgrey
+node "Natural gas" 0.49306 8.1993 0.98611 0.5 "Natural gas" filled box black lightgrey
+node "Crude oil" 15.319 3.7131 0.80556 0.5 "Crude oil" filled box black lightgrey
+node "Methanol synthesis" 11.847 5.0465 1.5278 0.5 "Methanol synthesis" filled box black white
+node "Captured CO2" 8.7917 6.3381 1.1389 0.5 "Captured CO2" filled box black lightgrey
+node "Fischer-Tropsch" 11.847 6.102 1.2361 0.5 "Fischer-Tropsch" filled box black white
+node "Methanol-to-kerosene" 15.319 2.6576 1.6944 0.5 "Methanol-to-kerosene" filled box black white
+node "Gas CHP" 3.6319 8.2826 0.79167 0.5 "Gas CHP" filled box black white
+node "Biomass CHP" 3.6319 6.0604 1.1111 0.5 "Biomass CHP" filled box black white
+node "Capture / DAC" 6.1736 6.3659 1.1528 0.5 "Capture / DAC" filled box black lightgrey
+node Sequestration 11.847 6.7826 1.1389 0.5 Sequestration filled box black lightgrey
+edge Electricity Heat 7 6.4584 5.5616 6.8262 5.8855 7.5187 6.4368 8.2222 6.6854 9.9514 7.2964 12.168 7.3863 13.092 7.3954 "heat pumps / heaters" 10.222 7.3034 solid #b28600
+edge Electricity Hydrogen 7 6.4175 5.0588 6.5676 4.9131 6.7766 4.7421 7 4.6576 7.4145 4.5007 7.9226 4.4935 8.2893 4.5174 electrolysis 7.4861 4.7201 solid #b28600
+edge Electricity "Buildings and services" 19 6.3964 5.5668 6.5049 5.703 6.6379 5.8744 6.75 6.0326 6.8688 6.2002 6.8446 6.2871 7 6.4215 7.9383 7.2329 8.4023 7.1289 9.6111 7.4076 12.897 8.1651 13.765 8.1375 17.111 8.5604 17.917 8.6623 18.12 8.6863 18.931 8.7409 19.011 8.7464 19.095 8.7511 19.179 8.7553 solid #b28600
+edge Electricity "Industry and feedstocks" 10 6.6132 5.3498 6.7378 5.3605 6.8743 5.3715 7 5.3798 12.186 5.7246 13.534 5.2137 18.681 5.9354 18.824 5.9554 18.973 5.9831 19.12 6.0141 solid #b28600
+edge Electricity "Land transport" 7 6.2141 5.0572 6.2933 4.3534 6.5502 2.3969 7 1.9631 10.513 -1.4245 17.33 0.4535 19.451 1.1529 solid #b28600
+edge Electricity Agriculture 10 6.2405 5.0604 6.4281 4.251 7.1396 1.7548 8.7778 1.7548 8.7778 1.7548 8.7778 1.7548 14.222 1.7548 16.228 1.7548 18.546 2.417 19.568 2.7436 solid #b28600
+edge Electricity "Methanol synthesis" 4 6.6119 5.2905 7.5447 5.2469 9.7876 5.1421 11.008 5.085 solid #b28600
+edge Heat "Buildings and services" 7 13.92 7.546 14.086 7.6101 14.287 7.6805 14.472 7.727 16.111 8.1379 18.054 8.4686 19.174 8.6444 solid #c85539
+edge Heat "Industry and feedstocks" 7 13.922 7.4598 14.781 7.5993 16.98 7.8662 18.681 7.2965 19.118 7.1499 19.535 6.8155 19.802 6.5677 solid #c85539
+edge Heat Agriculture 7 13.575 7.1389 13.642 6.3336 13.893 3.8666 14.472 3.3659 14.852 3.0374 18.235 2.95 19.564 2.9282 solid #c85539
+edge Hydrogen Electricity 7 8.3593 4.6786 7.9979 4.7703 7.4625 4.9101 7 5.0465 6.8971 5.0768 6.7876 5.1111 6.6833 5.1446 "fuel cell / turbine" 7.4861 5.109 solid #8846a2
+edge Hydrogen "Industry and feedstocks" 10 9.2232 4.5732 9.9245 4.5746 11.383 4.5919 12.611 4.6993 15.444 4.9469 16.257 4.6728 18.944 5.602 19.206 5.6925 19.475 5.8442 19.687 5.9801 solid #8846a2
+edge Hydrogen "Land transport" 10 8.8795 4.3224 8.987 4.0017 9.2178 3.4536 9.6111 3.1576 10.23 2.692 15.649 1.7622 16.417 1.6576 17.472 1.5137 18.707 1.4396 19.445 1.4053 solid #8846a2
+edge Hydrogen Shipping 10 9.2248 4.4563 9.3483 4.4261 9.4843 4.3973 9.6111 4.3798 13.607 3.8298 14.702 4.7126 18.681 4.0465 19.01 3.9913 19.37 3.8812 19.645 3.7861 solid #8846a2
+edge Hydrogen "Methanol synthesis" 4 9.2266 4.6399 9.6856 4.7115 10.432 4.8279 11.008 4.9178 solid #8846a2
+edge Hydrogen "Fischer-Tropsch" 4 9.2266 4.7867 9.7596 5.0557 10.68 5.5199 11.272 5.8188 solid #8846a2
+edge Hydrogen "Methanol-to-kerosene" 10 9.1018 4.3218 9.247 4.2097 9.4295 4.0853 9.6111 4.0048 10.86 3.4516 11.282 3.6536 12.611 3.3381 13.209 3.1963 13.878 3.0273 14.4 2.8932 solid #8846a2
+edge Methanol Electricity 7 13.121 2.5711 12.395 2.4348 10.838 2.2233 9.6111 2.6159 8.2048 3.0658 6.9526 4.3962 6.4371 5.0028 turbine 10.222 2.6784 solid #008872
+edge Methanol Hydrogen 13 13.123 2.8647 13.042 2.901 12.957 2.9358 12.875 2.9631 12.761 3.0012 12.728 2.9944 12.611 3.0187 11.279 3.2947 10.783 2.9387 9.6111 3.6298 9.3498 3.7839 9.1323 4.0541 8.9894 4.2661 reforming 11.847 3.234 solid #008872
+edge Methanol "Industry and feedstocks" 10 13.654 2.9086 13.791 3.2224 14.067 3.7538 14.472 4.0465 16.141 5.2522 17.13 4.281 18.944 5.2548 19.282 5.4361 19.604 5.7337 19.822 5.9597 solid #008872
+edge Methanol Shipping 10 13.962 2.4676 14.118 2.4043 14.3 2.3419 14.472 2.3104 15.213 2.1748 15.423 2.1901 16.167 2.3104 16.857 2.422 18.766 3.1172 19.644 3.4451 solid #008872
+edge Methanol "Methanol-to-kerosene" 4 13.961 2.6576 14.094 2.6576 14.246 2.6576 14.4 2.6576 solid #008872
+edge Methane Electricity 10 2.0959 7.9456 2.213 7.7974 2.3733 7.6133 2.5417 7.477 3.2999 6.8633 3.6221 6.9098 4.4583 6.4076 4.8952 6.1452 5.3829 5.8281 5.7238 5.6024 "gas turbines" 3.6319 7.3173 solid #9c6837
+edge Methane Hydrogen 16 2.296 8.0878 2.9858 7.8878 4.3663 7.4831 4.4583 7.4215 5.1216 6.9773 4.938 6.4828 5.5972 6.0326 6.0421 5.7287 6.2406 5.833 6.75 5.6576 7.2965 5.4694 7.4677 5.4951 7.9722 5.2131 8.1414 5.1186 8.312 4.9893 8.4524 4.8718 reforming 5.0278 7.2756 solid #9c6837
+edge Methane "Industry and feedstocks" 13 2.156 8.4532 2.467 8.7454 3.0325 9.1854 3.6181 9.1854 3.6181 9.1854 3.6181 9.1854 14.222 9.1854 14.698 9.1854 18.656 7.9651 18.681 7.9493 19.228 7.5927 19.676 6.9621 19.914 6.583 solid #9c6837
+edge Methane "Gas CHP" 4 2.2931 8.218 2.5503 8.2305 2.8902 8.2471 3.1614 8.2603 solid #9c6837
+edge "Liquid hydrocarbons" "Industry and feedstocks" 4 18.127 3.9675 18.532 4.4402 19.398 5.4519 19.834 5.9617 solid #386fa8
+edge "Liquid hydrocarbons" "Land transport" 4 18.148 3.459 18.553 3.0266 19.376 2.1494 19.811 1.6847 solid #386fa8
+edge "Liquid hydrocarbons" Shipping 4 18.681 3.6789 19.002 3.6646 19.363 3.6486 19.64 3.6362 solid #386fa8
+edge "Liquid hydrocarbons" Aviation 4 18.681 3.9188 19.01 4.0065 19.381 4.1056 19.661 4.1803 solid #386fa8
+edge "Liquid hydrocarbons" Agriculture 4 18.602 3.4627 18.915 3.3494 19.279 3.2178 19.569 3.1127 solid #386fa8
+edge Biomass Methanol 10 1.9385 5.8097 2.0626 4.7896 2.592 1.0048 3.6181 1.0048 3.6181 1.0048 3.6181 1.0048 7.5 1.0048 9.6395 1.0048 12.059 1.9853 13.058 2.4359 "bio-methanol" 7.4861 1.0673 solid #617f33
+edge Biomass "Industry and feedstocks" 16 1.9612 6.3118 2.0869 6.8998 2.4272 8.3371 2.8056 8.6298 3.5844 9.2324 4.0291 8.8104 5.0139 8.8104 5.0139 8.8104 5.0139 8.8104 14.222 8.8104 14.479 8.8104 18.456 7.6992 18.681 7.5743 19.146 7.3156 19.58 6.8742 19.842 6.5771 solid #617f33
+edge Biomass "Biomass CHP" 4 2.2931 6.0604 2.5017 6.0604 2.7648 6.0604 3.0015 6.0604 solid #617f33
+edge Coal "Industry and feedstocks" 4 18.271 6.8369 18.529 6.7565 18.888 6.6448 19.22 6.5416 solid #454b52
+edge Ammonia "Industry and feedstocks" 4 18.331 6.2687 18.557 6.2687 18.845 6.2687 19.122 6.2687 solid #467d87
+edge "Renewables / nuclear" Electricity 4 4.462 5.3104 4.8582 5.3104 5.3213 5.3104 5.6636 5.3104 generation 5.0278 5.3729 solid #415262
+edge "Natural gas" Methane 4 0.98785 8.1993 1.1303 8.1993 1.2858 8.1993 1.4266 8.1993 solid #415262
+edge "Crude oil" "Liquid hydrocarbons" 4 15.726 3.7131 16.075 3.7131 16.596 3.7131 17.038 3.7131 refining 16.639 3.7756 solid #415262
+edge "Methanol synthesis" Heat 7 12.162 5.2995 12.308 5.4306 12.479 5.5986 12.611 5.7687 12.936 6.1889 13.221 6.7379 13.384 7.0781 solid #c85539
+edge "Methanol synthesis" Methanol 4 12.036 4.7953 12.343 4.3563 12.975 3.4502 13.309 2.9709 solid #008872
+edge "Captured CO2" "Methanol synthesis" 4 9.3644 6.0997 9.8784 5.8805 10.64 5.5554 11.182 5.3244 dashed #95617e
+edge "Captured CO2" "Fischer-Tropsch" 4 9.3644 6.2946 9.8697 6.2552 10.615 6.197 11.154 6.155 dashed #95617e
+edge "Captured CO2" Sequestration 4 9.3644 6.4202 9.8861 6.4968 10.663 6.6109 11.206 6.6905 dashed #95617e
+edge "Fischer-Tropsch" Heat 7 12.458 6.3534 12.511 6.3832 12.563 6.4152 12.611 6.4493 12.865 6.6293 13.108 6.8851 13.28 7.0851 solid #c85539
+edge "Fischer-Tropsch" "Liquid hydrocarbons" 4 12.466 5.862 13.59 5.4161 15.994 4.4624 17.184 3.99 solid #386fa8
+edge "Methanol-to-kerosene" "Liquid hydrocarbons" 4 15.937 2.9077 16.32 3.0662 16.815 3.2714 17.21 3.435 solid #386fa8
+edge "Gas CHP" Electricity 10 3.9446 8.0326 4.4259 7.6293 5.3223 6.8759 5.3472 6.8381 5.5539 6.5254 5.4237 6.3649 5.5972 6.0326 5.6731 5.8873 5.7791 5.7419 5.8787 5.62 solid #b28600
+edge "Gas CHP" Heat 13 4.0287 8.3204 4.5212 8.3656 5.4033 8.4354 6.1597 8.4354 6.1597 8.4354 6.1597 8.4354 10.236 8.4354 11.297 8.4354 11.615 8.5626 12.611 8.1993 12.878 8.1019 13.117 7.8855 13.284 7.7014 solid #c85539
+edge "Biomass CHP" Electricity 4 4.1913 5.8976 4.6295 5.7669 5.2397 5.5849 5.6641 5.4582 solid #b28600
+edge "Biomass CHP" Heat 10 4.1885 6.2505 4.2796 6.2864 4.3724 6.3255 4.4583 6.3659 5.6365 6.921 5.7416 7.4889 7 7.8243 9.2337 8.4195 12.042 7.7961 13.099 7.5156 solid #c85539
+edge "Capture / DAC" "Captured CO2" 4 6.7559 6.3598 7.167 6.3554 7.7225 6.3495 8.1472 6.3449 dashed #95617e
+stop

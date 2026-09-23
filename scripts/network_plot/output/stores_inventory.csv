@@ -1,0 +1,427 @@
+Store,bus,carrier,e_nom_extendable,sign
+co2 atmosphere,co2 atmosphere,co2,False,1.0
+AL co2 stored,AL co2 stored,co2 stored,True,1.0
+AT co2 stored,AT co2 stored,co2 stored,True,1.0
+BA co2 stored,BA co2 stored,co2 stored,True,1.0
+BE co2 stored,BE co2 stored,co2 stored,True,1.0
+BG co2 stored,BG co2 stored,co2 stored,True,1.0
+CH co2 stored,CH co2 stored,co2 stored,True,1.0
+CZ co2 stored,CZ co2 stored,co2 stored,True,1.0
+DE co2 stored,DE co2 stored,co2 stored,True,1.0
+DK co2 stored,DK co2 stored,co2 stored,True,1.0
+EE co2 stored,EE co2 stored,co2 stored,True,1.0
+ES co2 stored,ES co2 stored,co2 stored,True,1.0
+FI co2 stored,FI co2 stored,co2 stored,True,1.0
+FR co2 stored,FR co2 stored,co2 stored,True,1.0
+GB co2 stored,GB co2 stored,co2 stored,True,1.0
+GBI co2 stored,GBI co2 stored,co2 stored,True,1.0
+GR co2 stored,GR co2 stored,co2 stored,True,1.0
+HR co2 stored,HR co2 stored,co2 stored,True,1.0
+HU co2 stored,HU co2 stored,co2 stored,True,1.0
+IE co2 stored,IE co2 stored,co2 stored,True,1.0
+IT co2 stored,IT co2 stored,co2 stored,True,1.0
+LT co2 stored,LT co2 stored,co2 stored,True,1.0
+LU co2 stored,LU co2 stored,co2 stored,True,1.0
+LV co2 stored,LV co2 stored,co2 stored,True,1.0
+ME co2 stored,ME co2 stored,co2 stored,True,1.0
+MK co2 stored,MK co2 stored,co2 stored,True,1.0
+NL co2 stored,NL co2 stored,co2 stored,True,1.0
+NO co2 stored,NO co2 stored,co2 stored,True,1.0
+PL co2 stored,PL co2 stored,co2 stored,True,1.0
+PT co2 stored,PT co2 stored,co2 stored,True,1.0
+RO co2 stored,RO co2 stored,co2 stored,True,1.0
+RS co2 stored,RS co2 stored,co2 stored,True,1.0
+SE co2 stored,SE co2 stored,co2 stored,True,1.0
+SI co2 stored,SI co2 stored,co2 stored,True,1.0
+SK co2 stored,SK co2 stored,co2 stored,True,1.0
+XK co2 stored,XK co2 stored,co2 stored,True,1.0
+AL co2 sequestered,AL co2 sequestered,co2 sequestered,True,1.0
+AT co2 sequestered,AT co2 sequestered,co2 sequestered,True,1.0
+BA co2 sequestered,BA co2 sequestered,co2 sequestered,True,1.0
+BE co2 sequestered,BE co2 sequestered,co2 sequestered,True,1.0
+BG co2 sequestered,BG co2 sequestered,co2 sequestered,True,1.0
+CH co2 sequestered,CH co2 sequestered,co2 sequestered,True,1.0
+CZ co2 sequestered,CZ co2 sequestered,co2 sequestered,True,1.0
+DE co2 sequestered,DE co2 sequestered,co2 sequestered,True,1.0
+DK co2 sequestered,DK co2 sequestered,co2 sequestered,True,1.0
+EE co2 sequestered,EE co2 sequestered,co2 sequestered,True,1.0
+ES co2 sequestered,ES co2 sequestered,co2 sequestered,True,1.0
+FI co2 sequestered,FI co2 sequestered,co2 sequestered,True,1.0
+FR co2 sequestered,FR co2 sequestered,co2 sequestered,True,1.0
+GB co2 sequestered,GB co2 sequestered,co2 sequestered,True,1.0
+GBI co2 sequestered,GBI co2 sequestered,co2 sequestered,True,1.0
+GR co2 sequestered,GR co2 sequestered,co2 sequestered,True,1.0
+HR co2 sequestered,HR co2 sequestered,co2 sequestered,True,1.0
+HU co2 sequestered,HU co2 sequestered,co2 sequestered,True,1.0
+IE co2 sequestered,IE co2 sequestered,co2 sequestered,True,1.0
+IT co2 sequestered,IT co2 sequestered,co2 sequestered,True,1.0
+LT co2 sequestered,LT co2 sequestered,co2 sequestered,True,1.0
+LU co2 sequestered,LU co2 sequestered,co2 sequestered,True,1.0
+LV co2 sequestered,LV co2 sequestered,co2 sequestered,True,1.0
+ME co2 sequestered,ME co2 sequestered,co2 sequestered,True,1.0
+MK co2 sequestered,MK co2 sequestered,co2 sequestered,True,1.0
+NL co2 sequestered,NL co2 sequestered,co2 sequestered,True,1.0
+NO co2 sequestered,NO co2 sequestered,co2 sequestered,True,1.0
+PL co2 sequestered,PL co2 sequestered,co2 sequestered,True,1.0
+PT co2 sequestered,PT co2 sequestered,co2 sequestered,True,1.0
+RO co2 sequestered,RO co2 sequestered,co2 sequestered,True,1.0
+RS co2 sequestered,RS co2 sequestered,co2 sequestered,True,1.0
+SE co2 sequestered,SE co2 sequestered,co2 sequestered,True,1.0
+SI co2 sequestered,SI co2 sequestered,co2 sequestered,True,1.0
+SK co2 sequestered,SK co2 sequestered,co2 sequestered,True,1.0
+XK co2 sequestered,XK co2 sequestered,co2 sequestered,True,1.0
+AL gas Store,AL gas,gas,True,1.0
+AT gas Store,AT gas,gas,True,1.0
+BA gas Store,BA gas,gas,True,1.0
+BE gas Store,BE gas,gas,True,1.0
+BG gas Store,BG gas,gas,True,1.0
+CH gas Store,CH gas,gas,True,1.0
+CZ gas Store,CZ gas,gas,True,1.0
+DE gas Store,DE gas,gas,True,1.0
+DK gas Store,DK gas,gas,True,1.0
+EE gas Store,EE gas,gas,True,1.0
+ES gas Store,ES gas,gas,True,1.0
+FI gas Store,FI gas,gas,True,1.0
+FR gas Store,FR gas,gas,True,1.0
+GB gas Store,GB gas,gas,True,1.0
+GBI gas Store,GBI gas,gas,True,1.0
+GR gas Store,GR gas,gas,True,1.0
+HR gas Store,HR gas,gas,True,1.0
+HU gas Store,HU gas,gas,True,1.0
+IE gas Store,IE gas,gas,True,1.0
+IT gas Store,IT gas,gas,True,1.0
+LT gas Store,LT gas,gas,True,1.0
+LU gas Store,LU gas,gas,True,1.0
+LV gas Store,LV gas,gas,True,1.0
+ME gas Store,ME gas,gas,True,1.0
+MK gas Store,MK gas,gas,True,1.0
+NL gas Store,NL gas,gas,True,1.0
+NO gas Store,NO gas,gas,True,1.0
+PL gas Store,PL gas,gas,True,1.0
+PT gas Store,PT gas,gas,True,1.0
+RO gas Store,RO gas,gas,True,1.0
+RS gas Store,RS gas,gas,True,1.0
+SE gas Store,SE gas,gas,True,1.0
+SI gas Store,SI gas,gas,True,1.0
+SK gas Store,SK gas,gas,True,1.0
+XK gas Store,XK gas,gas,True,1.0
+AL H2 Store,AL H2,H2 Store,True,1.0
+BA H2 Store,BA H2,H2 Store,True,1.0
+DE H2 Store,DE H2,H2 Store,True,1.0
+DK H2 Store,DK H2,H2 Store,True,1.0
+ES H2 Store,ES H2,H2 Store,True,1.0
+FR H2 Store,FR H2,H2 Store,True,1.0
+GB H2 Store,GB H2,H2 Store,True,1.0
+GR H2 Store,GR H2,H2 Store,True,1.0
+NL H2 Store,NL H2,H2 Store,True,1.0
+PL H2 Store,PL H2,H2 Store,True,1.0
+PT H2 Store,PT H2,H2 Store,True,1.0
+RO H2 Store,RO H2,H2 Store,True,1.0
+AT H2 Store,AT H2,H2 Store,True,1.0
+BE H2 Store,BE H2,H2 Store,True,1.0
+BG H2 Store,BG H2,H2 Store,True,1.0
+CH H2 Store,CH H2,H2 Store,True,1.0
+CZ H2 Store,CZ H2,H2 Store,True,1.0
+EE H2 Store,EE H2,H2 Store,True,1.0
+FI H2 Store,FI H2,H2 Store,True,1.0
+GBI H2 Store,GBI H2,H2 Store,True,1.0
+HR H2 Store,HR H2,H2 Store,True,1.0
+HU H2 Store,HU H2,H2 Store,True,1.0
+IE H2 Store,IE H2,H2 Store,True,1.0
+IT H2 Store,IT H2,H2 Store,True,1.0
+LT H2 Store,LT H2,H2 Store,True,1.0
+LU H2 Store,LU H2,H2 Store,True,1.0
+LV H2 Store,LV H2,H2 Store,True,1.0
+ME H2 Store,ME H2,H2 Store,True,1.0
+MK H2 Store,MK H2,H2 Store,True,1.0
+NO H2 Store,NO H2,H2 Store,True,1.0
+RS H2 Store,RS H2,H2 Store,True,1.0
+SE H2 Store,SE H2,H2 Store,True,1.0
+SI H2 Store,SI H2,H2 Store,True,1.0
+SK H2 Store,SK H2,H2 Store,True,1.0
+XK H2 Store,XK H2,H2 Store,True,1.0
+AL battery,AL battery,battery,True,1.0
+AT battery,AT battery,battery,True,1.0
+BA battery,BA battery,battery,True,1.0
+BE battery,BE battery,battery,True,1.0
+BG battery,BG battery,battery,True,1.0
+CH battery,CH battery,battery,True,1.0
+CZ battery,CZ battery,battery,True,1.0
+DE battery,DE battery,battery,True,1.0
+DK battery,DK battery,battery,True,1.0
+EE battery,EE battery,battery,True,1.0
+ES battery,ES battery,battery,True,1.0
+FI battery,FI battery,battery,True,1.0
+FR battery,FR battery,battery,True,1.0
+GB battery,GB battery,battery,True,1.0
+GBI battery,GBI battery,battery,True,1.0
+GR battery,GR battery,battery,True,1.0
+HR battery,HR battery,battery,True,1.0
+HU battery,HU battery,battery,True,1.0
+IE battery,IE battery,battery,True,1.0
+IT battery,IT battery,battery,True,1.0
+LT battery,LT battery,battery,True,1.0
+LU battery,LU battery,battery,True,1.0
+LV battery,LV battery,battery,True,1.0
+ME battery,ME battery,battery,True,1.0
+MK battery,MK battery,battery,True,1.0
+NL battery,NL battery,battery,True,1.0
+NO battery,NO battery,battery,True,1.0
+PL battery,PL battery,battery,True,1.0
+PT battery,PT battery,battery,True,1.0
+RO battery,RO battery,battery,True,1.0
+RS battery,RS battery,battery,True,1.0
+SE battery,SE battery,battery,True,1.0
+SI battery,SI battery,battery,True,1.0
+SK battery,SK battery,battery,True,1.0
+XK battery,XK battery,battery,True,1.0
+AL EV battery,AL EV battery,EV battery,False,1.0
+AT EV battery,AT EV battery,EV battery,False,1.0
+BA EV battery,BA EV battery,EV battery,False,1.0
+BE EV battery,BE EV battery,EV battery,False,1.0
+BG EV battery,BG EV battery,EV battery,False,1.0
+CH EV battery,CH EV battery,EV battery,False,1.0
+CZ EV battery,CZ EV battery,EV battery,False,1.0
+DE EV battery,DE EV battery,EV battery,False,1.0
+DK EV battery,DK EV battery,EV battery,False,1.0
+EE EV battery,EE EV battery,EV battery,False,1.0
+ES EV battery,ES EV battery,EV battery,False,1.0
+FI EV battery,FI EV battery,EV battery,False,1.0
+FR EV battery,FR EV battery,EV battery,False,1.0
+GB EV battery,GB EV battery,EV battery,False,1.0
+GBI EV battery,GBI EV battery,EV battery,False,1.0
+GR EV battery,GR EV battery,EV battery,False,1.0
+HR EV battery,HR EV battery,EV battery,False,1.0
+HU EV battery,HU EV battery,EV battery,False,1.0
+IE EV battery,IE EV battery,EV battery,False,1.0
+IT EV battery,IT EV battery,EV battery,False,1.0
+LT EV battery,LT EV battery,EV battery,False,1.0
+LU EV battery,LU EV battery,EV battery,False,1.0
+LV EV battery,LV EV battery,EV battery,False,1.0
+ME EV battery,ME EV battery,EV battery,False,1.0
+MK EV battery,MK EV battery,EV battery,False,1.0
+NL EV battery,NL EV battery,EV battery,False,1.0
+NO EV battery,NO EV battery,EV battery,False,1.0
+PL EV battery,PL EV battery,EV battery,False,1.0
+PT EV battery,PT EV battery,EV battery,False,1.0
+RO EV battery,RO EV battery,EV battery,False,1.0
+RS EV battery,RS EV battery,EV battery,False,1.0
+SE EV battery,SE EV battery,EV battery,False,1.0
+SI EV battery,SI EV battery,EV battery,False,1.0
+SK EV battery,SK EV battery,EV battery,False,1.0
+XK EV battery,XK EV battery,EV battery,False,1.0
+EU oil Store,EU oil,oil,True,1.0
+AL urban central water tanks,AL urban central water tanks,urban central water tanks,True,1.0
+AT urban central water tanks,AT urban central water tanks,urban central water tanks,True,1.0
+BA urban central water tanks,BA urban central water tanks,urban central water tanks,True,1.0
+BE urban central water tanks,BE urban central water tanks,urban central water tanks,True,1.0
+BG urban central water tanks,BG urban central water tanks,urban central water tanks,True,1.0
+CH urban central water tanks,CH urban central water tanks,urban central water tanks,True,1.0
+CZ urban central water tanks,CZ urban central water tanks,urban central water tanks,True,1.0
+DE urban central water tanks,DE urban central water tanks,urban central water tanks,True,1.0
+DK urban central water tanks,DK urban central water tanks,urban central water tanks,True,1.0
+EE urban central water tanks,EE urban central water tanks,urban central water tanks,True,1.0
+ES urban central water tanks,ES urban central water tanks,urban central water tanks,True,1.0
+FI urban central water tanks,FI urban central water tanks,urban central water tanks,True,1.0
+FR urban central water tanks,FR urban central water tanks,urban central water tanks,True,1.0
+GB urban central water tanks,GB urban central water tanks,urban central water tanks,True,1.0
+GBI urban central water tanks,GBI urban central water tanks,urban central water tanks,True,1.0
+GR urban central water tanks,GR urban central water tanks,urban central water tanks,True,1.0
+HR urban central water tanks,HR urban central water tanks,urban central water tanks,True,1.0
+HU urban central water tanks,HU urban central water tanks,urban central water tanks,True,1.0
+IE urban central water tanks,IE urban central water tanks,urban central water tanks,True,1.0
+IT urban central water tanks,IT urban central water tanks,urban central water tanks,True,1.0
+LT urban central water tanks,LT urban central water tanks,urban central water tanks,True,1.0
+LU urban central water tanks,LU urban central water tanks,urban central water tanks,True,1.0
+LV urban central water tanks,LV urban central water tanks,urban central water tanks,True,1.0
+ME urban central water tanks,ME urban central water tanks,urban central water tanks,True,1.0
+MK urban central water tanks,MK urban central water tanks,urban central water tanks,True,1.0
+NL urban central water tanks,NL urban central water tanks,urban central water tanks,True,1.0
+NO urban central water tanks,NO urban central water tanks,urban central water tanks,True,1.0
+PL urban central water tanks,PL urban central water tanks,urban central water tanks,True,1.0
+PT urban central water tanks,PT urban central water tanks,urban central water tanks,True,1.0
+RO urban central water tanks,RO urban central water tanks,urban central water tanks,True,1.0
+RS urban central water tanks,RS urban central water tanks,urban central water tanks,True,1.0
+SE urban central water tanks,SE urban central water tanks,urban central water tanks,True,1.0
+SI urban central water tanks,SI urban central water tanks,urban central water tanks,True,1.0
+SK urban central water tanks,SK urban central water tanks,urban central water tanks,True,1.0
+XK urban central water tanks,XK urban central water tanks,urban central water tanks,True,1.0
+AL urban central water pits,AL urban central water pits,urban central water pits,True,1.0
+AT urban central water pits,AT urban central water pits,urban central water pits,True,1.0
+BA urban central water pits,BA urban central water pits,urban central water pits,True,1.0
+BE urban central water pits,BE urban central water pits,urban central water pits,True,1.0
+BG urban central water pits,BG urban central water pits,urban central water pits,True,1.0
+CH urban central water pits,CH urban central water pits,urban central water pits,True,1.0
+CZ urban central water pits,CZ urban central water pits,urban central water pits,True,1.0
+DE urban central water pits,DE urban central water pits,urban central water pits,True,1.0
+DK urban central water pits,DK urban central water pits,urban central water pits,True,1.0
+EE urban central water pits,EE urban central water pits,urban central water pits,True,1.0
+ES urban central water pits,ES urban central water pits,urban central water pits,True,1.0
+FI urban central water pits,FI urban central water pits,urban central water pits,True,1.0
+FR urban central water pits,FR urban central water pits,urban central water pits,True,1.0
+GB urban central water pits,GB urban central water pits,urban central water pits,True,1.0
+GBI urban central water pits,GBI urban central water pits,urban central water pits,True,1.0
+GR urban central water pits,GR urban central water pits,urban central water pits,True,1.0
+HR urban central water pits,HR urban central water pits,urban central water pits,True,1.0
+HU urban central water pits,HU urban central water pits,urban central water pits,True,1.0
+IE urban central water pits,IE urban central water pits,urban central water pits,True,1.0
+IT urban central water pits,IT urban central water pits,urban central water pits,True,1.0
+LT urban central water pits,LT urban central water pits,urban central water pits,True,1.0
+LU urban central water pits,LU urban central water pits,urban central water pits,True,1.0
+LV urban central water pits,LV urban central water pits,urban central water pits,True,1.0
+ME urban central water pits,ME urban central water pits,urban central water pits,True,1.0
+MK urban central water pits,MK urban central water pits,urban central water pits,True,1.0
+NL urban central water pits,NL urban central water pits,urban central water pits,True,1.0
+NO urban central water pits,NO urban central water pits,urban central water pits,True,1.0
+PL urban central water pits,PL urban central water pits,urban central water pits,True,1.0
+PT urban central water pits,PT urban central water pits,urban central water pits,True,1.0
+RO urban central water pits,RO urban central water pits,urban central water pits,True,1.0
+RS urban central water pits,RS urban central water pits,urban central water pits,True,1.0
+SE urban central water pits,SE urban central water pits,urban central water pits,True,1.0
+SI urban central water pits,SI urban central water pits,urban central water pits,True,1.0
+SK urban central water pits,SK urban central water pits,urban central water pits,True,1.0
+XK urban central water pits,XK urban central water pits,urban central water pits,True,1.0
+EU NH3 ammonia store,EU NH3,ammonia store,True,1.0
+EU methanol Store,EU methanol,methanol,True,1.0
+AL non-sequestered HVC,AL non-sequestered HVC,non-sequestered HVC,False,1.0
+AT non-sequestered HVC,AT non-sequestered HVC,non-sequestered HVC,False,1.0
+BA non-sequestered HVC,BA non-sequestered HVC,non-sequestered HVC,False,1.0
+BE non-sequestered HVC,BE non-sequestered HVC,non-sequestered HVC,False,1.0
+BG non-sequestered HVC,BG non-sequestered HVC,non-sequestered HVC,False,1.0
+CH non-sequestered HVC,CH non-sequestered HVC,non-sequestered HVC,False,1.0
+CZ non-sequestered HVC,CZ non-sequestered HVC,non-sequestered HVC,False,1.0
+DE non-sequestered HVC,DE non-sequestered HVC,non-sequestered HVC,False,1.0
+DK non-sequestered HVC,DK non-sequestered HVC,non-sequestered HVC,False,1.0
+EE non-sequestered HVC,EE non-sequestered HVC,non-sequestered HVC,False,1.0
+ES non-sequestered HVC,ES non-sequestered HVC,non-sequestered HVC,False,1.0
+FI non-sequestered HVC,FI non-sequestered HVC,non-sequestered HVC,False,1.0
+FR non-sequestered HVC,FR non-sequestered HVC,non-sequestered HVC,False,1.0
+GB non-sequestered HVC,GB non-sequestered HVC,non-sequestered HVC,False,1.0
+GBI non-sequestered HVC,GBI non-sequestered HVC,non-sequestered HVC,False,1.0
+GR non-sequestered HVC,GR non-sequestered HVC,non-sequestered HVC,False,1.0
+HR non-sequestered HVC,HR non-sequestered HVC,non-sequestered HVC,False,1.0
+HU non-sequestered HVC,HU non-sequestered HVC,non-sequestered HVC,False,1.0
+IE non-sequestered HVC,IE non-sequestered HVC,non-sequestered HVC,False,1.0
+IT non-sequestered HVC,IT non-sequestered HVC,non-sequestered HVC,False,1.0
+LT non-sequestered HVC,LT non-sequestered HVC,non-sequestered HVC,False,1.0
+LU non-sequestered HVC,LU non-sequestered HVC,non-sequestered HVC,False,1.0
+LV non-sequestered HVC,LV non-sequestered HVC,non-sequestered HVC,False,1.0
+ME non-sequestered HVC,ME non-sequestered HVC,non-sequestered HVC,False,1.0
+MK non-sequestered HVC,MK non-sequestered HVC,non-sequestered HVC,False,1.0
+NL non-sequestered HVC,NL non-sequestered HVC,non-sequestered HVC,False,1.0
+NO non-sequestered HVC,NO non-sequestered HVC,non-sequestered HVC,False,1.0
+PL non-sequestered HVC,PL non-sequestered HVC,non-sequestered HVC,False,1.0
+PT non-sequestered HVC,PT non-sequestered HVC,non-sequestered HVC,False,1.0
+RO non-sequestered HVC,RO non-sequestered HVC,non-sequestered HVC,False,1.0
+RS non-sequestered HVC,RS non-sequestered HVC,non-sequestered HVC,False,1.0
+SE non-sequestered HVC,SE non-sequestered HVC,non-sequestered HVC,False,1.0
+SI non-sequestered HVC,SI non-sequestered HVC,non-sequestered HVC,False,1.0
+SK non-sequestered HVC,SK non-sequestered HVC,non-sequestered HVC,False,1.0
+XK non-sequestered HVC,XK non-sequestered HVC,non-sequestered HVC,False,1.0
+EU coal Store,EU coal,coal,True,1.0
+EU oil Store from H2,EU oil from H2,oil from H2,True,1.0
+AL home battery,AL home battery,home battery,True,1.0
+AT home battery,AT home battery,home battery,True,1.0
+BA home battery,BA home battery,home battery,True,1.0
+BE home battery,BE home battery,home battery,True,1.0
+BG home battery,BG home battery,home battery,True,1.0
+CH home battery,CH home battery,home battery,True,1.0
+CZ home battery,CZ home battery,home battery,True,1.0
+DE home battery,DE home battery,home battery,True,1.0
+DK home battery,DK home battery,home battery,True,1.0
+EE home battery,EE home battery,home battery,True,1.0
+ES home battery,ES home battery,home battery,True,1.0
+FI home battery,FI home battery,home battery,True,1.0
+FR home battery,FR home battery,home battery,True,1.0
+GB home battery,GB home battery,home battery,True,1.0
+GBI home battery,GBI home battery,home battery,True,1.0
+GR home battery,GR home battery,home battery,True,1.0
+HR home battery,HR home battery,home battery,True,1.0
+HU home battery,HU home battery,home battery,True,1.0
+IE home battery,IE home battery,home battery,True,1.0
+IT home battery,IT home battery,home battery,True,1.0
+LT home battery,LT home battery,home battery,True,1.0
+LU home battery,LU home battery,home battery,True,1.0
+LV home battery,LV home battery,home battery,True,1.0
+ME home battery,ME home battery,home battery,True,1.0
+MK home battery,MK home battery,home battery,True,1.0
+NL home battery,NL home battery,home battery,True,1.0
+NO home battery,NO home battery,home battery,True,1.0
+PL home battery,PL home battery,home battery,True,1.0
+PT home battery,PT home battery,home battery,True,1.0
+RO home battery,RO home battery,home battery,True,1.0
+RS home battery,RS home battery,home battery,True,1.0
+SE home battery,SE home battery,home battery,True,1.0
+SI home battery,SI home battery,home battery,True,1.0
+SK home battery,SK home battery,home battery,True,1.0
+XK home battery,XK home battery,home battery,True,1.0
+AL rural water tanks,AL rural water tanks,rural water tanks,True,1.0
+AL urban decentral water tanks,AL urban decentral water tanks,urban decentral water tanks,True,1.0
+AT rural water tanks,AT rural water tanks,rural water tanks,True,1.0
+AT urban decentral water tanks,AT urban decentral water tanks,urban decentral water tanks,True,1.0
+BA rural water tanks,BA rural water tanks,rural water tanks,True,1.0
+BA urban decentral water tanks,BA urban decentral water tanks,urban decentral water tanks,True,1.0
+BE rural water tanks,BE rural water tanks,rural water tanks,True,1.0
+BE urban decentral water tanks,BE urban decentral water tanks,urban decentral water tanks,True,1.0
+BG rural water tanks,BG rural water tanks,rural water tanks,True,1.0
+BG urban decentral water tanks,BG urban decentral water tanks,urban decentral water tanks,True,1.0
+CH rural water tanks,CH rural water tanks,rural water tanks,True,1.0
+CH urban decentral water tanks,CH urban decentral water tanks,urban decentral water tanks,True,1.0
+CZ rural water tanks,CZ rural water tanks,rural water tanks,True,1.0
+CZ urban decentral water tanks,CZ urban decentral water tanks,urban decentral water tanks,True,1.0
+DE rural water tanks,DE rural water tanks,rural water tanks,True,1.0
+DE urban decentral water tanks,DE urban decentral water tanks,urban decentral water tanks,True,1.0
+DK rural water tanks,DK rural water tanks,rural water tanks,True,1.0
+DK urban decentral water tanks,DK urban decentral water tanks,urban decentral water tanks,True,1.0
+EE rural water tanks,EE rural water tanks,rural water tanks,True,1.0
+EE urban decentral water tanks,EE urban decentral water tanks,urban decentral water tanks,True,1.0
+ES rural water tanks,ES rural water tanks,rural water tanks,True,1.0
+ES urban decentral water tanks,ES urban decentral water tanks,urban decentral water tanks,True,1.0
+FI rural water tanks,FI rural water tanks,rural water tanks,True,1.0
+FI urban decentral water tanks,FI urban decentral water tanks,urban decentral water tanks,True,1.0
+FR rural water tanks,FR rural water tanks,rural water tanks,True,1.0
+FR urban decentral water tanks,FR urban decentral water tanks,urban decentral water tanks,True,1.0
+GB rural water tanks,GB rural water tanks,rural water tanks,True,1.0
+GB urban decentral water tanks,GB urban decentral water tanks,urban decentral water tanks,True,1.0
+GBI rural water tanks,GBI rural water tanks,rural water tanks,True,1.0
+GBI urban decentral water tanks,GBI urban decentral water tanks,urban decentral water tanks,True,1.0
+GR rural water tanks,GR rural water tanks,rural water tanks,True,1.0
+GR urban decentral water tanks,GR urban decentral water tanks,urban decentral water tanks,True,1.0
+HR rural water tanks,HR rural water tanks,rural water tanks,True,1.0
+HR urban decentral water tanks,HR urban decentral water tanks,urban decentral water tanks,True,1.0
+HU rural water tanks,HU rural water tanks,rural water tanks,True,1.0
+HU urban decentral water tanks,HU urban decentral water tanks,urban decentral water tanks,True,1.0
+IE rural water tanks,IE rural water tanks,rural water tanks,True,1.0
+IE urban decentral water tanks,IE urban decentral water tanks,urban decentral water tanks,True,1.0
+IT rural water tanks,IT rural water tanks,rural water tanks,True,1.0
+IT urban decentral water tanks,IT urban decentral water tanks,urban decentral water tanks,True,1.0
+LT rural water tanks,LT rural water tanks,rural water tanks,True,1.0
+LT urban decentral water tanks,LT urban decentral water tanks,urban decentral water tanks,True,1.0
+LU rural water tanks,LU rural water tanks,rural water tanks,True,1.0
+LU urban decentral water tanks,LU urban decentral water tanks,urban decentral water tanks,True,1.0
+LV rural water tanks,LV rural water tanks,rural water tanks,True,1.0
+LV urban decentral water tanks,LV urban decentral water tanks,urban decentral water tanks,True,1.0
+ME rural water tanks,ME rural water tanks,rural water tanks,True,1.0
+ME urban decentral water tanks,ME urban decentral water tanks,urban decentral water tanks,True,1.0
+MK rural water tanks,MK rural water tanks,rural water tanks,True,1.0
+MK urban decentral water tanks,MK urban decentral water tanks,urban decentral water tanks,True,1.0
+NL rural water tanks,NL rural water tanks,rural water tanks,True,1.0
+NL urban decentral water tanks,NL urban decentral water tanks,urban decentral water tanks,True,1.0
+NO rural water tanks,NO rural water tanks,rural water tanks,True,1.0
+NO urban decentral water tanks,NO urban decentral water tanks,urban decentral water tanks,True,1.0
+PL rural water tanks,PL rural water tanks,rural water tanks,True,1.0
+PL urban decentral water tanks,PL urban decentral water tanks,urban decentral water tanks,True,1.0
+PT rural water tanks,PT rural water tanks,rural water tanks,True,1.0
+PT urban decentral water tanks,PT urban decentral water tanks,urban decentral water tanks,True,1.0
+RO rural water tanks,RO rural water tanks,rural water tanks,True,1.0
+RO urban decentral water tanks,RO urban decentral water tanks,urban decentral water tanks,True,1.0
+RS rural water tanks,RS rural water tanks,rural water tanks,True,1.0
+RS urban decentral water tanks,RS urban decentral water tanks,urban decentral water tanks,True,1.0
+SE rural water tanks,SE rural water tanks,rural water tanks,True,1.0
+SE urban decentral water tanks,SE urban decentral water tanks,urban decentral water tanks,True,1.0
+SI rural water tanks,SI rural water tanks,rural water tanks,True,1.0
+SI urban decentral water tanks,SI urban decentral water tanks,urban decentral water tanks,True,1.0
+SK rural water tanks,SK rural water tanks,rural water tanks,True,1.0
+SK urban decentral water tanks,SK urban decentral water tanks,urban decentral water tanks,True,1.0
+XK rural water tanks,XK rural water tanks,rural water tanks,True,1.0
+XK urban decentral water tanks,XK urban decentral water tanks,urban decentral water tanks,True,1.0
