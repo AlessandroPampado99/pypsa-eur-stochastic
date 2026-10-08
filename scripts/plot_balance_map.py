@@ -7,6 +7,7 @@ Create static energy balance maps for the defined carriers using`n.plot()`.
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import pypsa
 from packaging.version import Version, parse
@@ -61,6 +62,7 @@ if __name__ == "__main__":
     carrier = snakemake.wildcards.carrier
     settings = snakemake.params.settings
     show_legend = settings.get("show_legend", True)
+    optimal_sizes = settings.get("optimal_sizes", False)
 
     if settings is None:
         available = list((config or {}).get("balance_map", {}).keys())
@@ -101,7 +103,17 @@ if __name__ == "__main__":
     n.buses["y"] = n.buses.location.map(n.buses.y)
 
     # bus_size according to energy balance of bus carrier
-    eb = n.statistics.energy_balance(bus_carrier=carrier, groupby=["bus", "carrier"])
+    if optimal_sizes:
+        eb = n.statistics.optimal_capacity(
+            components=["Generator", "StorageUnit", "Link"],
+            bus_carrier=carrier,
+            groupby=["bus", "carrier"],
+            at_port=True,
+        )
+        # Unbounded supplies and load shedding have no finite rating to plot.
+        eb = eb.loc[np.isfinite(eb)]
+    else:
+        eb = n.statistics.energy_balance(bus_carrier=carrier, groupby=["bus", "carrier"])
 
     # remove energy balance of transmission carriers which relate to losses
     transmission_carriers = get_transmission_carriers(n, bus_carrier=carrier).rename(
@@ -113,7 +125,10 @@ if __name__ == "__main__":
     # only carriers that are also in the energy balance
     carriers_in_eb = carriers[carriers.isin(eb.index.get_level_values("carrier"))]
 
-    eb.loc[components] = eb.loc[components].drop(index=carriers_in_eb, level="carrier")
+    if optimal_sizes:
+        eb = eb.loc[~eb.index.get_level_values("carrier").isin(carriers_in_eb)]
+    else:
+        eb.loc[components] = eb.loc[components].drop(index=carriers_in_eb, level="carrier")
     eb = eb.dropna()
     bus_size = eb.groupby(level=["bus", "carrier"]).sum().div(unit_conversion)
     bus_size = bus_size.sort_values(ascending=False)
@@ -130,8 +145,12 @@ if __name__ == "__main__":
     )
 
     # line and links widths according to optimal capacity
-    flow = n.statistics.transmission(groupby=False, bus_carrier=carrier).div(
-        unit_conversion
+    flow = (
+        pd.Series(dtype=float)
+        if optimal_sizes
+        else n.statistics.transmission(groupby=False, bus_carrier=carrier).div(
+            unit_conversion
+        )
     )
 
     if not flow.empty:
@@ -145,6 +164,17 @@ if __name__ == "__main__":
     fallback = pd.Series()
     line_width = flow.get("Line", fallback).abs()
     link_width = flow.get("Link", fallback).abs()
+    if optimal_sizes:
+        # Branch ratings are independent of annual dispatch and flow direction.
+        def branch_capacity(table, attr):
+            mask = table.bus0.map(n.buses.carrier).eq(carrier) & table.bus1.map(
+                n.buses.carrier
+            ).eq(carrier)
+            return table.loc[mask, attr].clip(lower=0).div(unit_conversion)
+
+        line_width = branch_capacity(n.lines, "s_nom_opt")
+        link_width = branch_capacity(n.links, "p_nom_opt")
+        flow = pd.Series(dtype=float)
 
     # define maximal size of buses and branch width
     bus_size_factor = settings["bus_factor"]
@@ -217,7 +247,7 @@ if __name__ == "__main__":
         linewidth=0,
     )
 
-    ax.set_title(carrier)
+    ax.set_title(f"{carrier} — optimal capacities" if optimal_sizes else carrier)
 
     # Add colorbar
     norm = plt.Normalize(vmin=vmin, vmax=vmax)

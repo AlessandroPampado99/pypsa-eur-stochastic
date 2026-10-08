@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from collections.abc import Mapping, Sequence
@@ -15,7 +16,7 @@ import pandas as pd
 import yaml
 from matplotlib.patches import Patch
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -71,6 +72,7 @@ ZERO_BALANCE_TOLERANCE = 1e-12
 
 SCENARIO_ORDER: list[str] | None = None
 SCENARIO_PREFIX_ALIASES: dict[str, str] = {}
+SCENARIO_LABELS: dict[str, str] = {}
 FAMILY_GROUPS: dict[str, list[str]] | None = None
 FAMILY_ORDER: list[str] | None = None
 INFER_FAMILY_FROM_NAME = True
@@ -218,10 +220,30 @@ def order_and_group_scenarios(
 
 def _scenario_plot_label(scenario: str) -> str:
     """Replace a configured scenario-family prefix while retaining its suffix."""
+    if scenario in SCENARIO_LABELS:
+        return SCENARIO_LABELS[scenario]
     for prefix, alias in SCENARIO_PREFIX_ALIASES.items():
         if scenario == prefix or scenario.startswith(f"{prefix}_"):
             return f"{alias}{scenario[len(prefix):]}"
     return scenario
+
+
+def load_scenario_names(path: Path) -> dict[str, str]:
+    """Read exact scenario labels from lines of the form 'identifier - label'."""
+    labels = {"__BASE__": "BASE", "BASE": "BASE"}
+    for line_number, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        identifier, separator, label = line.partition(" - ")
+        if not separator or not identifier.strip() or not label.strip():
+            raise ValueError(f"Invalid scenario name at {path}:{line_number}")
+        labels[identifier.strip()] = label.strip()
+    return labels
+
+
+def _family_plot_label(family: str, scenarios: Sequence[str]) -> str:
+    labels = {_scenario_plot_label(s).split("_", 1)[0] for s in scenarios}
+    return next(iter(labels)) if SCENARIO_LABELS and len(labels) == 1 else family
 
 
 def _read_level_sheet(path: Path, sheet: str, sign: float) -> pd.DataFrame:
@@ -559,7 +581,7 @@ def plot_group(
             ax.text(
                 (x[first] + x[last]) / 2.0,
                 -0.25,
-                family,
+                _family_plot_label(family, scenarios[first : last + 1]),
                 transform=ax.get_xaxis_transform(),
                 ha="center",
                 va="top",
@@ -671,4 +693,28 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--csv-dir", type=Path, help="Regenerate plots from exported carrier tables")
+    parser.add_argument("--names", type=Path, help="Scenario identifier-to-label mapping")
+    args = parser.parse_args()
+    if args.names:
+        SCENARIO_LABELS = load_scenario_names(args.names)
+    if args.csv_dir:
+        plotting = _load_yaml(PLOTTING_YAML)
+        summary = []
+        for path in sorted(args.csv_dir.glob(f"{OUT_STEM}_*_by_technology.csv")):
+            if path.name == f"{OUT_STEM}_co2_delta_by_technology.csv":
+                continue
+            table = pd.read_csv(path, index_col="scenario")
+            SCENARIO_ORDER = table.index.tolist()
+            totals_path = path.with_name(path.name.replace("_by_technology.csv", "_totals.csv"))
+            group = str(pd.read_csv(totals_path)["group"].iloc[0])
+            summary.append(plot_group(group, table, plotting, args.csv_dir)[0])
+        if not summary:
+            raise ValueError(f"No carrier tables found in {args.csv_dir}")
+        pd.concat(summary, ignore_index=True).to_csv(
+            args.csv_dir / f"{OUT_STEM}_all_group_totals.csv", index=False
+        )
+        print(f"[DONE] Regenerated {len(summary)} carrier plot sets")
+    else:
+        main()

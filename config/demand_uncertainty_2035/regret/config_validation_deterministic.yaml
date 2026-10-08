@@ -236,6 +236,25 @@ clustering:
 solving:
   options:
     load_shedding: true
-
-
+    dispatch_exclude_carriers:
+      # CO2 accounting and primary fuel supply remain extendable in validation.
+      - co2 stored
+      - co2 sequestered
+      - co2 atmosphere
+      - oil primary
+      - gas
+      # Final-demand delivery links adapt to the operations scenario's demand.
+      # Conversion plants and carbon-capture investments remain fixed.
+      - gas for industry
+      - solid biomass for industry
+      - coal for industry
+      - land transport oil
+      - industry methanol
+      - naphtha for industry
+      - shipping oil
+      - shipping methanol
+      - kerosene for aviation
+      - agriculture machinery oil
+      # Zero-cost release of industrial process emissions.
+      - process emissions
 

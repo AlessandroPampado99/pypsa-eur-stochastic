@@ -62,14 +62,9 @@ def summarize(costs, columns):
     return values, summary
 
 
-def plot_distributions(values, summary, output, title):
-    fig, (ax, var_ax) = plt.subplots(
-        1,
-        2,
-        figsize=(16, max(5, 0.36 * len(values) + 2.4)),
-        sharey=True,
-        gridspec_kw={"width_ratios": [3.5, 1]},
-        constrained_layout=True,
+def plot_distributions(values, summary, output, title, *, by_year=False, shedding=None):
+    fig, ax = plt.subplots(
+        figsize=(max(9, 0.42 * len(values)), 7), constrained_layout=True
     )
     rng = np.random.default_rng(0)
     for y, (solution, row) in enumerate(values.iterrows()):
@@ -85,7 +80,7 @@ def plot_distributions(values, summary, output, title):
                 violin = ax.violinplot(
                     [logs],
                     positions=[y],
-                    vert=False,
+                    vert=True,
                     widths=0.75,
                     showmeans=False,
                     showmedians=False,
@@ -96,15 +91,15 @@ def plot_distributions(values, summary, output, title):
                     body.set_edgecolor(color)
                     body.set_alpha(0.3)
             ax.scatter(
-                logs,
                 y + rng.uniform(-0.13, 0.13, len(data)),
+                logs,
                 s=9,
                 color=color,
                 alpha=0.6,
             )
             ax.scatter(
-                np.log10(summary.loc[solution, "mean"]),
                 y,
+                np.log10(summary.loc[solution, "mean"]),
                 marker="o",
                 s=38,
                 color="#d55e00",
@@ -115,18 +110,29 @@ def plot_distributions(values, summary, output, title):
         reference = summary.loc[solution, "expansion_cost"]
         if pd.notna(reference) and reference > 0:
             ax.scatter(
-                np.log10(reference), y, marker="D", s=30, color="#202020", zorder=5
+                y, np.log10(reference), marker="D", s=30, color="#202020", zorder=5
             )
-        variance = summary.loc[solution, "variance"]
-        if pd.notna(variance):
-            var_ax.barh(y, variance, height=0.6, color=color, alpha=0.8)
-    labels = [
-        f"{solution}  (n={count})"
-        for solution, count in zip(values.index, summary["n_valid"])
-    ]
-    ax.set_yticks(range(len(values)), labels)
-    ax.invert_yaxis()
-    low, high = ax.get_xlim()
+        if by_year:
+            stochastic_mean = summary.loc[solution, "stochastic_mean"]
+            if pd.notna(stochastic_mean) and stochastic_mean > 0:
+                ax.scatter(
+                    y,
+                    np.log10(stochastic_mean),
+                    marker="s",
+                    s=40,
+                    facecolor="none",
+                    edgecolor="#008a78",
+                    linewidth=1.5,
+                    zorder=6,
+                )
+    labels = [str(s).removeprefix("d_") for s in values.index]
+    ax.set_xticks(range(len(values)), labels, rotation=90)
+    ax.set_xlabel(
+        "Validation weather year"
+        if by_year
+        else "Capacity solution (weather year / stochastic case)"
+    )
+    low, high = ax.get_ylim()
     ticks = [
         m * 10.0**e
         for e in range(int(np.floor(low)), int(np.ceil(high)) + 1)
@@ -135,18 +141,29 @@ def plot_distributions(values, summary, output, title):
     ]
     if len(ticks) > 9:
         ticks = ticks[::2]
-    ax.set_xticks(np.log10(ticks))
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{10**x:,.0f}"))
-    ax.set_xlabel(f"Total cost ({UNIT}; logarithmic axis)")
-    ax.set_title("Validation-cost distribution")
-    var_ax.set_title("Population variance")
-    var_ax.set_xlabel(f"({UNIT})²")
-    var_ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-    for axis in (ax, var_ax):
-        axis.grid(axis="x", alpha=0.2)
-        axis.set_axisbelow(True)
-        axis.tick_params(labelsize=8)
-        axis.spines[["top", "right"]].set_visible(False)
+    ax.set_yticks(np.log10(ticks))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{10**x:,.0f}"))
+    ax.set_ylabel(f"Total cost ({UNIT}; logarithmic axis)")
+    ax.grid(axis="y", alpha=0.2)
+    ax.set_axisbelow(True)
+    ax.tick_params(labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+    if shedding is not None:
+        # Labels use an independent annotation row, not the cost-axis units.
+        ax.set_ylim(low, high + 0.12 * (high - low))
+        for x, solution in enumerate(values.index):
+            mean = shedding.loc[solution]
+            ax.text(
+                x,
+                0.96,
+                f"{mean:.1f}" if pd.notna(mean) else "N/A",
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="top",
+                rotation=90,
+                color="black",
+                fontsize=8,
+            )
     handles = [
         Line2D(
             [],
@@ -154,7 +171,9 @@ def plot_distributions(values, summary, output, title):
             marker="D",
             color="#202020",
             linestyle="",
-            label="Capacity-expansion cost (diagonal)",
+            label="Same-year capacity-expansion cost"
+            if by_year
+            else "Capacity-expansion cost (diagonal)",
         ),
         Line2D(
             [],
@@ -162,20 +181,101 @@ def plot_distributions(values, summary, output, title):
             marker="o",
             color="#d55e00",
             linestyle="",
-            label="Arithmetic mean over validation years",
+            label="Mean of deterministic solutions"
+            if by_year
+            else "Arithmetic mean over validation years",
         ),
     ]
+    if by_year:
+        handles.append(
+            Line2D(
+                [],
+                [],
+                marker="s",
+                markerfacecolor="none",
+                markeredgecolor="#008a78",
+                markeredgewidth=1.5,
+                linestyle="",
+                label="Mean of stochastic solutions",
+            )
+        )
     ax.legend(
-        handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.17), fontsize=8
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.30),
+        fontsize=8,
+        ncol=3 if by_year else 2,
     )
     fig.suptitle(
         title
-        + "\nEqual weight per validation year; violin density estimated in log-cost space",
+        + (
+            "\nViolins: deterministic solutions; equal weight per solution; density estimated in log-cost space"
+            if by_year
+            else "\nEqual weight per validation year; violin density estimated in log-cost space"
+        ),
         fontsize=12,
     )
     for suffix in ("png", "pdf"):
         fig.savefig(output.with_suffix("." + suffix), dpi=220, bbox_inches="tight")
     plt.close(fig)
+
+
+def plot_by_load_shedding(path, values, summary, out, *, by_year=False):
+    sheets = pd.read_excel(path, sheet_name=None, index_col=0)
+    shedding = sheets["load_curtailment"].apply(pd.to_numeric, errors="raise")
+    invalid = sheets.get("invalid_load_curtailment")
+    if invalid is not None:
+        shedding = shedding.mask(
+            invalid.reindex_like(shedding).fillna(False).astype(bool)
+        )
+    # Match the violin population, including diagonals. For OP plots, average
+    # each operating-year column across deterministic capacity solutions.
+    if by_year:
+        shedding = shedding.T
+    shedding = shedding.loc[values.index, values.columns].replace(
+        [np.inf, -np.inf], np.nan
+    )
+    means = shedding.mean(axis=1).rename("mean_total_load_shedding_TWh")
+    ordered = means.sort_values(kind="stable", na_position="last")
+    export = pd.DataFrame(
+        {
+            "mean_total_load_shedding_TWh": ordered,
+            "n_valid_capacity_solutions"
+            if by_year
+            else "n_valid_years": shedding.count(axis=1).reindex(ordered.index),
+        }
+    )
+    export.index.name = "operating_year" if by_year else "capacity_solution"
+    export.to_csv(
+        out
+        / (
+            "validation_op_mean_load_shedding.csv"
+            if by_year
+            else "validation_mean_load_shedding.csv"
+        )
+    )
+    plot_distributions(
+        values.loc[ordered.index],
+        summary.loc[ordered.index],
+        out
+        / (
+            "validation_year_cost_distributions_sorted_by_load_shedding"
+            if by_year
+            else "validation_cost_distributions_sorted_by_load_shedding"
+        ),
+        (
+            "Validation cost by operating year (OP) — ascending mean total load shedding"
+            if by_year
+            else "Validation cost by capacity solution — ascending mean total load shedding"
+        )
+        + (
+            "\nBlack numbers: mean load shedding across deterministic capacity solutions (TWh)"
+            if by_year
+            else "\nBlack numbers: mean total load shedding (TWh)"
+        ),
+        shedding=ordered,
+        by_year=by_year,
+    )
 
 
 def main():
@@ -190,6 +290,17 @@ def main():
     if not columns:
         raise ValueError("No d_YYYY validation columns found.")
     values, summary = summarize(costs, columns)
+    plot_by_load_shedding(args.input, values, summary, out)
+    deterministic = [s for s in costs.index if re.fullmatch(r"d_\d{4}", str(s))]
+    stochastic = costs.index.str.startswith("stochastic_")
+    yearly_values, yearly_summary = summarize(costs.T.loc[columns], deterministic)
+    yearly_summary.index.name = "validation_year"
+    yearly_summary = yearly_summary.rename(
+        columns={"worst_validation_scenario": "worst_capacity_solution"}
+    )
+    yearly_summary["stochastic_mean"] = costs.loc[stochastic, columns].mean(axis=0)
+    yearly_summary["n_stochastic_valid"] = costs.loc[stochastic, columns].count(axis=0)
+    plot_by_load_shedding(args.input, yearly_values, yearly_summary, out, by_year=True)
     metadata = pd.DataFrame(
         {
             "setting": [
@@ -200,6 +311,7 @@ def main():
                 "units",
                 "expansion_marker",
                 "missing_values",
+                "by_year_plot",
             ],
             "value": [
                 str(args.input),
@@ -209,6 +321,7 @@ def main():
                 "Costs: bn. EUR/a; variance: (bn. EUR/a)^2",
                 "Workbook diagonal; expected total cost for stochastic solutions",
                 "Excluded; counts reported per solution",
+                "One violin per validation year over deterministic solutions (including diagonal); equal-weight arithmetic means within deterministic and stochastic groups; same-year expansion marker from diagonal",
             ],
         }
     )
@@ -216,12 +329,32 @@ def main():
         summary.to_excel(writer, sheet_name="summary")
         values.to_excel(writer, sheet_name="validation_costs")
         metadata.to_excel(writer, sheet_name="method", index=False)
+        yearly_summary.to_excel(writer, sheet_name="by_year_summary")
+        yearly_values.to_excel(writer, sheet_name="by_year_deterministic_costs")
+    plot_distributions(
+        yearly_values,
+        yearly_summary,
+        out / "validation_year_cost_distributions",
+        "Validation cost by weather year",
+        by_year=True,
+    )
     plot_distributions(
         values,
         summary,
         out / "validation_cost_distributions",
         "Validation cost by capacity solution",
     )
+    for metric, label in [
+        ("mean", "mean validation cost"),
+        ("expansion_cost", "capacity-expansion cost"),
+    ]:
+        ordered = summary.sort_values(metric, kind="stable", na_position="last")
+        plot_distributions(
+            values.loc[ordered.index],
+            ordered,
+            out / f"validation_cost_distributions_sorted_by_{metric}",
+            f"Validation cost by capacity solution — ascending {label}",
+        )
     stochastic = values.index.str.startswith("stochastic_")
     if stochastic.any():
         plot_distributions(

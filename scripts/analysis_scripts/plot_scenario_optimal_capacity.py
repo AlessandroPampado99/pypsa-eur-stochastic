@@ -78,9 +78,12 @@ FAMILY_GROUPS: dict[str, list[str]] | None = None
 FAMILY_ORDER: list[str] | None = None
 INFER_FAMILY_FROM_NAME = True
 FAMILY_GAP = 0.7
+SHOW_FAMILY_LABELS = True
+SHOW_FAMILY_SEPARATORS = True
 
 CAPACITY_THRESHOLD = 0.0  # in the plotted unit
 LEGEND_MIN_PERCENT = 0.5
+ALWAYS_LEGEND_CARRIERS: set[str] = set()
 ANNOTATE_TOTALS = True
 TOTAL_DECIMALS = 0
 ANNOTATE_SEGMENTS = True
@@ -355,17 +358,18 @@ def plot_capacity(
                 fontweight="bold",
             )
     for family_index, (family, first, last) in enumerate(family_ranges):
-        ax.text(
-            (x[first] + x[last]) / 2,
-            -0.25,
-            family,
-            transform=ax.get_xaxis_transform(),
-            ha="center",
-            va="top",
-            fontsize=10,
-            fontweight="bold",
-        )
-        if family_index < len(family_ranges) - 1:
+        if SHOW_FAMILY_LABELS:
+            ax.text(
+                (x[first] + x[last]) / 2,
+                -0.25,
+                family,
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="top",
+                fontsize=10,
+                fontweight="bold",
+            )
+        if SHOW_FAMILY_SEPARATORS and family_index < len(family_ranges) - 1:
             next_first = family_ranges[family_index + 1][1]
             ax.axvline(
                 (x[last] + x[next_first]) / 2,
@@ -392,7 +396,7 @@ def plot_capacity(
     legend_carriers = [
         carrier
         for carrier in carriers
-        if 100.0 * legend_shares[carrier].fillna(0.0).max()
+        if carrier in ALWAYS_LEGEND_CARRIERS or 100.0 * legend_shares[carrier].fillna(0.0).max()
         >= LEGEND_MIN_PERCENT
     ]
     handles, labels = ax.get_legend_handles_labels()
