@@ -118,7 +118,7 @@ PLOT_RC = {
     "savefig.facecolor": "white",
 }
 TECH_COLORS = ("#0072B2", "#D55E00", "#009E73", "#CC79A7")
-LINE_STYLES = ("-", "--", "-.", ":")
+LINE_STYLES = ("-", "-", "-", "-")
 FAMILY_COLORS = {"E": "#0072B2", "F": "#D55E00", "M": "#009E73", "H": "#CC79A7"}
 
 # Explicit input-name aliases preserve the current public scenario names.
@@ -396,8 +396,18 @@ def aggregate_technologies(
 
 
 def save_figure(fig: plt.Figure, stem: str, title: str) -> None:
+    from matplotlib.text import Text
+
     if SHOW_TITLES:
         fig.suptitle(title)
+    for ax in fig.findobj(match=plt.Axes):
+        ax.xaxis.label.set_fontweight("bold")
+        ax.yaxis.label.set_fontweight("bold")
+        for tick in ax.get_xticklabels() + ax.get_yticklabels():
+            tick.set_fontweight("bold")
+    # Keep input keys and artifact filenames stable; format all displayed labels.
+    for artist in fig.findobj(match=Text):
+        artist.set_text(artist.get_text().replace("_", "-").replace("H-OIL", "H-FUEL"))
     for suffix in ("png", "pdf"):
         fig.savefig(
             OUTPUT_DIR / f"{stem}.{suffix}",
@@ -422,8 +432,14 @@ def make_absolute_capacity_heatmap(result: pd.DataFrame) -> None:
                if label in set(result.loc[result.unit == unit, "technology"])]
         for unit in units
     }
+    order = ["Distribution grid", "H2 pipeline", "Onshore wind", "Solar rooftop",
+             "Solar-hsat", "Battery discharger", "Electrolysis", "SMR", "SMR CC",
+             "Biogas-to-gas", "Gas CHP", "Methanolisation", "Biomass-to-methanol",
+             "H2 storage", "Central water pit"]
+    row_labels = {unit: [label for label in order if label in labels]
+                  for unit, labels in row_labels.items()}
     fig, axes = plt.subplots(
-        2, 1, figsize=(DOUBLE_COLUMN_WIDTH, 6.1), layout="constrained",
+        2, 1, figsize=(12, 9), layout="constrained",
         gridspec_kw={"height_ratios": [len(row_labels[u]) for u in units]},
     )
     cmap = plt.get_cmap("RdBu_r").copy()
@@ -437,10 +453,15 @@ def make_absolute_capacity_heatmap(result: pd.DataFrame) -> None:
         limit = max(np.max(np.abs(finite)) if len(finite) else 0., threshold)
         norm = SymLogNorm(linthresh=threshold, vmin=-limit, vmax=limit, base=10)
         im = ax.imshow(matrix, aspect="auto", cmap=cmap, norm=norm)
-        ax.set_title("Power capacity [GW]" if unit == "GW" else "Storage energy capacity [TWh]")
+        ax.set_title("Optimal capacity change relative to BASE [GW]" if unit == "GW"
+                     else "Optimal storage capacity change relative to BASE [TWh]",
+                     fontsize=15, fontweight="bold")
         ax.set_yticks(range(len(matrix)), matrix.index)
-        ax.set_xticks(range(len(SCENARIOS)), SCENARIOS, rotation=55, ha="right")
+        ax.set_xticks(range(len(SCENARIOS)), [s.replace(chr(95), chr(45)) for s in SCENARIOS], rotation=55, ha="right")
         ax.tick_params(axis="x", labelbottom=unit == "TWh")
+        ax.tick_params(axis="both", labelsize=12)
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontweight("bold")
         separators(ax)
         for row in range(len(matrix)):
             for col in range(len(SCENARIOS)):
@@ -448,9 +469,9 @@ def make_absolute_capacity_heatmap(result: pd.DataFrame) -> None:
                 if not np.isfinite(value):
                     text, color = "NA", "0.3"
                 else:
-                    text = "0" if abs(value) < 1e-6 else format(float(format(value, ".2g")), "g")
+                    text = "~0" if abs(value) < threshold / 2 else format(float(format(value, ".2g")), "g")
                     color = "white" if abs(float(norm(value)) - .5) > .32 else "black"
-                ax.text(col, row, text, ha="center", va="center", fontsize=5.5, color=color)
+                ax.text(col, row, text, ha="center", va="center", fontsize=10, color=color)
         powers = np.arange(int(np.log10(threshold)), int(np.floor(np.log10(limit))) + 1)
         ticks = 10. ** powers
         ticks = np.concatenate((-ticks[::-1], [0.], ticks))
@@ -458,14 +479,13 @@ def make_absolute_capacity_heatmap(result: pd.DataFrame) -> None:
             ticks = [-10. ** np.floor(np.log10(limit)), 0., 10. ** np.floor(np.log10(limit))]
         bar = fig.colorbar(im, ax=ax, ticks=ticks, fraction=.035, pad=.025)
         bar.ax.set_yticklabels([f"{v:g}" for v in ticks])
-        bar.set_label(f"Δ capacity [{unit}]", fontsize=7)
-        bar.ax.tick_params(labelsize=6)
+        bar.set_label(f"Δ capacity [{unit}]", fontsize=12, fontweight="bold")
+        bar.ax.tick_params(labelsize=10)
         report(f"Absolute capacity heatmap {unit}: symmetric-log colors, linear within ±{threshold:g} {unit}; range ±{limit:.6g} {unit}.")
-    fig.suptitle("Capacity change relative to BASE; symmetric-log colors", fontsize=9)
     save_figure(fig, "01_capacity_response_heatmap_absolute_delta",
                 "Absolute capacity changes relative to BASE")
     (OUTPUT_DIR / "01_capacity_response_heatmap_absolute_delta_caption.tex").write_text(
-        r"Signed changes in optimal capacity relative to BASE across nominal scenarios. Power capacities are in GW and storage energy capacities in TWh, with separate symmetric logarithmic color scales. Red denotes increases and blue decreases; white denotes zero. Colors are linear within $\pm0.1$ GW and $\pm0.01$ TWh and logarithmic outside these intervals. Cell annotations show untransformed changes to two significant digits; magnitudes below $10^{-6}$ are displayed as zero. Link power capacities refer to input-side nominal capacity. Grey cells marked NA indicate missing values." + "\n", encoding="utf-8")
+        r"Signed changes in optimal capacity relative to BASE across nominal scenarios. Power capacities are in GW and storage energy capacities in TWh, with separate symmetric logarithmic color scales. Red denotes increases and blue decreases; white denotes zero. Colors are linear within $\pm0.1$ GW and $\pm0.01$ TWh and logarithmic outside these intervals. Cell annotations show untransformed changes to two significant digits; magnitudes below 0.05 GW or 0.005 TWh are displayed as approximately zero (~0). Link power capacities refer to input-side nominal capacity. Grey cells marked NA indicate missing values." + "\n", encoding="utf-8")
 
 
 # Main useful output for the technologies used in the capacity heatmap.
@@ -521,7 +541,7 @@ def make_energy_balance_heatmap(data: dict[str, pd.DataFrame]) -> pd.DataFrame:
     cmap.set_bad("0.85")
     fig, ax = plt.subplots(figsize=(DOUBLE_COLUMN_WIDTH, 5.5), layout="constrained")
     im = ax.imshow(matrix, aspect="auto", cmap=cmap, norm=norm)
-    ax.set_xticks(range(len(SCENARIOS)), SCENARIOS, rotation=55, ha="right")
+    ax.set_xticks(range(len(SCENARIOS)), [s.replace(chr(95), chr(45)) for s in SCENARIOS], rotation=55, ha="right")
     ax.set_yticks(range(len(labels)), [""] * len(labels))
     # Offset-box labels underline only the output carrier, without requiring LaTeX.
     for row, label in enumerate(labels):
@@ -642,7 +662,7 @@ def make_capacity_heatmap(data: dict[str, pd.DataFrame]) -> pd.DataFrame:
     im = ax.imshow(
         matrix, aspect="auto", cmap=cmap, norm=TwoSlopeNorm(0, -1, 1)
     )
-    ax.set_xticks(range(12), SCENARIOS, rotation=55, ha="right")
+    ax.set_xticks(range(12), [s.replace(chr(95), chr(45)) for s in SCENARIOS], rotation=55, ha="right")
     ax.set_yticks(range(len(matrix)), matrix.index)
     separators(ax)
     fig.colorbar(im, ax=ax, label="Row-normalized capacity change [−1, +1]", shrink=0.8)
@@ -716,15 +736,15 @@ def line_panels(
             ax.set_xlabel("Perturbation [TWh]")
     if highlight_nominal:
         for ax, family in zip(axes[:, 0], "EFMH"):
-            ax.annotate(family, xy=(0, .5), xycoords="axes fraction",
+            ax.annotate(f"Family {family}", xy=(0, .5), xycoords="axes fraction",
                         xytext=(-48, 0), textcoords="offset points",
-                        ha="right", va="center", fontsize=11, fontweight="bold",
-                        color=FAMILY_COLORS[family])
+                        ha="right", va="center", fontsize=9, fontweight="bold",
+                        color="black", rotation=90)
     for ax in axes[:, 0]:
         ax.set_ylabel(ylabel)
     handles, names = axes.flat[0].get_legend_handles_labels()
     fig.legend(
-        handles, names, loc="outside lower center", ncol=len(labels), frameon=False,
+        handles, names, loc="outside upper right", ncol=len(labels), frameon=False,
         title="Outlined marker = nominal target" if highlight_nominal else None,
         title_fontsize=7,
     )
@@ -913,12 +933,25 @@ def make_cost_figure(table: pd.DataFrame) -> None:
             ax.plot(part.perturbation_twh, part.relative_delta_percent,
                     color=TECH_COLORS[i], marker=("o", "s", "^")[i], markersize=3,
                     linestyle=LINE_STYLES[i], label=scenario)
+        family_scenarios = [s for s in SCENARIOS if s.startswith(family)]
+        objectives = table[table.scenario.isin(family_scenarios)].pivot(
+            index="perturbation_twh", columns="scenario", values="objective"
+        ).reindex(columns=family_scenarios).sort_index()
+        complete = objectives.dropna()
+        if not complete.empty:
+            expected = complete.sum(axis=1) / 3
+            base = float(table.base_objective.iloc[0])
+            ax.plot(expected.index, 100 * (expected - base) / base,
+                    color="black", linewidth=1.5, linestyle="--", label="Expected cost")
+            pd.DataFrame({"expected_objective_eur_per_a": expected,
+                          "relative_delta_percent": 100 * (expected - base) / base
+                          }).to_csv(OUTPUT_DIR / f"04_expected_cost_family_{family}.csv")
         ax.set_title(f"({chr(97+panel)}) {title}", loc="left")
         ax.axhline(0, color="0.3", linewidth=.8)
         ax.grid(axis="y", alpha=.18)
         ax.set_xlabel("Perturbation [TWh]")
         if ax.get_legend_handles_labels()[0]:
-            ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(.5, -.23), ncol=3,
+            ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(.5, -.23), ncol=2,
                       columnspacing=.8, handlelength=1.7)
         else:
             ax.text(.5, .5, "No objective data", transform=ax.transAxes, ha="center")
@@ -1048,7 +1081,7 @@ def carbon_interpretation(scatter: pd.DataFrame, components: pd.DataFrame) -> li
 
 
 def atmospheric_emissions_tables(sensitivity: dict, levels: dict) -> tuple[pd.DataFrame, list[str]]:
-    """Use positive atmospheric CO2 workbook entries, not emission factors."""
+    """Use atmospheric CO2 entries, netting out biogas carbon uptake for gas."""
     if set(CO2_OIL_TECHNOLOGIES) & set(CO2_GAS_TECHNOLOGIES):
         raise ValueError("Oil and gas emissions mappings overlap")
     report(f"Atmospheric oil-related CO2 labels: {CO2_OIL_TECHNOLOGIES}")
@@ -1059,8 +1092,8 @@ def atmospheric_emissions_tables(sensitivity: dict, levels: dict) -> tuple[pd.Da
            "ordinary oil loads and adds oil from H2 emissions for the reserved share. Both are included "
            "once. HVC to air releases a separate industrial stock and is excluded.")
     report("Atmospheric CC rows are uncaptured residual emissions only; captured outputs on co2 stored "
-           "are not added to panel b. Gross oil/gas carrier emissions include blended non-fossil fuels; "
-           "negative atmospheric uptake, process emissions, coal and methanol emissions are outside this subtotal. "
+           "are not added to panel b. Gas-related emissions subtract atmospheric uptake from biogas to gas; "
+           "other negative atmospheric uptake, process emissions, coal and methanol emissions are outside this subtotal. "
            "The compensation diagonal is a benchmark, not the full model carbon constraint.")
     records, components = [], []
     for scenario, data in sensitivity.items():
@@ -1083,6 +1116,15 @@ def atmospheric_emissions_tables(sensitivity: dict, levels: dict) -> tuple[pd.Da
                                            level_mtco2=values[name], base_mtco2=values["BASE"],
                                            delta_mtco2=values[name]-values["BASE"]))
             totals[category] = pd.concat(parts, axis=1).sum(axis=1, min_count=len(parts))
+        biogas_uptake = get_carbon_series(data, "consumption", "biogas to gas", group="co2")
+        if biogas_uptake.isna().any():
+            raise ValueError(f"{scenario}: missing biogas atmospheric CO2 uptake")
+        totals["gas"] = totals["gas"] - biogas_uptake
+        for name, magnitude in {"BASE": 0., **levels[scenario]}.items():
+            components.append(dict(scenario=scenario, perturbation=magnitude,
+                                   category="gas", technology="biogas to gas (uptake correction)",
+                                   level_mtco2=-biogas_uptake[name], base_mtco2=-biogas_uptake["BASE"],
+                                   delta_mtco2=-(biogas_uptake[name]-biogas_uptake["BASE"])))
         for name, magnitude in levels[scenario].items():
             oil, gas = totals["oil"], totals["gas"]
             records.append(dict(family=scenario[0], scenario=scenario, perturbation=magnitude,
@@ -1114,7 +1156,8 @@ def atmospheric_emissions_tables(sensitivity: dict, levels: dict) -> tuple[pd.Da
              f"oil/gas di segno opposto; {near}/{len(material)} con residuo assoluto della somma entro il 10 percento "
              "della somma dei moduli. " + ("Tendenza inversa visibile." if visible else "Tendenza inversa non robusta secondo il criterio configurato.")
              + " La diagonale rappresenta compensazione perfetta solo fra questi due sottoinsiemi; processi, metanolo, "
-             "carbone e assorbimenti restano fuori. Emissioni lorde dei carrier, non attribuzione esclusiva a combustibili fossili."]
+             "carbone e altri assorbimenti restano fuori. Le emissioni gas-related sono al netto "
+             "dell'assorbimento associato a biogas to gas."]
     return result, notes
 
 
@@ -1146,7 +1189,7 @@ def methanol_capture_table(components: pd.DataFrame) -> pd.DataFrame:
 # Give the dense cluster the main panel; retain all points in an overview.
 def add_full_range_inset(ax: plt.Axes, table: pd.DataFrame, xcol: str, ycol: str,
                      xlim: tuple[float, float], ylim: tuple[float, float],
-                     bounds: tuple[float, float, float, float] = (.59, .61, .37, .34)) -> None:
+                     bounds: tuple[float, float, float, float] = (.59, .61, .37, .34)) -> plt.Axes:
     full_xlim, full_ylim = ax.get_xlim(), ax.get_ylim()
     ax.set(xlim=xlim, ylim=ylim)
     inset = ax.inset_axes(bounds)
@@ -1172,6 +1215,16 @@ def add_full_range_inset(ax: plt.Axes, table: pd.DataFrame, xcol: str, ycol: str
                               ylim[1] - ylim[0], fill=False,
                               edgecolor="0.35", linewidth=.7, linestyle="--"))
     inset.set_title("Full range", fontsize=6.5, pad=3)
+    return inset
+
+
+def add_compensation_line(ax: plt.Axes, label: str | None = None) -> None:
+    """Draw y=-x without changing the data limits."""
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    low, high = max(xlim[0], -ylim[1]), min(xlim[1], -ylim[0])
+    ax.plot([low, high], [-low, -high], color="0.5", linestyle="--",
+            linewidth=.75, zorder=0, label=label)
+    ax.set(xlim=xlim, ylim=ylim)
 
 
 def make_carbon_substitution_figure(sensitivity: dict, levels: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -1270,7 +1323,7 @@ def make_carbon_substitution_figure(sensitivity: dict, levels: dict) -> tuple[pd
     ax_a.set(title="(a) Primary oil and fossil-gas supply", xlabel="Δ primary-oil supply [TWh/a]",
              ylabel="Δ fossil-gas supply [TWh/a]")
     ax_b.set(title="(a) Oil- and gas-related\nCO₂ emissions",
-             xlabel="Δ oil-related CO₂ [MtCO₂/a]", ylabel="Δ gas-related CO₂ [MtCO₂/a]")
+             xlabel="Δ oil-related CO₂ [MtCO₂/a]", ylabel="Δ gas-related CO₂, net of biogas [MtCO₂/a]")
     for ax in (ax_a, ax_b):
         ax.axvline(0, color="0.4", linewidth=.7)
     xlim, ylim = ax_b.get_xlim(), ax_b.get_ylim()
@@ -1280,19 +1333,27 @@ def make_carbon_substitution_figure(sensitivity: dict, levels: dict) -> tuple[pd
     ax_b.set(xlim=xlim, ylim=ylim)
     ax_b.plot([], [], color="0.5", linestyle="--", linewidth=.75,
               label="ΔCO₂ oil + ΔCO₂ gas = 0")
-    ax_b.legend(handles=[ax_b.lines[-1]], loc="upper center",
-                bbox_to_anchor=(.5, -.10), frameon=False, fontsize=6.5)
+    ax_b.legend(handles=[ax_b.lines[-1]], loc="lower left",
+                bbox_to_anchor=(.02, .02), frameon=False, fontsize=6.5)
 
-    add_full_range_inset(ax_a, scatter_table, "delta_oil_supply", "delta_fossil_gas_supply",
+    fuel_inset = add_full_range_inset(ax_a, scatter_table, "delta_oil_supply", "delta_fossil_gas_supply",
                      (-300, 30), (-40, 720))
-    add_full_range_inset(ax_b, emissions, "delta_co2_oil", "delta_co2_gas",
+    carbon_inset = add_full_range_inset(ax_b, emissions, "delta_co2_oil", "delta_co2_gas",
                      (-75, 10), (-12, 120))
+    add_compensation_line(ax_a, "Δ oil + Δ gas = 0")
+    add_compensation_line(fuel_inset)
+    add_compensation_line(carbon_inset)
+    ax_a.legend(handles=[ax_a.lines[-1]], loc="upper center",
+                bbox_to_anchor=(.35, .98), frameon=False, fontsize=6.5)
     report("Figures 5a and 6a: zoomed main axes with full-range overview insets.")
     handles, names = ax_a.get_legend_handles_labels()
     order = np.arange(len(SCENARIOS)).reshape(2, 6).T.ravel()
     for figure in (fig_fuel, fig_carbon):
-        figure.legend([handles[i] for i in order], [names[i] for i in order],
-                      loc="outside upper center", ncol=6, frameon=False,
+        legend_order = (np.arange(len(SCENARIOS)).reshape(4, 3).T.ravel()
+                        if figure is fig_carbon else order)
+        figure.legend([handles[i] for i in legend_order], [names[i] for i in legend_order],
+                      loc="outside upper left" if figure is fig_carbon else "outside upper center",
+                      ncol=3 if figure is fig_carbon else 6, frameon=False,
                       title="Panel (a): outlined marker = nominal target; changes vs BASE",
                       title_fontsize=7, columnspacing=1, handletextpad=.3, handlelength=1.3)
     # Diverging stacks preserve any negative changes instead of hiding them.
@@ -1317,17 +1378,15 @@ def make_carbon_substitution_figure(sensitivity: dict, levels: dict) -> tuple[pd
     capture_axes[1].set_ylabel("Δ captured CO₂ supply [MtCO₂/a]")
     capture_axes[-1].set_xlabel("Perturbation [TWh]")
     stack_handles, stack_labels = capture_axes[0].get_legend_handles_labels()
-    fig_carbon.legend(stack_handles, stack_labels, loc="outside lower center",
-                      ncol=2, frameon=False, fontsize=7)
+    fig_carbon.legend(stack_handles, stack_labels, loc="outside upper right",
+                      ncol=1, frameon=False, fontsize=7)
 
     for i, scenario in enumerate(("F_HEAT", "F_IND", "F_ROAD")):
         part = biogas_table[biogas_table.scenario == scenario].sort_values("perturbation")
-        ax_d.plot(part.perturbation, part.delta_biogas_to_gas, color=TECH_COLORS[i],
+        ax_d.plot(part.perturbation, part.delta_biogas_to_gas, color=FAMILY_COLORS["F"],
                   linestyle=LINE_STYLES[i], marker=("o","s","^")[i], markersize=3, label=scenario)
     ax_d.set(title="(b) Biogas under fossil persistence",
              xlabel="Perturbation [TWh]", ylabel="Δ biogas-to-gas [TWh/a]")
-    ax_d.legend(frameon=False, loc="upper center", bbox_to_anchor=(.5,-.23), ncol=3,
-                columnspacing=.7, handlelength=1.5)
     for ax in (ax_a, ax_b, ax_d):
         ax.axhline(0, color="0.3", linewidth=.8)
         ax.grid(axis="y", alpha=.15)
@@ -1467,7 +1526,7 @@ def make_electricity_response_ratio(data: dict) -> pd.DataFrame:
         color=[FAMILY_COLORS[s[0]] for s in SCENARIOS],
         width=0.72,
     )
-    ax.set_xticks(range(12), SCENARIOS, rotation=55, ha="right")
+    ax.set_xticks(range(12), [s.replace(chr(95), chr(45)) for s in SCENARIOS], rotation=55, ha="right")
     ax.set_ylabel("Electricity-system response ratio\n[TWh_AC / TWh_perturbation]")
     ax.axhline(0, color="0.2", linewidth=0.9)
     separators(ax)

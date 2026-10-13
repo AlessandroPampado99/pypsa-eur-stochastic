@@ -79,6 +79,9 @@ INFER_FAMILY_FROM_NAME = True
 FAMILY_GAP = 0.7
 SHOW_FAMILY_SEPARATORS = True
 SHOW_FAMILY_LABELS = True
+HIDE_BASE = False
+AXIS_FONT_SIZE = 14
+TITLE_FONT_SIZE = 18
 
 ENERGY_THRESHOLD_TWH = 0.0
 LEGEND_MIN_PERCENT = 0.5
@@ -221,11 +224,11 @@ def order_and_group_scenarios(
 def _scenario_plot_label(scenario: str) -> str:
     """Replace a configured scenario-family prefix while retaining its suffix."""
     if scenario in SCENARIO_LABELS:
-        return SCENARIO_LABELS[scenario]
+        return SCENARIO_LABELS[scenario].replace("_", "-")
     for prefix, alias in SCENARIO_PREFIX_ALIASES.items():
         if scenario == prefix or scenario.startswith(f"{prefix}_"):
-            return f"{alias}{scenario[len(prefix):]}"
-    return scenario
+            return f"{alias}{scenario[len(prefix):]}".replace("_", "-")
+    return scenario.replace("_", "-")
 
 
 def load_scenario_names(path: Path) -> dict[str, str]:
@@ -242,7 +245,7 @@ def load_scenario_names(path: Path) -> dict[str, str]:
 
 
 def _family_plot_label(family: str, scenarios: Sequence[str]) -> str:
-    labels = {_scenario_plot_label(s).split("_", 1)[0] for s in scenarios}
+    labels = {_scenario_plot_label(s).split("-", 1)[0] for s in scenarios}
     return next(iter(labels)) if SCENARIO_LABELS and len(labels) == 1 else family
 
 
@@ -500,6 +503,10 @@ def plot_group(
     totals = totals.assign(group=group, unit=unit)
     totals.to_csv(output_dir / f"{stem}_totals.csv")
     totals_for_summary = totals.reset_index(names="scenario")
+    if HIDE_BASE:
+        scenarios = [s for s in scenarios if s.strip("_").upper() != "BASE"]
+        full_table = full_table.reindex(scenarios)
+        totals = totals.reindex(scenarios)
 
     if full_table.abs().to_numpy().max(initial=0.0) <= ZERO_BALANCE_TOLERANCE:
         print(f"[SKIP] {group}: balance contains no non-zero activity")
@@ -571,7 +578,7 @@ def plot_group(
                 f"{value:.{TOTAL_DECIMALS}f}",
                 ha="center",
                 va="bottom",
-                fontsize=8,
+                fontsize=13,
                 rotation=0,
                 fontweight="bold",
             )
@@ -605,11 +612,12 @@ def plot_group(
         ha="right",
         fontweight="bold",
     )
-    ax.set_ylabel(f"Energy balance [{unit}]", fontweight="bold")
-    ax.set_xlabel("Scenario", fontweight="bold")
+    ax.set_ylabel(f"Energy balance [{unit}]", fontweight="bold", fontsize=AXIS_FONT_SIZE)
+    ax.set_xlabel("Scenario", fontweight="bold", fontsize=AXIS_FONT_SIZE)
+    ax.tick_params(axis="both", labelsize=AXIS_FONT_SIZE)
     for label in ax.get_yticklabels():
         label.set_fontweight("bold")
-    ax.set_title(f"{TITLE_PREFIX}: {group}", fontweight="bold")
+    ax.set_title(f"{TITLE_PREFIX}: {group}", fontweight="bold", fontsize=TITLE_FONT_SIZE)
     ax.grid(axis="y", alpha=0.25)
     ax.grid(axis="x", visible=False)
     supply_technologies = _legend_technologies(
@@ -652,7 +660,7 @@ def plot_group(
         negative_bottom.min() - 0.04 * span,
         positive_bottom.max() + 0.12 * span,
     )
-    fig.subplots_adjust(bottom=0.28)
+    fig.subplots_adjust(bottom=0.28 if SHOW_FAMILY_LABELS else 0.18)
 
     for enabled, suffix in (
         (SAVE_PNG, "png"),
@@ -696,7 +704,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--csv-dir", type=Path, help="Regenerate plots from exported carrier tables")
     parser.add_argument("--names", type=Path, help="Scenario identifier-to-label mapping")
+    parser.add_argument("--hide-base", action="store_true", help="Hide BASE bars; retain source CSV data")
+    parser.add_argument("--hide-family-labels", action="store_true")
+    parser.add_argument("--legend-min-percent", type=float, default=LEGEND_MIN_PERCENT)
     args = parser.parse_args()
+    HIDE_BASE = args.hide_base
+    SHOW_FAMILY_LABELS = not args.hide_family_labels
+    LEGEND_MIN_PERCENT = args.legend_min_percent
     if args.names:
         SCENARIO_LABELS = load_scenario_names(args.names)
     if args.csv_dir:

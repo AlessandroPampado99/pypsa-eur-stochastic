@@ -119,7 +119,14 @@ SCENARIO_LABELS = {
     "H2_TRANS": "H_SHIP",
 
 }
-SCENARIO_LABELS = None
+SCENARIO_NAMES_FILE = ROOT / ROOT_DIR / "names.txt"
+if SCENARIO_NAMES_FILE.exists():
+    SCENARIO_LABELS = {
+        source.strip(): label.strip().replace("_", "-")
+        for line in SCENARIO_NAMES_FILE.read_text().splitlines()
+        if line.strip()
+        for source, label in [line.split(" - ", 1)]
+    }
 
 # Metrics
 TOTAL_COST_SCALE = 1e9
@@ -216,7 +223,8 @@ def _network_has_invalid_solution(n: pypsa.Network) -> bool:
 
 def _scenario_display_name(name: str) -> str:
     """Return the scenario label used in the plot."""
-    return SCENARIO_LABELS.get(name, name) if SCENARIO_LABELS else name
+    label = SCENARIO_LABELS.get(name, name) if SCENARIO_LABELS else name
+    return label.replace("_", "-")
 
 
 def _list_scenarios(root_dir: Path) -> list[str]:

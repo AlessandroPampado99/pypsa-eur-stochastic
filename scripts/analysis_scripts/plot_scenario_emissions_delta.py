@@ -78,22 +78,17 @@ def main() -> None:
     for i, scenario in enumerate(scenarios):
         value = totals.loc[scenario, "gross_emissions_delta_MtCO2_per_year"]
         ax.text(x[i], positive_bottom[i] + 0.025 * span, f"{value:+.0f}",
-                ha="center", va="bottom", fontsize=9, fontweight="bold")
+                ha="center", va="bottom", fontsize=13, fontweight="bold")
     for j, (family, first, last) in enumerate(ranges):
-        ax.text((x[first] + x[last]) / 2, -0.26,
-                balance._family_plot_label(family, scenarios[first : last + 1]),
-                transform=ax.get_xaxis_transform(), ha="center", va="top",
-                fontweight="bold")
         if j < len(ranges) - 1:
             ax.axvline((x[last] + x[ranges[j + 1][1]]) / 2, color="0.5", linewidth=0.8)
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_xticks(x, [balance._scenario_plot_label(s) for s in scenarios],
                   rotation=45, ha="right", fontweight="bold")
-    ax.set_ylabel("Change in atmospheric CO₂ contribution [MtCO₂/a]", fontweight="bold")
-    ax.set_xlabel("Scenario", fontweight="bold")
-    ax.set_title("CO₂ balance: change relative to BASE", fontweight="bold", pad=32)
-    ax.text(0, 1.02, "Bold totals: change in gross emissions; segment labels: carrier changes",
-            transform=ax.transAxes, fontsize=9)
+    ax.set_ylabel("Change in atmospheric CO₂ contribution [MtCO₂/a]", fontweight="bold", fontsize=14)
+    ax.set_xlabel("Scenario", fontweight="bold", fontsize=14)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.set_title("CO₂ balance: change relative to BASE", fontweight="bold", pad=12, fontsize=18)
     ax.grid(axis="y", alpha=0.25)
     ax.set_axisbelow(True)
     handles = [Patch(facecolor=colors[t], label=t) for t in technologies]
@@ -103,7 +98,7 @@ def main() -> None:
     ])
     ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 1), frameon=False)
     ax.set_ylim(negative_bottom.min() - 0.08 * span, positive_bottom.max() + 0.16 * span)
-    fig.subplots_adjust(bottom=0.28)
+    fig.subplots_adjust(bottom=0.18)
     for suffix in ("png", "svg", "pdf"):
         fig.savefig(f"{stem}.{suffix}", dpi=300, bbox_inches="tight")
         print(f"[WRITE] {stem}.{suffix}")
